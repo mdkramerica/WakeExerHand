@@ -1929,6 +1929,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Patient not found" });
       }
 
+      // Set proper headers for JSON download
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${motionData.patient.code}_motion_data.json"`);
+      
       res.json(motionData);
     } catch (error) {
       console.error("Admin download error:", error);
@@ -2146,8 +2150,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const assessments = assessmentsByType[assessmentType];
         
         assessments.forEach((assessment, index) => {
-          const fileName = `${folderName}/${patient.code}_${folderName}_${index + 1}_${new Date(assessment.completedAt).toISOString().split('T')[0]}.json`;
-          zip.file(fileName, JSON.stringify(assessment, null, 2));
+          const dateStr = new Date(assessment.completedAt).toISOString().split('T')[0];
+          
+          // Create main assessment file with all data
+          const assessmentFileName = `${folderName}/${patient.code}_${folderName}_${index + 1}_${dateStr}.json`;
+          zip.file(assessmentFileName, JSON.stringify(assessment, null, 2));
+          
+          // Create dedicated motion data file if repetitionData exists
+          if (assessment.repetitionData && assessment.repetitionData.length > 0) {
+            const motionData = {
+              assessment: {
+                id: assessment.id,
+                assessmentId: assessment.assessmentId,
+                assessmentName: assessment.assessmentName || folderName.replace(/_/g, ' '),
+                completedAt: assessment.completedAt,
+                handType: assessment.handType
+              },
+              patient: {
+                code: patient.code,
+                injuryType: patient.injuryType
+              },
+              recording: {
+                duration: assessment.repetitionData.reduce((sum: number, rep: any) => sum + (rep.duration || 0), 0),
+                totalFrames: assessment.repetitionData.reduce((sum: number, rep: any) => sum + (rep.motionFrames?.length || 0), 0),
+                frameRate: 30,
+                recordedAt: assessment.completedAt,
+                exportedAt: new Date().toISOString()
+              },
+              motionFrames: assessment.repetitionData.flatMap((rep: any) => rep.motionFrames || [])
+            };
+            
+            const motionFileName = `${folderName}/${patient.code}_${folderName}_${index + 1}_${dateStr}_motion.json`;
+            zip.file(motionFileName, JSON.stringify(motionData, null, 2));
+          }
         });
       });
 
