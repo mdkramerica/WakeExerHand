@@ -578,7 +578,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       At Risk
                     </p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {complianceData.totalPatients - complianceData.activePatients}
+                      {complianceData.activePatients}
                     </p>
                   </div>
                 </div>

@@ -287,18 +287,27 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.isActive, true));
 
-    // Get active patients (those with recent assessments)
-    const threeDaysAgo = new Date();
-    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-    
-    const [activePatientsResult] = await db
-      .select({ count: count() })
+    // Get patients with compliance rates below 60% (at risk)
+    const allPatientsWithCompliance = await db
+      .select({
+        id: users.id,
+        injuryType: users.injuryType,
+        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`
+      })
       .from(users)
       .leftJoin(userAssessments, eq(users.id, userAssessments.userId))
-      .where(and(
-        eq(users.isActive, true),
-        sql`${userAssessments.completedAt} >= ${threeDaysAgo}`
-      ));
+      .where(eq(users.isActive, true))
+      .groupBy(users.id, users.injuryType);
+
+    let atRiskPatients = 0;
+    allPatientsWithCompliance.forEach(patient => {
+      const assignedCount = this.getAssessmentCountByInjuryType(patient.injuryType || 'Unknown');
+      const completedCount = patient.completedAssessments || 0;
+      const complianceRate = assignedCount > 0 ? (completedCount / assignedCount) * 100 : 0;
+      if (complianceRate < 60) {
+        atRiskPatients++;
+      }
+    });
 
     // Get total assessments completed across all users
     const [totalAssessmentsResult] = await db
@@ -337,7 +346,7 @@ export class DatabaseStorage implements IStorage {
 
     return {
       totalPatients: totalPatientsResult.count || 0,
-      activePatients: activePatientsResult.count || 0,
+      activePatients: atRiskPatients, // Now represents patients below 60% compliance
       totalAssessments: completedAssessments,
       completedToday: completedTodayResult.count || 0,
       complianceRate,
