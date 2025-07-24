@@ -257,6 +257,33 @@ body,
   background-color: #F9FAFB !important;
 }
 
+/* Hide Replit development error overlay */
+[data-vite-error-overlay],
+[data-error-overlay],
+.vite-error-overlay,
+#error-overlay,
+iframe[src*="error"],
+div[style*="position: fixed"][style*="bottom"][style*="right"][style*="background: white"],
+div[style*="position:fixed"][style*="bottom"][style*="right"][style*="background:white"],
+div[style*="position: fixed"][style*="z-index"][style*="background: white"],
+div[style*="position:fixed"][style*="z-index"][style*="background:white"],
+/* Target Replit-specific overlays */
+div[data-testid*="error"],
+div[data-cy*="error"],
+.replit-error-overlay,
+.runtime-error-overlay,
+div[style*="position: fixed"][style*="right: 0"][style*="bottom: 0"],
+div[style*="position:fixed"][style*="right:0"][style*="bottom:0"],
+/* Target small white boxes in corners */
+div[style*="width: 200px"][style*="height: 100px"][style*="position: fixed"],
+div[style*="width:200px"][style*="height:100px"][style*="position:fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+
 /* Force white on card-like components */
 div[class*="p-6"],
 div[class*="CardContent"] {

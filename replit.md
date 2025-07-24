@@ -95,7 +95,7 @@ This is a comprehensive hand rehabilitation assessment platform that combines re
 
 ## Recent Changes
 
-### July 24, 2025 - PostgreSQL Database Integration Successfully Completed
+### July 24, 2025 - PostgreSQL Database Integration Successfully Completed & Development Overlay Fix
 - **Successfully integrated PostgreSQL database using Neon serverless database**
 - **Replaced memory storage with persistent DatabaseStorage implementation**  
 - **Database schema deployed with all 17 tables: clinical_users, patients, assessments, etc.**
@@ -104,6 +104,8 @@ This is a comprehensive hand rehabilitation assessment platform that combines re
 - **Storage system automatically detects and uses database when DATABASE_URL is present**
 - **Verified database connection and data persistence across server restarts**
 - **Maintained backward compatibility with existing API endpoints and data structures**
+- **Fixed white box UI overlay in bottom right corner by adding CSS rules to hide Replit development error overlay**
+- **Enhanced CSS targeting to prevent development overlays from interfering with patient interface**
 
 ### July 23, 2025 - Kapandji Assessment Display Issue Fixed & UI Development Overlay Resolution
 - **Fixed critical Kapandji assessment display bug by correcting injury-specific assessment mapping**
