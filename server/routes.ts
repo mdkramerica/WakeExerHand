@@ -1460,7 +1460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: assessment.id,
           name: assessment.name,
           description: assessment.description,
-          estimatedMinutes: Math.floor(assessment.duration / 60) || 10,
+          estimatedMinutes: Math.ceil(assessment.duration / 60),
           isRequired: true,
           isCompleted: !!completed,
           assessmentUrl: `/assessment/${assessment.id}/video/${code}`
@@ -1564,7 +1564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: assessment.id,
             name: assessment.name,
             description: assessment.description,
-            estimatedMinutes: Math.floor((assessment.duration || 600) / 60),
+            estimatedMinutes: Math.ceil((assessment.duration || 600) / 60),
             isRequired: true,
             isCompleted: !!completedAssessment,
             completedAt: completedAssessment?.completedAt || null,

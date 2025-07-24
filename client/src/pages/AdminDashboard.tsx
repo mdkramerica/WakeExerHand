@@ -39,7 +39,8 @@ import {
   Eye,
   Database,
   Trash2,
-  Edit
+  Edit,
+  Home
 } from "lucide-react";
 
 interface AdminDashboardProps {
