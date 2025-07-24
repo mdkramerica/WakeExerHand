@@ -66,6 +66,7 @@ interface Patient {
   lastVisit: string | null;
   surgeryDate: string | null;
   postOpDay: number | null;
+  complianceRate: number;
 }
 
 export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
@@ -191,6 +192,28 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         {labels[status]}
       </Badge>
     );
+  };
+
+  const getComplianceStyle = (complianceRate: number) => {
+    if (complianceRate < 60) {
+      return {
+        backgroundColor: '#fef2f2', // red-50
+        borderColor: '#dc2626', // red-600
+        color: '#dc2626'
+      };
+    } else if (complianceRate < 75) {
+      return {
+        backgroundColor: '#fefce8', // yellow-50
+        borderColor: '#ca8a04', // yellow-600
+        color: '#ca8a04'
+      };
+    } else {
+      return {
+        backgroundColor: '#f0fdf4', // green-50
+        borderColor: '#16a34a', // green-600
+        color: '#16a34a'
+      };
+    }
   };
 
   const copyAccessCode = async (code: string) => {
@@ -697,6 +720,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     <th className="text-left p-2">Surgery Date</th>
                     <th className="text-left p-2">Post-Op Day</th>
                     <th className="text-left p-2">Last Assessment</th>
+                    <th className="text-left p-2">Compliance Rate</th>
                     <th className="text-left p-2">Status</th>
                     <th className="text-left p-2">Actions</th>
                   </tr>
@@ -751,6 +775,17 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                           ? new Date(patient.lastVisit).toLocaleDateString()
                           : "Never"
                         }
+                      </td>
+                      <td 
+                        className="p-2"
+                        style={{
+                          ...getComplianceStyle(patient.complianceRate),
+                          border: `2px solid ${getComplianceStyle(patient.complianceRate).borderColor}`,
+                          borderRadius: '6px',
+                          fontWeight: '600'
+                        }}
+                      >
+                        {patient.complianceRate}%
                       </td>
                       <td className="p-2">{getStatusBadge(patient)}</td>
                       <td className="p-2">

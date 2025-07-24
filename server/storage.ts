@@ -354,6 +354,7 @@ export class DatabaseStorage implements IStorage {
     isActive: boolean;
     createdAt: string;
     lastVisit: string | null;
+    complianceRate: number;
   }>> {
     const result = await db
       .select({
@@ -364,7 +365,8 @@ export class DatabaseStorage implements IStorage {
         isActive: users.isActive,
         createdAt: users.createdAt,
         surgeryDate: users.surgeryDate,
-        lastVisit: sql<string>`MAX(${userAssessments.completedAt})`
+        lastVisit: sql<string>`MAX(${userAssessments.completedAt})`,
+        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`
       })
       .from(users)
       .leftJoin(userAssessments, eq(users.id, userAssessments.userId))
@@ -372,15 +374,23 @@ export class DatabaseStorage implements IStorage {
       .groupBy(users.id, users.code, users.injuryType, users.isActive, users.createdAt, users.surgeryDate)
       .orderBy(desc(users.createdAt));
 
-    return result.map(row => ({
-      ...row,
-      injuryType: row.injuryType || 'Unknown',
-      isActive: row.isActive || false,
-      createdAt: row.createdAt?.toISOString() || new Date().toISOString(),
-      lastVisit: row.lastVisit,
-      surgeryDate: row.surgeryDate ? (typeof row.surgeryDate === 'string' ? row.surgeryDate : row.surgeryDate.toISOString().split('T')[0]) : null,
-      postOpDay: row.surgeryDate ? Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24)) : null
-    }));
+    return result.map(row => {
+      // Calculate assigned assessments based on injury type
+      const assignedCount = this.getAssessmentCountByInjuryType(row.injuryType || 'Unknown');
+      const completedCount = row.completedAssessments || 0;
+      const complianceRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+
+      return {
+        ...row,
+        injuryType: row.injuryType || 'Unknown',
+        isActive: row.isActive || false,
+        createdAt: row.createdAt?.toISOString() || new Date().toISOString(),
+        lastVisit: row.lastVisit,
+        surgeryDate: row.surgeryDate ? (typeof row.surgeryDate === 'string' ? row.surgeryDate : row.surgeryDate.toISOString().split('T')[0]) : null,
+        postOpDay: row.surgeryDate ? Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24)) : null,
+        complianceRate
+      };
+    });
   }
 
   async generatePatientAccessCode(): Promise<string> {
