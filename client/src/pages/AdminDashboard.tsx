@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { PatientDetailModal } from "@/components/patient-detail-modal";
+import exerLogoPath from "@assets/ExerLogoColor_1750399504621.png";
 import {
   Users,
   Activity,
@@ -505,9 +506,13 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <Stethoscope className="h-8 w-8 text-blue-600" />
+              <img 
+                src={exerLogoPath} 
+                alt="ExerAI Logo" 
+                className="h-8 w-auto"
+              />
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                HandCare Portal
+                ExerAI Admin Portal
               </h1>
             </div>
             
