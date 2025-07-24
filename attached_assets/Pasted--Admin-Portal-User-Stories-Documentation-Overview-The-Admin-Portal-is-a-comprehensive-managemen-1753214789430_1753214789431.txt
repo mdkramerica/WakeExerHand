@@ -1,0 +1,288 @@
+# Admin Portal User Stories Documentation
+
+## Overview
+The Admin Portal is a comprehensive management interface for healthcare administrators to monitor patient compliance, manage assessments, and oversee the Hand Assessment Compliance Portal system. It provides real-time analytics, patient management capabilities, and motion data analysis tools.
+
+## System Access & Authentication
+
+### AS-001: Admin Login
+**As an** administrator  
+**I want to** log into the admin portal with my credentials  
+**So that** I can securely access patient data and system management functions  
+
+**Acceptance Criteria:**
+- Admin can log in using username/password combination
+- Invalid credentials show appropriate error messages
+- Successful login redirects to admin dashboard
+- Session is maintained until manual logout
+- Login page is accessible at `/admin` route
+
+**Technical Implementation:**
+- Endpoint: `POST /api/admin/login`
+- Authentication: Simple password verification (development)
+- Session storage: Browser sessionStorage for admin data
+
+---
+
+## Dashboard Analytics & Monitoring
+
+### AS-002: View System Overview
+**As an** administrator  
+**I want to** see key system metrics on the dashboard  
+**So that** I can quickly assess overall system health and patient compliance  
+
+**Acceptance Criteria:**
+- Dashboard displays total number of patients in the system
+- Shows overall compliance rate as a percentage
+- Highlights number of "at-risk" patients (3+ days since last visit)
+- Displays today's completed assessments count
+- All metrics update in real-time when data changes
+
+**Dashboard Metrics:**
+1. **Total Patients**: Count of all patients in the system
+2. **Compliance Rate**: Percentage of active patients (based on recent activity)
+3. **At Risk**: Patients who haven't completed assessments in 3+ days
+4. **Today's Assessments**: Number of assessments completed today
+
+**Visual Design:**
+- Four metric cards with color-coded icons (blue, green, orange, purple)
+- Responsive grid layout (1-4 columns based on screen size)
+- Loading states with skeleton placeholders
+
+---
+
+## Patient Management
+
+### AS-003: View All Patients
+**As an** administrator  
+**I want to** view a comprehensive list of all patients  
+**So that** I can monitor their status and manage their accounts  
+
+**Acceptance Criteria:**
+- Patient table shows: Patient ID, Access Code, Injury Type, Last Assessment, Status
+- Each patient row displays compliance status with color coding:
+  - **Green (Active)**: Last visit within 1 day
+  - **Orange (At Risk)**: Last visit 2-3 days ago
+  - **Red (Non-Compliant)**: Last visit 4+ days ago or inactive
+- Patient avatars show last 2 digits of Patient ID
+- Table includes creation date for each patient
+- Loading states show skeleton rows during data fetch
+
+**Patient Status Logic:**
+- **Active**: Recent assessment activity (≤ 1 day)
+- **At Risk**: Moderate delay (2-3 days since last visit)
+- **Non-Compliant**: Extended delay (4+ days) or marked inactive
+
+### AS-004: Search and Filter Patients
+**As an** administrator  
+**I want to** search and filter the patient list  
+**So that** I can quickly find specific patients or view specific status groups  
+
+**Acceptance Criteria:**
+- Search functionality works on Patient ID and Injury Type
+- Filter dropdown options: All Status, Active, At Risk, Non-Compliant
+- Search is case-insensitive and real-time
+- Filters can be combined (search + status filter)
+- Clear visual feedback when no results match criteria
+
+### AS-005: View Patient Access Codes
+**As an** administrator  
+**I want to** view and copy patient access codes  
+**So that** I can provide them to patients for system access  
+
+**Acceptance Criteria:**
+- 6-digit access codes displayed prominently for each patient
+- One-click copy functionality for each access code
+- Visual confirmation when code is copied to clipboard
+- Codes displayed in monospace font with blue styling
+- Copy button with clipboard icon next to each code
+
+---
+
+## Patient Registration & Management
+
+### AS-006: Add New Patients
+**As an** administrator  
+**I want to** register new patients with specific injury types  
+**So that** they can access condition-appropriate assessments  
+
+**Acceptance Criteria:**
+- Modal dialog for new patient registration
+- Required injury type selection from dropdown:
+  - Trigger Finger
+  - Carpal Tunnel
+  - Distal Radius Fracture
+  - CMC Arthroplasty
+- System auto-generates unique 6-digit access code
+- System auto-generates unique Patient ID (format: P001, P002, etc.)
+- Success notification displays generated code and Patient ID
+- Patient immediately appears in the patient list
+- Error handling for failed registration attempts
+
+**Business Logic:**
+- Each injury type determines which assessments are available to the patient
+- Access codes are unique across the entire system
+- Patient IDs follow sequential numbering (P001, P002, P003...)
+
+---
+
+## Data Export & Motion Analysis
+
+### AS-007: Download Patient Motion Data
+**As an** administrator  
+**I want to** download individual patient motion capture data  
+**So that** I can perform detailed analysis or share with medical professionals  
+
+**Acceptance Criteria:**
+- Download button available for each patient in the table
+- Data exported as JSON file format
+- Filename format: `patient_{userId}_motion_data.json`
+- Download includes all motion capture sessions for the patient
+- Success notification confirms download initiation
+- Error handling for failed download attempts
+
+**Data Structure:**
+- Hand landmarks (21 points per hand)
+- Pose landmarks (when available from Holistic model)
+- Handedness detection (Left/Right)
+- Timestamp information for each capture session
+- Assessment metadata (type, completion status)
+- Quality metrics and stability measurements
+
+### AS-008: Export System Data
+**As an** administrator  
+**I want to** export comprehensive system data  
+**So that** I can perform system-wide analysis or backup patient information  
+
+**Acceptance Criteria:**
+- "Export Data" button in dashboard header
+- Opens all patient data in new browser tab
+- JSON format suitable for external analysis
+- Includes patient demographics, assessment history, and compliance data
+- Available without individual patient selection
+
+---
+
+## Navigation & User Experience
+
+### AS-009: Admin Portal Navigation
+**As an** administrator  
+**I want to** navigate easily through the admin interface  
+**So that** I can efficiently perform my administrative tasks  
+
+**Acceptance Criteria:**
+- Header shows "HandCare Portal" branding with medical icon
+- Admin username displayed in header
+- One-click logout functionality
+- Responsive design works on desktop and tablet devices
+- Consistent styling with healthcare/medical theme
+- Loading states prevent user confusion during data operations
+
+### AS-010: Real-time Updates
+**As an** administrator  
+**I want to** see data updates automatically  
+**So that** I have current information without manual page refreshes  
+
+**Acceptance Criteria:**
+- Patient list refreshes after adding new patients
+- Compliance metrics update when new assessments are completed
+- Status indicators reflect current patient activity
+- No manual refresh required for data synchronization
+
+---
+
+## Condition-Specific Assessment Management
+
+### AS-011: Condition Assessment Mapping
+**As an** administrator  
+**I want to** understand which assessments are assigned to each injury type  
+**So that** I can ensure patients receive appropriate evaluations  
+
+**Assessment Mappings:**
+1. **Trigger Finger**: TAM (Total Active Motion) only
+2. **Carpal Tunnel**: TAM, Kapandji, F/E, P/S, R/U (comprehensive evaluation)
+3. **Distal Radius Fracture**: TAM, Kapandji, F/E, P/S, R/U (full wrist assessment)
+4. **CMC Arthroplasty**: TAM, Kapandji, F/E, P/S, R/U (thumb joint focus)
+
+**Assessment Types:**
+- **TAM**: Total Active Motion measurement
+- **Kapandji**: Thumb opposition test
+- **F/E**: Flexion/Extension range testing
+- **P/S**: Pronation/Supination movement testing
+- **R/U**: Radial/Ulnar deviation assessment
+
+---
+
+## Technical Implementation Details
+
+### API Endpoints Used:
+- `GET /api/admin/compliance` - Dashboard metrics
+- `GET /api/admin/patients` - Patient list
+- `POST /api/admin/generate-code` - New patient registration
+- `GET /api/admin/download/:userId` - Motion data download
+- `POST /api/admin/login` - Authentication
+
+### Data Models:
+```typescript
+interface ComplianceData {
+  totalPatients: number;
+  activePatients: number;
+  totalAssessments: number;
+  completedToday: number;
+}
+
+interface Patient {
+  id: number;
+  patientId: string;
+  code: string;
+  injuryType: string;
+  isActive: boolean;
+  createdAt: string;
+  lastVisit: string | null;
+}
+```
+
+### State Management:
+- React Query for server state management
+- SessionStorage for admin authentication
+- Real-time cache invalidation after mutations
+- Loading states for all async operations
+
+### Security Considerations:
+- Session-based authentication
+- Input validation on all forms
+- Error boundary handling for failed operations
+- Secure API endpoint access
+
+---
+
+## Integration Points
+
+### Patient Portal Integration:
+- Access codes generated here are used for patient login
+- Patient compliance status reflects activity in patient portal
+- Assessment completion data flows from patient to admin portal
+
+### Motion Tracking Integration:
+- Motion data captured during patient assessments
+- Real-time data streaming via WebSocket
+- Data storage in JSON format for analysis
+- Quality metrics calculation and storage
+
+### Database Integration:
+- PostgreSQL database with Drizzle ORM
+- Transactional operations for data integrity
+- Relational data model connecting patients, assessments, and motion data
+
+---
+
+## Future Enhancement Opportunities
+
+1. **Advanced Analytics**: Trend analysis, compliance reporting, outcome tracking
+2. **Patient Communication**: Automated reminders, progress notifications
+3. **Role-based Access**: Different admin permission levels
+4. **Data Visualization**: Charts and graphs for compliance trends
+5. **Export Formats**: PDF reports, CSV exports, medical record integration
+6. **Audit Logging**: Track admin actions and patient data access
+
+This documentation provides a complete overview of the admin portal functionality for any developer working on the system.

@@ -1,0 +1,447 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   COMPREHENSIVE CSS RESET AND STYLING FIX
+   ======================================== */
+
+/* Root CSS Variables for Consistent Theming */
+:root {
+  --background: 249 250 251; /* #F9FAFB - light gray */
+  --foreground: 17 24 39; /* #111827 - dark gray-900 */
+  --card: 255 255 255; /* #FFFFFF - white */
+  --card-foreground: 31 41 55; /* #1F2937 - gray-800 */
+  --primary: 31 41 55; /* #1F2937 - gray-800 */
+  --primary-foreground: 255 255 255; /* #FFFFFF - white */
+  --secondary: 249 250 251; /* #F9FAFB */
+  --secondary-foreground: 31 41 55; /* #1F2937 */
+  --muted: 243 244 246; /* #F3F4F6 - gray-100 */
+  --muted-foreground: 75 85 99; /* #4B5563 - gray-600 */
+  --accent: 239 246 255; /* #EFF6FF - blue-50 */
+  --accent-foreground: 31 41 55; /* #1F2937 */
+  --border: 209 213 219; /* #D1D5DB - gray-300 */
+  --input: 209 213 219; /* #D1D5DB */
+  --ring: 59 130 246; /* #3B82F6 - blue-500 */
+}
+
+/* Global Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  color: rgb(var(--foreground));
+  background-color: rgb(var(--background));
+}
+
+#root {
+  min-height: 100vh;
+  background-color: rgb(var(--background));
+}
+
+/* Typography with High Contrast for Older Adults */
+h1, h2, h3, h4, h5, h6 {
+  color: rgb(17 24 39); /* gray-900 - highest contrast */
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+p, span, div, label, li {
+  color: rgb(31 41 55); /* gray-800 - high contrast */
+}
+
+/* Button Component Styling - CRITICAL FIX */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Primary Button Styling - Dark Theme for Visibility */
+.btn-primary,
+button[class*="bg-gray"],
+button[class*="bg-primary"] {
+  background-color: rgb(31 41 55) !important; /* gray-800 */
+  color: rgb(255 255 255) !important; /* white */
+  border: 2px solid rgb(17 24 39) !important; /* gray-900 */
+  font-weight: 800 !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.75rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-primary:hover,
+button[class*="bg-gray"]:hover,
+button[class*="bg-primary"]:hover {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+  color: rgb(255 255 255) !important; /* white */
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure all button text and icons are visible */
+button * {
+  color: inherit !important;
+}
+
+button svg {
+  fill: currentColor !important;
+  color: inherit !important;
+}
+
+/* Card Components - Clean White Backgrounds */
+.card,
+[data-testid="card"],
+main,
+section,
+article {
+  background-color: rgb(255 255 255) !important;
+  border: 1px solid rgb(209 213 219) !important; /* gray-300 */
+  color: rgb(31 41 55) !important; /* gray-800 */
+}
+
+/* Card Header Styling - Ensure white text on dark backgrounds */
+.card header,
+[data-card-header],
+.bg-gradient-to-r {
+  color: rgb(255 255 255) !important; /* white text */
+}
+
+.card header *,
+[data-card-header] *,
+.bg-gradient-to-r * {
+  color: rgb(255 255 255) !important; /* white text for all children */
+}
+
+/* Progress and Status Colors - High Contrast */
+.bg-green-100 { background-color: rgb(220 252 231) !important; }
+.text-green-800 { color: rgb(22 101 52) !important; }
+.bg-red-100 { background-color: rgb(254 226 226) !important; }
+.text-red-800 { color: rgb(153 27 27) !important; }
+.bg-blue-100 { background-color: rgb(219 234 254) !important; }
+.text-blue-800 { color: rgb(30 64 175) !important; }
+.bg-yellow-100 { background-color: rgb(254 249 195) !important; }
+.text-yellow-800 { color: rgb(133 77 14) !important; }
+
+/* CRITICAL FIX: Prevent yellow background leak */
+.min-h-screen {
+  background-color: rgb(249 250 251) !important; /* light gray */
+}
+
+.bg-gray-50 {
+  background-color: rgb(249 250 251) !important; /* light gray */
+}
+
+/* Ensure cards have white backgrounds, not yellow - ONLY in admin dashboard main content */
+.admin-dashboard > main [data-radix-collection-item],
+.admin-dashboard > main .card,
+.admin-dashboard > main .Card,
+.admin-dashboard > main [role="group"],
+.admin-dashboard > main .grid > div,
+.admin-dashboard > main .flex > div {
+  background-color: rgb(255 255 255) !important; /* white */
+}
+
+/* CRITICAL: Force all card components to have white backgrounds - ONLY in admin dashboard main content */
+.admin-dashboard > main div[class*="Card"],
+.admin-dashboard > main div[class*="card"],
+.admin-dashboard > main [data-card],
+.admin-dashboard > main .grid div[class*="Card"],
+.admin-dashboard > main .grid div[style*="Card"] {
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+}
+
+/* Remove any yellow background that might be applied globally */
+* {
+  background-color: inherit;
+}
+
+/* CRITICAL: Force modal and dialog content to have white backgrounds */
+[data-radix-dialog-content],
+[data-radix-alert-dialog-content],
+.modal-content,
+[role="dialog"] {
+  background-color: #FFFFFF !important;
+}
+
+/* Fix for cards inside modals */
+[data-radix-dialog-content] .Card,
+[data-radix-dialog-content] [class*="Card"],
+[data-radix-alert-dialog-content] .Card,
+[data-radix-alert-dialog-content] [class*="Card"],
+[role="dialog"] .Card,
+[role="dialog"] [class*="Card"] {
+  background-color: #FFFFFF !important;
+}
+
+/* Override any yellow background classes globally to prevent the issue */
+.bg-yellow-50,
+.bg-yellow-100,
+.bg-yellow-200,
+.bg-yellow-300,
+.bg-yellow-400,
+.bg-yellow-500,
+[data-state="active"],
+[data-radix-tabs-trigger][data-state="active"],
+button[data-state="active"] {
+  background-color: #FFFFFF !important;
+}
+
+/* But allow yellow badges and intentional yellow elements */
+.badge.bg-yellow-100,
+.Badge.bg-yellow-100,
+[data-badge].bg-yellow-100,
+div[class*="p-2 rounded-md bg-yellow-100"] {
+  background-color: rgb(254 249 195) !important; /* original yellow-100 */
+  color: rgb(133 77 14) !important; /* original yellow-800 */
+}
+
+/* More specific override for injury condition icons */
+.p-2.rounded-md.bg-yellow-100 {
+  background-color: rgb(254 249 195) !important; /* original yellow-100 */
+  color: rgb(133 77 14) !important; /* original yellow-800 */
+}
+
+/* Fix for tabs and their active states */
+[data-radix-tabs-list] {
+  background-color: #FFFFFF !important;
+}
+
+[data-radix-tabs-trigger] {
+  background-color: #F3F4F6 !important;
+}
+
+[data-radix-tabs-trigger][data-state="active"] {
+  background-color: #FFFFFF !important;
+  border-bottom: 2px solid #3B82F6 !important;
+}
+
+/* Fix for badges specifically - prevent all yellow badges */
+.bg-yellow-100.text-yellow-800,
+.bg-yellow-200.text-yellow-800,
+[class*="bg-yellow"],
+[data-badge],
+.badge {
+  background-color: #F3F4F6 !important; /* Light gray instead of yellow */
+  color: #374151 !important;
+}
+
+/* Override any progress bar backgrounds */
+[data-radix-progress-root],
+[role="progressbar"] {
+  background-color: #F3F4F6 !important;
+}
+
+/* Ensure specific page containers don't have yellow backgrounds */
+.min-h-screen,
+main,
+header,
+body,
+#root {
+  background-color: #F9FAFB !important;
+}
+
+/* Force white on card-like components */
+div[class*="p-6"],
+div[class*="CardContent"] {
+  background-color: #FFFFFF !important;
+}
+
+/* CRITICAL FIX: Select Component Yellow Background Issue - ONLY in admin dashboard main content */
+.admin-dashboard > main [data-radix-select-trigger],
+.admin-dashboard > main [data-radix-select-content],
+.admin-dashboard > main button[role="combobox"],
+.admin-dashboard > main div[role="combobox"],
+.admin-dashboard > main .select-trigger,
+.admin-dashboard > main [class*="SelectTrigger"] {
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  color: #1F2937 !important;
+  border: 1px solid #D1D5DB !important;
+}
+
+/* Override any yellow backgrounds on Select components - ONLY in admin dashboard main content */
+.admin-dashboard > main [data-radix-select-trigger]:focus,
+.admin-dashboard > main [data-radix-select-trigger]:hover,
+.admin-dashboard > main button[role="combobox"]:focus,
+.admin-dashboard > main button[role="combobox"]:hover {
+  background-color: #F9FAFB !important;
+  background: #F9FAFB !important;
+}
+
+/* Fix for Radix Select Portal content - ONLY in admin dashboard main content */
+.admin-dashboard > main [data-radix-popper-content-wrapper] {
+  background-color: #FFFFFF !important;
+}
+
+/* Ensure Select items have proper background - ONLY in admin dashboard main content */
+.admin-dashboard > main [data-radix-select-item] {
+  background-color: #FFFFFF !important;
+  color: #1F2937 !important;
+}
+
+.admin-dashboard > main [data-radix-select-item]:hover,
+.admin-dashboard > main [data-radix-select-item][data-highlighted] {
+  background-color: #F3F4F6 !important;
+  color: #111827 !important;
+}
+
+/* Muted Text - Ensure Readable Contrast */
+.text-muted-foreground {
+  color: rgb(75 85 99) !important; /* gray-600 */
+}
+
+.text-gray-500,
+.text-gray-600,
+.text-gray-700 {
+  color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+/* Form Elements */
+input, textarea, select {
+  background-color: rgb(255 255 255) !important;
+  border: 2px solid rgb(209 213 219) !important; /* gray-300 */
+  color: rgb(31 41 55) !important; /* gray-800 */
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 1rem !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  border-color: rgb(59 130 246) !important; /* blue-500 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Calendar Styling - Maintain Special Day Colors */
+.calendar-completed-day {
+  background-color: rgb(34 197 94) !important; /* green-500 */
+  color: rgb(255 255 255) !important;
+  font-weight: bold !important;
+}
+
+.calendar-pending-day {
+  background-color: rgb(245 158 11) !important; /* amber-500 */
+  color: rgb(255 255 255) !important;
+  font-weight: bold !important;
+}
+
+.calendar-missed-day {
+  background-color: rgb(239 68 68) !important; /* red-500 */
+  color: rgb(255 255 255) !important;
+  font-weight: bold !important;
+}
+
+.calendar-surgery-day {
+  background-color: rgb(59 130 246) !important; /* blue-500 */
+  color: rgb(255 255 255) !important;
+  font-weight: bold !important;
+  border: 3px solid rgb(29 78 216) !important; /* blue-700 */
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --foreground: 0 0 0; /* Black text */
+    --background: 255 255 255; /* White background */
+    --border: 0 0 0; /* Black borders */
+  }
+  
+  button {
+    border: 3px solid rgb(0 0 0) !important;
+  }
+}
+
+/* Focus Styles for Accessibility */
+*:focus {
+  outline: 2px solid rgb(59 130 246) !important; /* blue-500 */
+  outline-offset: 2px !important;
+}
+
+/* Specific fixes for common UI patterns */
+.badge {
+  padding: 0.25rem 0.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
+
+.alert {
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid transparent !important;
+}
+
+/* Progress bar styling */
+.progress {
+  background-color: rgb(243 244 246) !important; /* gray-100 */
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+}
+
+.progress-indicator {
+  background-color: rgb(34 197 94) !important; /* green-500 */
+  transition: width 0.3s ease !important;
+}
+
+/* Ensure streak card text visibility */
+.streak-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.9)) !important;
+  color: rgb(255 255 255) !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.streak-card * {
+  color: rgb(255 255 255) !important;
+  text-shadow: inherit !important;
+}
+
+/* Override any remaining problematic styles */
+.text-white {
+  color: rgb(255 255 255) !important;
+}
+
+.text-black {
+  color: rgb(0 0 0) !important;
+}
+
+.bg-white {
+  background-color: rgb(255 255 255) !important;
+}
+
+.bg-transparent {
+  background-color: transparent !important;
+}
+
+/* Dark mode support (if needed) */
+.dark {
+  --background: 15 23 42; /* #0F172A */
+  --foreground: 248 250 252; /* #F8FAFC */
+  --card: 30 41 59; /* #1E293B */
+  --card-foreground: 248 250 252; /* #F8FAFC */
+}
