@@ -250,7 +250,7 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
           }
           return prev + 1;
         });
-      }, 100); // 10 fps
+      }, 33); // Real-time 30 fps playback
     }
   };
 

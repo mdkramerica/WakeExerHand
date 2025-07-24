@@ -1601,9 +1601,9 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isPlaying) {
-      // Adjust interval based on assessment type for consistent playback speed
-      const baseInterval = isWristAssessment ? 80 : 33; // Much slower for wrist assessments
-      intervalId = setInterval(playAnimation, baseInterval);
+      // Real-time playback at 30 FPS (33.33ms per frame)
+      const realTimeInterval = Math.round(1000 / 30 / playbackSpeed); // Adjust for playback speed
+      intervalId = setInterval(playAnimation, realTimeInterval);
     }
 
     return () => {
@@ -1611,7 +1611,7 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
         clearInterval(intervalId);
       }
     };
-  }, [isPlaying, playAnimation]);
+  }, [isPlaying, playAnimation, playbackSpeed]);
 
   useEffect(() => {
     drawFrame(currentFrame);

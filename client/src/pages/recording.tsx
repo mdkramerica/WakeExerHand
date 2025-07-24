@@ -131,7 +131,7 @@ export default function Recording() {
           if (prev <= 1) {
             setIsCountingDown(false);
             setIsRecording(true);
-            setRecordingTimer(assessment?.duration || 10);
+            setRecordingTimer(15); // 15 second recording duration
             const startTime = Date.now();
             recordingStartTimeRef.current = startTime;
             setRecordingMotionData([]);
@@ -154,14 +154,14 @@ export default function Recording() {
               recordingStartTimeRef.current = null;
               handleRepetitionComplete();
             }, 100);
-            return assessment?.duration || 10;
+            return 15; // 15 second recording duration
           }
           return prev - 1;
         });
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isRecording, isCountingDown, assessment?.duration]);
+  }, [isRecording, isCountingDown]);
 
   const startRecording = () => {
     // Lock the current detected hand type immediately when record button is pressed
@@ -207,7 +207,7 @@ export default function Recording() {
     // Calculate actual duration from motion data timestamps
     const actualDuration = recordingMotionDataRef.current.length > 0 
       ? Math.round((recordingMotionDataRef.current[recordingMotionDataRef.current.length - 1].timestamp - recordingMotionDataRef.current[0].timestamp) / 1000)
-      : assessment?.duration || 10;
+      : 15; // 15 second recording duration
 
     const repetitionData = {
       repetition: currentRepetition,
