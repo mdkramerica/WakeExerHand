@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Stethoscope } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import exerLogoPath from "@assets/ExerLogoColor_1750399504621.png";
 
 interface AdminLoginProps {
   onLogin: (token: string, user: any) => void;
@@ -63,10 +64,14 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
-            <Stethoscope className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <div className="mx-auto mb-4 flex justify-center">
+            <img 
+              src={exerLogoPath} 
+              alt="ExerAI Logo" 
+              className="h-16 w-auto"
+            />
           </div>
-          <CardTitle className="text-2xl font-bold">HandCare Portal</CardTitle>
+          <CardTitle className="text-2xl font-bold">ExerAI Admin Portal</CardTitle>
           <p className="text-gray-600 dark:text-gray-400">Admin Access</p>
         </CardHeader>
         <CardContent>
@@ -112,14 +117,6 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
               {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
-
-          <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-            <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-              Demo Credentials:<br />
-              Username: <code>admin</code><br />
-              Password: <code>admin123</code>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
