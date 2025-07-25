@@ -290,37 +290,71 @@ div[class*="CardContent"] {
   background-color: #FFFFFF !important;
 }
 
-/* CRITICAL FIX: Select Component Yellow Background Issue - ONLY in admin dashboard main content */
-.admin-dashboard > main [data-radix-select-trigger],
-.admin-dashboard > main [data-radix-select-content],
-.admin-dashboard > main button[role="combobox"],
-.admin-dashboard > main div[role="combobox"],
-.admin-dashboard > main .select-trigger,
-.admin-dashboard > main [class*="SelectTrigger"] {
+/* CRITICAL FIX: Select Component Yellow Background Issue - Global fix for all Select components */
+[data-radix-select-trigger],
+[data-radix-select-content],
+button[role="combobox"],
+div[role="combobox"],
+.select-trigger,
+[class*="SelectTrigger"],
+/* Additional targeting for background classes */
+.bg-background,
+.bg-popover {
   background-color: #FFFFFF !important;
   background: #FFFFFF !important;
   color: #1F2937 !important;
   border: 1px solid #D1D5DB !important;
 }
 
-/* Override any yellow backgrounds on Select components - ONLY in admin dashboard main content */
-.admin-dashboard > main [data-radix-select-trigger]:focus,
-.admin-dashboard > main [data-radix-select-trigger]:hover,
-.admin-dashboard > main button[role="combobox"]:focus,
-.admin-dashboard > main button[role="combobox"]:hover {
+/* Override any yellow backgrounds on Select components - Global fix */
+[data-radix-select-trigger]:focus,
+[data-radix-select-trigger]:hover,
+button[role="combobox"]:focus,
+button[role="combobox"]:hover,
+.bg-background:focus,
+.bg-background:hover {
   background-color: #F9FAFB !important;
   background: #F9FAFB !important;
 }
 
-/* Fix for Radix Select Portal content - ONLY in admin dashboard main content */
-.admin-dashboard > main [data-radix-popper-content-wrapper] {
+/* Fix for Radix Select Portal content - Global fix including portals */
+[data-radix-popper-content-wrapper],
+[data-radix-portal],
+[data-radix-select-portal] {
   background-color: #FFFFFF !important;
 }
 
-/* Ensure Select items have proper background - ONLY in admin dashboard main content */
-.admin-dashboard > main [data-radix-select-item] {
+/* Ensure Select items have proper background - Global fix */
+[data-radix-select-item] {
   background-color: #FFFFFF !important;
   color: #1F2937 !important;
+}
+
+/* Additional comprehensive fix for all potential yellow backgrounds */
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: #F3F4F6 !important;
+  color: #111827 !important;
+}
+
+/* Force white backgrounds for portal-rendered content */
+body > div[data-radix-portal] {
+  background-color: transparent !important;
+}
+
+body > div[data-radix-portal] * {
+  background-color: inherit !important;
+}
+
+/* Specific fix for Select trigger backgrounds */
+.bg-background {
+  background-color: #FFFFFF !important;
+}
+
+/* Fix for Tailwind CSS variables that might cause yellow */
+:root {
+  --background: 255 255 255; /* Force white instead of potential yellow */
+  --popover: 255 255 255; /* Force white for popover backgrounds */
 }
 
 .admin-dashboard > main [data-radix-select-item]:hover,
