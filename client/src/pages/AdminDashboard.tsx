@@ -726,7 +726,8 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     <th className="text-left p-2">Surgery Date</th>
                     <th className="text-left p-2">Post-Op Day</th>
                     <th className="text-left p-2">Days Active</th>
-                    <th className="text-left p-2">Compliance Rate</th>
+                    <th className="text-left p-2">Assessment %</th>
+                    <th className="text-left p-2">Days Active %</th>
                     <th className="text-left p-2">Status</th>
                     <th className="text-left p-2">Actions</th>
                   </tr>
@@ -777,21 +778,29 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                         }
                       </td>
                       <td className="p-2">
-                        {patient.lastVisit 
-                          ? new Date(patient.lastVisit).toLocaleDateString()
-                          : "Never"
-                        }
+                        {patient.daysActive || 0}
                       </td>
                       <td 
                         className="p-2"
                         style={{
-                          ...getComplianceStyle(patient.complianceRate),
-                          border: `2px solid ${getComplianceStyle(patient.complianceRate).borderColor}`,
+                          ...getComplianceStyle(patient.assessmentCompletionRate),
+                          border: `2px solid ${getComplianceStyle(patient.assessmentCompletionRate).borderColor}`,
                           borderRadius: '6px',
                           fontWeight: '600'
                         }}
                       >
-                        {patient.complianceRate}%
+                        {patient.assessmentCompletionRate}%
+                      </td>
+                      <td 
+                        className="p-2"
+                        style={{
+                          ...getComplianceStyle(patient.daysActiveRate),
+                          border: `2px solid ${getComplianceStyle(patient.daysActiveRate).borderColor}`,
+                          borderRadius: '6px',
+                          fontWeight: '600'
+                        }}
+                      >
+                        {patient.daysActiveRate}%
                       </td>
                       <td className="p-2">{getStatusBadge(patient)}</td>
                       <td className="p-2">

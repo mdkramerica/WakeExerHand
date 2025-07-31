@@ -311,12 +311,11 @@ export class DatabaseStorage implements IStorage {
       const currentPostOpDay = patient.surgeryDate ? 
         Math.max(1, Math.floor((Date.now() - new Date(patient.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
       
-      // Hybrid compliance calculation
-      const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
-      const adherenceScore = currentPostOpDay > 0 ? (uniqueDays / currentPostOpDay) * 50 : 0;
-      const complianceRate = assessmentScore + adherenceScore;
+      // Pure assessment completion rate
+      const assessmentCompletionRate = assignedCount > 0 ? (completedCount / assignedCount) * 100 : 0;
       
-      if (complianceRate < 60) {
+      // Consider at risk if assessment completion rate is below 60%
+      if (assessmentCompletionRate < 60) {
         atRiskPatients++;
       }
     });
@@ -375,7 +374,8 @@ export class DatabaseStorage implements IStorage {
     isActive: boolean;
     createdAt: string;
     lastVisit: string | null;
-    complianceRate: number;
+    assessmentCompletionRate: number;
+    daysActiveRate: number;
     daysActive: number;
     postOpDay: number;
   }>> {
@@ -408,15 +408,12 @@ export class DatabaseStorage implements IStorage {
       const currentPostOpDay = row.surgeryDate ? 
         Math.max(1, Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
       
-      // Hybrid compliance calculation (Option C)
-      // Base score: (completed assessments / assigned assessments) × 50%
-      const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
+      // Pure percentage calculations (no weighting)
+      // Assessment completion rate: completed assessments / assigned assessments
+      const assessmentCompletionRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
       
-      // Adherence score: (days with assessments / days since surgery) × 50%
-      const adherenceScore = currentPostOpDay > 0 ? (uniqueDays / currentPostOpDay) * 50 : 0;
-      
-      // Combined compliance rate
-      const complianceRate = Math.round(assessmentScore + adherenceScore);
+      // Days active rate: days with assessments / days since surgery
+      const daysActiveRate = currentPostOpDay > 0 ? Math.round((uniqueDays / currentPostOpDay) * 100) : 0;
 
       return {
         ...row,
@@ -427,7 +424,8 @@ export class DatabaseStorage implements IStorage {
         surgeryDate: row.surgeryDate ? (typeof row.surgeryDate === 'string' ? row.surgeryDate : row.surgeryDate.toISOString().split('T')[0]) : null,
         postOpDay: currentPostOpDay,
         daysActive: uniqueDays,
-        complianceRate
+        assessmentCompletionRate,
+        daysActiveRate
       };
     });
   }

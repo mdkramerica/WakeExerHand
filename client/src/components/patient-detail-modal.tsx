@@ -60,20 +60,17 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     );
     const daysCompleted = completionDates.size;
 
-    // Hybrid compliance calculation (Option C)
+    // Pure percentage calculations (no weighting)
     const assignedCount = getAssignedAssessmentCount(patient.injuryType || '');
     const completedCount = assessments.length;
     
-    // Base score: (completed assessments / assigned assessments) × 50%
-    const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
+    // Assessment completion rate: completed assessments / assigned assessments
+    const assessmentCompletionRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
     
-    // Adherence score: (days with assessments / days since surgery) × 50%
-    const adherenceScore = totalDays > 0 ? (daysCompleted / totalDays) * 50 : 0;
-    
-    // Combined compliance rate
-    const complianceRate = Math.round(assessmentScore + adherenceScore);
+    // Days active rate: days with assessments / days since surgery
+    const daysActiveRate = totalDays > 0 ? Math.round((daysCompleted / totalDays) * 100) : 0;
 
-    return { complianceRate, daysCompleted, totalDays };
+    return { assessmentCompletionRate, daysActiveRate, daysCompleted, totalDays };
   };
 
   // Fetch patient assessment history
@@ -250,10 +247,10 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Compliance Rate</CardTitle>
+                <CardTitle className="text-sm font-medium">Assessment Completion</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{complianceMetrics.complianceRate}%</div>
+                <div className="text-2xl font-bold">{complianceMetrics.assessmentCompletionRate}%</div>
                 <div className="text-xs text-muted-foreground mt-1">
                   {assessments.length} of {
                     patient.injuryType === 'Carpal Tunnel' || 
@@ -269,12 +266,12 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Days Completed</CardTitle>
+                <CardTitle className="text-sm font-medium">Days Active</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{complianceMetrics.daysCompleted}</div>
+                <div className="text-2xl font-bold">{complianceMetrics.daysActiveRate}%</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  of {complianceMetrics.totalDays} post-surgery days
+                  {complianceMetrics.daysCompleted} of {complianceMetrics.totalDays} post-surgery days
                 </div>
               </CardContent>
             </Card>
