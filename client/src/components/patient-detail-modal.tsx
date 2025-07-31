@@ -64,8 +64,10 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     const assignedCount = getAssignedAssessmentCount(patient.injuryType || '');
     const completedCount = assessments.length;
     
-    // Assessment completion rate: completed assessments / assigned assessments
-    const assessmentCompletionRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+    // Assessment completion rate: completed assessments / expected assessments by now
+    // Expected: patient should complete each assessment type once per day up to assigned limit
+    const expectedByNow = Math.min(totalDays, assignedCount);
+    const assessmentCompletionRate = expectedByNow > 0 ? Math.round((completedCount / expectedByNow) * 100) : 0;
     
     // Days active rate: days with assessments / days since surgery
     const daysActiveRate = totalDays > 0 ? Math.round((daysCompleted / totalDays) * 100) : 0;
@@ -252,7 +254,7 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
               <CardContent>
                 <div className="text-2xl font-bold">{complianceMetrics.assessmentCompletionRate}%</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {assessments.length} of {
+                  {assessments.length} of {Math.min(complianceMetrics.totalDays, 
                     patient.injuryType === 'Carpal Tunnel' || 
                     patient.injuryType === 'Wrist Fracture' || 
                     patient.injuryType === 'Tendon Injury' || 
@@ -260,7 +262,7 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
                     patient.injuryType === 'Tennis Elbow' || 
                     patient.injuryType === 'Golfer\'s Elbow' || 
                     patient.injuryType === 'Trigger Finger' ? 3 : 3
-                  } assigned
+                  )} expected by Day {complianceMetrics.totalDays}
                 </div>
               </CardContent>
             </Card>

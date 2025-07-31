@@ -311,8 +311,9 @@ export class DatabaseStorage implements IStorage {
       const currentPostOpDay = patient.surgeryDate ? 
         Math.max(1, Math.floor((Date.now() - new Date(patient.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
       
-      // Pure assessment completion rate
-      const assessmentCompletionRate = assignedCount > 0 ? (completedCount / assignedCount) * 100 : 0;
+      // Pure assessment completion rate: completed vs expected by now
+      const expectedByNow = Math.min(currentPostOpDay, assignedCount);
+      const assessmentCompletionRate = expectedByNow > 0 ? (completedCount / expectedByNow) * 100 : 0;
       
       // Consider at risk if assessment completion rate is below 60%
       if (assessmentCompletionRate < 60) {
@@ -409,8 +410,10 @@ export class DatabaseStorage implements IStorage {
         Math.max(1, Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
       
       // Pure percentage calculations (no weighting)
-      // Assessment completion rate: completed assessments / assigned assessments
-      const assessmentCompletionRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+      // Assessment completion rate: completed assessments / expected assessments by now
+      // Expected: patient should complete each assessment type once per day up to assigned limit
+      const expectedByNow = Math.min(currentPostOpDay, assignedCount);
+      const assessmentCompletionRate = expectedByNow > 0 ? Math.round((completedCount / expectedByNow) * 100) : 0;
       
       // Days active rate: days with assessments / days since surgery
       const daysActiveRate = currentPostOpDay > 0 ? Math.round((uniqueDays / currentPostOpDay) * 100) : 0;
