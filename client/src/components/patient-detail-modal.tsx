@@ -65,8 +65,22 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     const completedCount = assessments.length;
     
     // Assessment completion rate: completed assessments / expected assessments by now
-    // Expected: patient should complete each assessment type once per day up to assigned limit
-    const expectedByNow = Math.min(totalDays, assignedCount);
+    // Expected: all assessments daily (DASH only on day 1, others repeat daily)
+    const calculateExpectedAssessments = (days: number, injuryType: string) => {
+      if (days <= 0) return 0;
+      
+      // Get base assessments (without DASH)
+      const baseAssessments = injuryType === 'Carpal Tunnel' || 
+                             injuryType === 'Wrist Fracture' || 
+                             injuryType === 'Tendon Injury' || 
+                             injuryType === 'Distal Radius Fracture' ? 5 : 2;
+      
+      // Day 1: all assessments including DASH
+      // Day 2+: base assessments only (no DASH repeat)
+      return baseAssessments * days + 1; // +1 for DASH on day 1
+    };
+    
+    const expectedByNow = calculateExpectedAssessments(totalDays, patient.injuryType || '');
     const assessmentCompletionRate = expectedByNow > 0 ? Math.round((completedCount / expectedByNow) * 100) : 0;
     
     // Days active rate: days with assessments / days since surgery
@@ -254,15 +268,14 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
               <CardContent>
                 <div className="text-2xl font-bold">{complianceMetrics.assessmentCompletionRate}%</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {assessments.length} of {Math.min(complianceMetrics.totalDays, 
-                    patient.injuryType === 'Carpal Tunnel' || 
-                    patient.injuryType === 'Wrist Fracture' || 
-                    patient.injuryType === 'Tendon Injury' || 
-                    patient.injuryType === 'Distal Radius Fracture' ? 6 :
-                    patient.injuryType === 'Tennis Elbow' || 
-                    patient.injuryType === 'Golfer\'s Elbow' || 
-                    patient.injuryType === 'Trigger Finger' ? 3 : 3
-                  )} expected by Day {complianceMetrics.totalDays}
+                  {assessments.length} of {(() => {
+                    const days = complianceMetrics.totalDays;
+                    const baseAssessments = patient.injuryType === 'Carpal Tunnel' || 
+                                           patient.injuryType === 'Wrist Fracture' || 
+                                           patient.injuryType === 'Tendon Injury' || 
+                                           patient.injuryType === 'Distal Radius Fracture' ? 5 : 2;
+                    return baseAssessments * days + 1; // +1 for DASH on day 1
+                  })()} expected by Day {complianceMetrics.totalDays}
                 </div>
               </CardContent>
             </Card>

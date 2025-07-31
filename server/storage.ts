@@ -312,7 +312,21 @@ export class DatabaseStorage implements IStorage {
         Math.max(1, Math.floor((Date.now() - new Date(patient.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
       
       // Pure assessment completion rate: completed vs expected by now
-      const expectedByNow = Math.min(currentPostOpDay, assignedCount);
+      const calculateExpectedAssessments = (days: number, injuryType: string) => {
+        if (days <= 0) return 0;
+        
+        // Get base assessments (without DASH)
+        const baseAssessments = injuryType === 'Carpal Tunnel' || 
+                               injuryType === 'Wrist Fracture' || 
+                               injuryType === 'Tendon Injury' || 
+                               injuryType === 'Distal Radius Fracture' ? 5 : 2;
+        
+        // Day 1: all assessments including DASH
+        // Day 2+: base assessments only (no DASH repeat)
+        return baseAssessments * days + 1; // +1 for DASH on day 1
+      };
+      
+      const expectedByNow = calculateExpectedAssessments(currentPostOpDay, patient.injuryType || 'Unknown');
       const assessmentCompletionRate = expectedByNow > 0 ? (completedCount / expectedByNow) * 100 : 0;
       
       // Consider at risk if assessment completion rate is below 60%
@@ -411,8 +425,22 @@ export class DatabaseStorage implements IStorage {
       
       // Pure percentage calculations (no weighting)
       // Assessment completion rate: completed assessments / expected assessments by now
-      // Expected: patient should complete each assessment type once per day up to assigned limit
-      const expectedByNow = Math.min(currentPostOpDay, assignedCount);
+      // Expected: all assessments daily (DASH only on day 1, others repeat daily)
+      const calculateExpectedAssessments = (days: number, injuryType: string) => {
+        if (days <= 0) return 0;
+        
+        // Get base assessments (without DASH)
+        const baseAssessments = injuryType === 'Carpal Tunnel' || 
+                               injuryType === 'Wrist Fracture' || 
+                               injuryType === 'Tendon Injury' || 
+                               injuryType === 'Distal Radius Fracture' ? 5 : 2;
+        
+        // Day 1: all assessments including DASH
+        // Day 2+: base assessments only (no DASH repeat)
+        return baseAssessments * days + 1; // +1 for DASH on day 1
+      };
+      
+      const expectedByNow = calculateExpectedAssessments(currentPostOpDay, row.injuryType || 'Unknown');
       const assessmentCompletionRate = expectedByNow > 0 ? Math.round((completedCount / expectedByNow) * 100) : 0;
       
       // Days active rate: days with assessments / days since surgery
