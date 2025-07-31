@@ -287,23 +287,35 @@ export class DatabaseStorage implements IStorage {
       .from(users)
       .where(eq(users.isActive, true));
 
-    // Get patients with compliance rates below 60% (at risk)
+    // Get patients with compliance rates below 60% (at risk) using hybrid model
     const allPatientsWithCompliance = await db
       .select({
         id: users.id,
         injuryType: users.injuryType,
-        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`
+        surgeryDate: users.surgeryDate,
+        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`,
+        uniqueCompletionDays: sql<number>`COUNT(DISTINCT DATE(${userAssessments.completedAt}))`
       })
       .from(users)
       .leftJoin(userAssessments, eq(users.id, userAssessments.userId))
       .where(eq(users.isActive, true))
-      .groupBy(users.id, users.injuryType);
+      .groupBy(users.id, users.injuryType, users.surgeryDate);
 
     let atRiskPatients = 0;
     allPatientsWithCompliance.forEach(patient => {
       const assignedCount = this.getAssessmentCountByInjuryType(patient.injuryType || 'Unknown');
       const completedCount = patient.completedAssessments || 0;
-      const complianceRate = assignedCount > 0 ? (completedCount / assignedCount) * 100 : 0;
+      const uniqueDays = patient.uniqueCompletionDays || 0;
+      
+      // Calculate current post-op day
+      const currentPostOpDay = patient.surgeryDate ? 
+        Math.max(1, Math.floor((Date.now() - new Date(patient.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
+      
+      // Hybrid compliance calculation
+      const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
+      const adherenceScore = currentPostOpDay > 0 ? (uniqueDays / currentPostOpDay) * 50 : 0;
+      const complianceRate = assessmentScore + adherenceScore;
+      
       if (complianceRate < 60) {
         atRiskPatients++;
       }
@@ -364,6 +376,8 @@ export class DatabaseStorage implements IStorage {
     createdAt: string;
     lastVisit: string | null;
     complianceRate: number;
+    daysActive: number;
+    postOpDay: number;
   }>> {
     const result = await db
       .select({
@@ -375,7 +389,8 @@ export class DatabaseStorage implements IStorage {
         createdAt: users.createdAt,
         surgeryDate: users.surgeryDate,
         lastVisit: sql<string>`MAX(${userAssessments.completedAt})`,
-        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`
+        completedAssessments: sql<number>`COUNT(CASE WHEN ${userAssessments.isCompleted} = true THEN 1 END)`,
+        uniqueCompletionDays: sql<number>`COUNT(DISTINCT DATE(${userAssessments.completedAt}))`
       })
       .from(users)
       .leftJoin(userAssessments, eq(users.id, userAssessments.userId))
@@ -387,7 +402,21 @@ export class DatabaseStorage implements IStorage {
       // Calculate assigned assessments based on injury type
       const assignedCount = this.getAssessmentCountByInjuryType(row.injuryType || 'Unknown');
       const completedCount = row.completedAssessments || 0;
-      const complianceRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+      const uniqueDays = row.uniqueCompletionDays || 0;
+      
+      // Calculate days since surgery (current post-op day)
+      const currentPostOpDay = row.surgeryDate ? 
+        Math.max(1, Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24))) : 1;
+      
+      // Hybrid compliance calculation (Option C)
+      // Base score: (completed assessments / assigned assessments) × 50%
+      const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
+      
+      // Adherence score: (days with assessments / days since surgery) × 50%
+      const adherenceScore = currentPostOpDay > 0 ? (uniqueDays / currentPostOpDay) * 50 : 0;
+      
+      // Combined compliance rate
+      const complianceRate = Math.round(assessmentScore + adherenceScore);
 
       return {
         ...row,
@@ -396,7 +425,8 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.createdAt?.toISOString() || new Date().toISOString(),
         lastVisit: row.lastVisit,
         surgeryDate: row.surgeryDate ? (typeof row.surgeryDate === 'string' ? row.surgeryDate : row.surgeryDate.toISOString().split('T')[0]) : null,
-        postOpDay: row.surgeryDate ? Math.floor((Date.now() - new Date(row.surgeryDate).getTime()) / (1000 * 60 * 60 * 24)) : null,
+        postOpDay: currentPostOpDay,
+        daysActive: uniqueDays,
         complianceRate
       };
     });

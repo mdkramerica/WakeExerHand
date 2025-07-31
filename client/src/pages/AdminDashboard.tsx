@@ -725,7 +725,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     <th className="text-left p-2">Injury Type</th>
                     <th className="text-left p-2">Surgery Date</th>
                     <th className="text-left p-2">Post-Op Day</th>
-                    <th className="text-left p-2">Last Assessment</th>
+                    <th className="text-left p-2">Days Active</th>
                     <th className="text-left p-2">Compliance Rate</th>
                     <th className="text-left p-2">Status</th>
                     <th className="text-left p-2">Actions</th>

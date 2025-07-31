@@ -60,10 +60,18 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     );
     const daysCompleted = completionDates.size;
 
-    // Calculate compliance rate based on assessments completed vs assigned
+    // Hybrid compliance calculation (Option C)
     const assignedCount = getAssignedAssessmentCount(patient.injuryType || '');
     const completedCount = assessments.length;
-    const complianceRate = assignedCount > 0 ? Math.round((completedCount / assignedCount) * 100) : 0;
+    
+    // Base score: (completed assessments / assigned assessments) × 50%
+    const assessmentScore = assignedCount > 0 ? (completedCount / assignedCount) * 50 : 0;
+    
+    // Adherence score: (days with assessments / days since surgery) × 50%
+    const adherenceScore = totalDays > 0 ? (daysCompleted / totalDays) * 50 : 0;
+    
+    // Combined compliance rate
+    const complianceRate = Math.round(assessmentScore + adherenceScore);
 
     return { complianceRate, daysCompleted, totalDays };
   };
