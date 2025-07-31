@@ -1186,6 +1186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user-assessments/:userAssessmentId/motion-data", async (req, res) => {
     try {
       const userAssessmentId = parseInt(req.params.userAssessmentId);
+      console.log(`🔍 Fetching motion data for assessment ID: ${userAssessmentId}`);
       
       // Try to find the user assessment by iterating through all users
       let userAssessment = null;
@@ -1195,6 +1196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const found = userAssessments.find(ua => ua.id === userAssessmentId);
           if (found) {
             userAssessment = found;
+            console.log(`✅ Found assessment for user ${userId}`);
             break;
           }
         } catch (e) {
@@ -1203,21 +1205,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (!userAssessment || !userAssessment.repetitionData) {
+        console.log(`❌ No assessment or repetition data found for ID: ${userAssessmentId}`);
         return res.status(404).json({ message: "Motion data not found" });
       }
+      
+      console.log(`📊 Repetition data structure:`, {
+        isArray: Array.isArray(userAssessment.repetitionData),
+        length: userAssessment.repetitionData?.length,
+        firstRepHasMotionData: userAssessment.repetitionData?.[0]?.motionData ? true : false,
+        firstRepMotionDataLength: userAssessment.repetitionData?.[0]?.motionData?.length
+      });
       
       // Extract motion data from repetition data
       const motionData: any[] = [];
       if (Array.isArray(userAssessment.repetitionData)) {
-        userAssessment.repetitionData.forEach((rep: any) => {
+        userAssessment.repetitionData.forEach((rep: any, index: number) => {
+          console.log(`🔄 Processing repetition ${index}:`, {
+            hasMotionData: !!rep.motionData,
+            motionDataLength: rep.motionData?.length || 0,
+            isArray: Array.isArray(rep.motionData)
+          });
+          
           if (rep.motionData && Array.isArray(rep.motionData)) {
             motionData.push(...rep.motionData);
+            console.log(`➕ Added ${rep.motionData.length} frames from rep ${index}`);
           }
         });
       }
       
+      console.log(`🎬 Total motion frames extracted: ${motionData.length}`);
       res.json({ motionData });
     } catch (error) {
+      console.error(`❌ Error retrieving motion data:`, error);
       res.status(400).json({ message: "Failed to retrieve motion data" });
     }
   });

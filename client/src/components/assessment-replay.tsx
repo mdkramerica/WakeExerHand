@@ -1590,8 +1590,9 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
     setCurrentFrame(prev => {
       const next = prev + playbackSpeed;
       if (next >= replayData.length) {
-        // Loop back to beginning instead of stopping
-        return 0;
+        // Stop at the last frame instead of looping
+        setIsPlaying(false);
+        return replayData.length - 1;
       }
       return Math.floor(next);
     });

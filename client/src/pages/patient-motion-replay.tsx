@@ -240,17 +240,18 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
       setIsPlaying(true);
       intervalRef.current = setInterval(() => {
         setCurrentFrame((prev) => {
+          // Play through ALL frames, stopping after the last frame
           if (prev >= totalFrames - 1) {
             setIsPlaying(false);
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
               intervalRef.current = null;
             }
-            return prev;
+            return totalFrames - 1; // Ensure we show the last frame
           }
           return prev + 1;
         });
-      }, 33); // Real-time 30 fps playback
+      }, 33); // Real-time 30 fps playbook
     }
   };
 

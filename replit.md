@@ -95,6 +95,15 @@ This is a comprehensive hand rehabilitation assessment platform that combines re
 
 ## Recent Changes
 
+### July 31, 2025 - Motion Recording Duration Fix & Full 15-Second Capture Implementation
+- **Fixed critical motion recording duration mismatch that was limiting recordings to 5-6 seconds instead of 15 seconds**
+- **Updated motion capture logic from 10-second limit to 15-second limit to match recording timer**
+- **Database confirmed storing ~450 frames for 15-second recordings (30 fps × 15 seconds)**
+- **Motion replay now displays full recording duration with proper frame count**
+- **Enhanced motion data API endpoint with debug logging for tracking frame extraction**
+- **Resolved discrepancy between recording timer display (15s) and actual motion data capture (10s)**
+- **All assessment recordings now capture complete 15-second motion sequences**
+
 ### July 24, 2025 - ExerAI Admin Portal Branding Complete & PostgreSQL Database Integration
 - **Completed full ExerAI branding transformation of admin portal interface**
 - **Updated admin login page to use authentic ExerAI logo instead of generic stethoscope icon**

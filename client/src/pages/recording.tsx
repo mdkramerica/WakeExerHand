@@ -387,8 +387,8 @@ export default function Recording() {
         }
       }
       
-      // Capture motion data if we're within the recording period (0-10 seconds)
-      if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 10 && data.handDetected && data.landmarks && data.landmarks.length > 0) {
+      // Capture motion data if we're within the recording period (0-15 seconds)
+      if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15 && data.handDetected && data.landmarks && data.landmarks.length > 0) {
         console.log(`Recording motion data: ${data.landmarks.length} landmarks detected, elapsed: ${recordingElapsed.toFixed(1)}s`);
         
         // Use elbow-referenced wrist angles from the tracker for wrist assessments
@@ -428,7 +428,7 @@ export default function Recording() {
         
         // Also update ref for immediate access
         recordingMotionDataRef.current.push(motionFrame);
-      } else if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 10) {
+      } else if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15) {
         console.log(`Recording period but no valid landmarks: handDetected=${data.handDetected}, landmarks=${data.landmarks ? data.landmarks.length : 'none'}, elapsed=${recordingElapsed.toFixed(1)}s`);
       }
     }
