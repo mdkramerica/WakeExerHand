@@ -3,11 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Download, Eye, Trash2, Archive, Calendar, Clock, Target } from 'lucide-react';
+import { Download, Eye, Trash2, Archive, Calendar, Clock, Target, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { DashProgressTracker } from './dash-progress-tracker';
 
 interface PatientDetailModalProps {
   patient: any;
@@ -297,124 +299,144 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
             </Card>
           </div>
 
-          {/* Bulk Actions */}
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">Assessment History</h3>
-            <div className="flex gap-2">
-              <Button 
-                onClick={downloadAllAssessments}
-                disabled={assessments.length === 0}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Archive className="w-4 h-4" />
-                Download All
-              </Button>
-            </div>
-          </div>
+          {/* Patient Data Tabs */}
+          <Tabs defaultValue="assessments" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="assessments" className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Assessment History
+              </TabsTrigger>
+              <TabsTrigger value="dash-progress" className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                DASH Progress
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Assessment List */}
-          <div className="space-y-3">
-            {loadingAssessments ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-2 text-muted-foreground">Loading assessments...</p>
+            <TabsContent value="assessments" className="space-y-4 mt-4">
+              {/* Bulk Actions */}
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Assessment History</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={downloadAllAssessments}
+                    disabled={assessments.length === 0}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Archive className="w-4 h-4" />
+                    Download All
+                  </Button>
+                </div>
               </div>
-            ) : assessments.length === 0 ? (
-              <Card style={{ backgroundColor: '#FFFFFF' }}>
-                <CardContent className="py-8 text-center text-muted-foreground" style={{ backgroundColor: '#FFFFFF' }}>
-                  No assessments found for this patient.
-                </CardContent>
-              </Card>
-            ) : (
-              assessments.map((assessment) => (
-                <Card key={assessment.id} className="hover:shadow-md transition-shadow" style={{ backgroundColor: '#FFFFFF' }}>
-                  <CardContent className="p-4" style={{ backgroundColor: '#FFFFFF' }}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className="font-semibold">{assessment.assessmentName}</h4>
-                          <Badge variant={getQualityBadgeVariant(assessment.qualityScore || 0)}>
-                            {assessment.qualityScore || 0}% Quality
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Completed: {formatDate(assessment.completedAt)}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {/* Conditional button based on assessment type */}
-                        {assessment.assessmentName === 'DASH Survey' ? (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => viewDashResults(assessment.id)}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View Results
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => viewMotionReplay(assessment.id)}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View Replay
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => downloadAssessment(assessment)}
-                          className="flex items-center gap-1"
-                        >
-                          <Download className="w-4 h-4" />
-                          Download
-                        </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
+
+              {/* Assessment List */}
+              <div className="space-y-3">
+                {loadingAssessments ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-2 text-muted-foreground">Loading assessments...</p>
+                  </div>
+                ) : assessments.length === 0 ? (
+                  <Card style={{ backgroundColor: '#FFFFFF' }}>
+                    <CardContent className="py-8 text-center text-muted-foreground" style={{ backgroundColor: '#FFFFFF' }}>
+                      No assessments found for this patient.
+                    </CardContent>
+                  </Card>
+                ) : (
+                  assessments.map((assessment) => (
+                    <Card key={assessment.id} className="hover:shadow-md transition-shadow" style={{ backgroundColor: '#FFFFFF' }}>
+                      <CardContent className="p-4" style={{ backgroundColor: '#FFFFFF' }}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-semibold">{assessment.assessmentName}</h4>
+                              <Badge variant={getQualityBadgeVariant(assessment.qualityScore || 0)}>
+                                {assessment.qualityScore || 0}% Quality
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Completed: {formatDate(assessment.completedAt)}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {/* Conditional button based on assessment type */}
+                            {assessment.assessmentName === 'DASH Survey' ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => viewDashResults(assessment.id)}
+                                className="flex items-center gap-1"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View Results
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => viewMotionReplay(assessment.id)}
+                                className="flex items-center gap-1"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View Replay
+                              </Button>
+                            )}
                             <Button
                               size="sm"
                               variant="outline"
-                              className="flex items-center gap-1 text-destructive hover:text-destructive"
+                              onClick={() => downloadAssessment(assessment)}
+                              className="flex items-center gap-1"
                             >
-                              <Trash2 className="w-4 h-4" />
-                              Delete
+                              <Download className="w-4 h-4" />
+                              Download
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Assessment</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to permanently delete this assessment? This action cannot be undone.
-                                <br /><br />
-                                <strong>Assessment:</strong> {assessment.assessmentName}<br />
-                                <strong>Completed:</strong> {formatDate(assessment.completedAt)}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteAssessmentMutation.mutate(assessment.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete Assessment
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex items-center gap-1 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Assessment</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to permanently delete this assessment? This action cannot be undone.
+                                    <br /><br />
+                                    <strong>Assessment:</strong> {assessment.assessmentName}<br />
+                                    <strong>Completed:</strong> {formatDate(assessment.completedAt)}
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => deleteAssessmentMutation.mutate(assessment.id)}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    Delete Assessment
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="dash-progress" className="mt-4">
+              <DashProgressTracker patientCode={patient.code} />
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>

@@ -2334,6 +2334,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin DASH Progress endpoint - get historical DASH scores for trend analysis
+  app.get("/api/admin/dash-progress/:patientCode", requireAdminAuth, async (req, res) => {
+    try {
+      const { patientCode } = req.params;
+      
+      // Get patient by code
+      const patient = await storage.getUserByCode(patientCode);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get all user assessments for this patient
+      const userAssessments = await storage.getUserAssessments(patient.id);
+      
+      // Filter for DASH assessments (assessmentId = 6) with scores
+      const dashAssessments = userAssessments
+        .filter(ua => ua.assessmentId === 6 && ua.dashScore && ua.completedAt)
+        .map(ua => ({
+          id: ua.id,
+          score: parseFloat(ua.dashScore!),
+          completedAt: ua.completedAt,
+          sessionNumber: ua.sessionNumber || 1
+        }))
+        .sort((a, b) => new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime());
+
+      if (dashAssessments.length === 0) {
+        return res.json({
+          patientCode,
+          patientAlias: patient.firstName ? `${patient.firstName} ${patient.lastName?.charAt(0)}.` : `Patient ${patient.code}`,
+          injuryType: patient.injuryType || 'General Recovery',
+          assessments: [],
+          trend: null,
+          improvement: null,
+          message: "No DASH assessments found"
+        });
+      }
+
+      // Calculate trend analysis
+      const firstScore = dashAssessments[0].score;
+      const latestScore = dashAssessments[dashAssessments.length - 1].score;
+      const totalChange = firstScore - latestScore; // Lower DASH scores are better
+      const improvementPercentage = firstScore > 0 ? (totalChange / firstScore) * 100 : 0;
+      
+      // Determine trend direction
+      let trendDirection = 'stable';
+      if (Math.abs(totalChange) < 5) {
+        trendDirection = 'stable';
+      } else if (totalChange > 0) {
+        trendDirection = 'improving'; // Score decreased (better)
+      } else {
+        trendDirection = 'declining'; // Score increased (worse)
+      }
+
+      // Calculate rate of change (points per day)
+      const daysBetween = dashAssessments.length > 1 ? 
+        Math.max(1, Math.floor((new Date(dashAssessments[dashAssessments.length - 1].completedAt!).getTime() - 
+                               new Date(dashAssessments[0].completedAt!).getTime()) / (1000 * 60 * 60 * 24))) : 1;
+      const changeRate = totalChange / daysBetween;
+
+      res.json({
+        patientCode,
+        patientAlias: patient.firstName ? `${patient.firstName} ${patient.lastName?.charAt(0)}.` : `Patient ${patient.code}`,
+        injuryType: patient.injuryType || 'General Recovery',
+        assessments: dashAssessments,
+        trend: {
+          direction: trendDirection,
+          totalChange: Math.round(totalChange * 10) / 10,
+          improvementPercentage: Math.round(improvementPercentage * 10) / 10,
+          changeRate: Math.round(changeRate * 100) / 100,
+          daysBetween,
+          assessmentCount: dashAssessments.length
+        },
+        latestScore,
+        firstScore
+      });
+
+    } catch (error) {
+      console.error("DASH progress fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch DASH progress data" });
+    }
+  });
+
   // Helper functions for DASH score interpretation
   const getDifficultyLevel = (score: number): string => {
     if (score === 1) return 'No difficulty';
