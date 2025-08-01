@@ -181,6 +181,15 @@ export default function PatientDailyDashboard() {
     return "Start your streak today! 🚀";
   };
 
+  const getHealthcareStreakMessage = (streak: number) => {
+    if (streak >= 30) return "Outstanding dedication to your recovery! Your consistency is truly inspiring.";
+    if (streak >= 14) return "Excellent progress! Two weeks of consistent therapy shows real commitment.";
+    if (streak >= 7) return "Great work! One full week of consistent assessments is building strong habits.";
+    if (streak >= 3) return "You're building momentum! Keep up this excellent consistency.";
+    if (streak >= 1) return "Great start! Every day of progress matters in your recovery journey.";
+    return "Ready to begin your recovery journey? Complete your first assessment today!";
+  };
+
   const getStreakColor = (streak: number) => {
     if (streak >= 30) return 'linear-gradient(135deg, #B45309, #D97706)'; // High contrast amber
     if (streak >= 14) return 'linear-gradient(135deg, #7C2D12, #DC2626)'; // High contrast red-brown
@@ -224,102 +233,81 @@ export default function PatientDailyDashboard() {
           </div>
         </div>
 
-        {/* Enhanced Gamified Streak Card */}
+        {/* Clean ExerAI-Branded Streak Card */}
         <div className="relative">
-          {/* Background decorative elements - higher contrast */}
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-800 rounded-2xl opacity-20 blur-sm"></div>
-          
-          <div 
-            className="relative w-full rounded-2xl shadow-2xl border-0 p-8 overflow-hidden backdrop-blur-sm"
-            style={{ 
-              background: `linear-gradient(135deg, ${getStreakColor(streakData?.currentStreak || 0)}, rgba(255,255,255,0.1))`,
-              minHeight: '200px',
-              border: '1px solid rgba(255,255,255,0.2)'
-            }}
-          >
-            {/* Animated sparkles for higher streaks - higher contrast */}
-            {(streakData?.currentStreak || 0) >= 1 && (
-              <div className="absolute inset-0 pointer-events-none">
-                <Sparkles className="absolute top-4 left-6 h-6 w-6 text-white animate-bounce" style={{ animationDelay: '0s', animationDuration: '2s' }} />
-                <Sparkles className="absolute top-8 right-8 h-4 w-4 text-white animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '2s' }} />
-                <Sparkles className="absolute bottom-8 left-16 h-5 w-5 text-white animate-bounce" style={{ animationDelay: '1s', animationDuration: '2s' }} />
-                <Star className="absolute top-16 right-16 h-3 w-3 text-white animate-ping" style={{ animationDelay: '1.5s' }} />
-              </div>
-            )}
-            
-            <div className="flex items-center justify-between h-full relative z-10">
-              <div className="flex items-center space-x-8">
-                <div className="flex-shrink-0 transform scale-150 p-4 bg-white/30 rounded-full backdrop-blur-sm border-2 border-white/40">
-                  {getStreakIcon(streakData?.currentStreak || 0)}
-                </div>
-                <div>
-                  <div 
-                    className="text-5xl font-extrabold mb-2 text-white tracking-tight"
-                    style={{ 
-                      textShadow: '0 4px 20px rgba(0,0,0,0.5), 0 0 40px rgba(255,255,255,0.3)'
-                    }}
-                  >
-                    {streakData?.currentStreak || 0}
-                    <span className="text-2xl ml-2 font-medium opacity-90">Day Streak</span>
+          <Card className="bg-white border-2 border-teal-200 shadow-xl rounded-2xl overflow-hidden">
+            {/* Header with ExerAI branding */}
+            <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
+                      <span className="text-teal-600 font-bold text-lg">EX</span>
+                    </div>
+                    <span className="text-white font-bold text-lg">ExerAI</span>
                   </div>
-                  <div 
-                    className="text-lg font-medium text-white/95 flex items-center space-x-2"
-                    style={{ 
-                      textShadow: '0 2px 8px rgba(0,0,0,0.3)'
-                    }}
-                  >
-                    <Trophy className="h-5 w-5" />
-                    <span>Keep the momentum going!</span>
-                  </div>
+                  <span className="text-white font-bold text-xl">Recovery Progress</span>
                 </div>
-              </div>
-              <div className="text-right bg-white/25 rounded-xl p-6 backdrop-blur-sm border border-white/30">
-                <div 
-                  className="text-6xl font-extrabold text-white mb-2"
-                  style={{ 
-                    textShadow: '0 4px 20px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {streakData?.totalCompletions || 0}
-                </div>
-                <div 
-                  className="text-sm font-semibold text-white/95 mb-1"
-                  style={{ 
-                    textShadow: '0 1px 4px rgba(0,0,0,0.2)'
-                  }}
-                >
-                  Total Completions
-                </div>
-                <div 
-                  className="text-xs text-white/80 flex items-center justify-center space-x-1"
-                  style={{ 
-                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                  }}
-                >
-                  <Star className="h-3 w-3" />
-                  <span>Best: {streakData?.longestStreak || 0} days</span>
+                <div className="flex items-center space-x-2 text-white/90">
+                  <Trophy className="h-5 w-5" />
+                  <span className="text-sm font-medium">Day {patient.daysSinceStart}</span>
                 </div>
               </div>
             </div>
-            <div 
-              className="mt-8 px-8 py-6 rounded-xl relative z-10 text-center"
-              style={{ 
-                background: 'rgba(0,0,0,0.7)',
-                backdropFilter: 'blur(20px)',
-                border: '2px solid rgba(255,255,255,0.6)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-              }}
-            >
-              <p 
-                className="font-black text-2xl text-white"
-                style={{ 
-                  textShadow: '2px 2px 8px rgba(0,0,0,0.9)'
-                }}
-              >
-                {getStreakMessage(streakData?.currentStreak || 0)}
-              </p>
-            </div>
-          </div>
+
+            <CardContent className="p-8">
+              {/* Main Streak Display */}
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center space-x-4 mb-4">
+                  <div className="p-4 bg-teal-100 rounded-full">
+                    {getStreakIcon(streakData?.currentStreak || 0)}
+                  </div>
+                  <div>
+                    <div className="text-6xl font-bold text-gray-900 mb-1">
+                      {streakData?.currentStreak || 0}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-600">Day Streak</div>
+                  </div>
+                </div>
+                
+                {/* Motivational Message */}
+                <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                  <p className="text-lg font-semibold text-teal-800">
+                    {getHealthcareStreakMessage(streakData?.currentStreak || 0)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="text-center bg-gray-50 rounded-xl p-6">
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {streakData?.totalCompletions || 0}
+                  </div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">
+                    Total Completions
+                  </div>
+                  <div className="flex items-center justify-center text-teal-600">
+                    <Target className="h-4 w-4 mr-1" />
+                    <span className="text-xs">Building strength</span>
+                  </div>
+                </div>
+                
+                <div className="text-center bg-gray-50 rounded-xl p-6">
+                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                    {streakData?.longestStreak || 0}
+                  </div>
+                  <div className="text-sm font-medium text-gray-600 mb-1">
+                    Best Streak
+                  </div>
+                  <div className="flex items-center justify-center text-teal-600">
+                    <Star className="h-4 w-4 mr-1" />
+                    <span className="text-xs">Personal record</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Today's Progress Overview */}
