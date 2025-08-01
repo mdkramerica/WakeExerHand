@@ -2072,42 +2072,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const patients = await storage.getAdminPatients();
       
-      // CSV headers
+      // CSV headers - matching exactly what's shown in the admin dashboard
       const headers = [
+        'Patient ID',
         'Patient Code',
-        'Alias', 
         'Injury Type',
+        'Post-Op Day',
         'Registration Date',
-        'Last Active',
-        'Total Assessments',
-        'Completion Rate',
+        'Surgery Date',
+        'Last Visit',
+        'Days Active',
+        'Assessment Completion Rate (%)',
+        'Days Active Rate (%)',
         'Status'
       ];
       
-      // CSV rows
-      const rows = patients.map(patient => {
+      // CSV rows with actual data from the admin patients query
+      const rows = patients.map((patient: any) => {
         const registrationDate = new Date(patient.createdAt).toLocaleDateString();
-        const lastActive = patient.lastVisit ? new Date(patient.lastVisit).toLocaleDateString() : 'Never';
-        const totalAssessments = 0; // Will be calculated from assessment data
-        const completionRate = '0%'; // Will be calculated 
+        const surgeryDate = patient.surgeryDate ? new Date(patient.surgeryDate).toLocaleDateString() : 'Not Set';
+        const lastVisit = patient.lastVisit ? new Date(patient.lastVisit).toLocaleDateString() : 'Never';
         const status = patient.isActive ? 'Active' : 'Inactive';
         
         return [
-          patient.code,
-          `Patient ${patient.code}`, // De-identified alias
-          patient.injuryType,
+          patient.patientId || `P${String(patient.id).padStart(3, '0')}`,
+          patient.code || 'Unknown',
+          patient.injuryType || 'Unknown',
+          patient.postOpDay || 0,
           registrationDate,
-          lastActive,
-          totalAssessments,
-          completionRate,
+          surgeryDate,
+          lastVisit,
+          patient.daysActive || 0,
+          `${patient.assessmentCompletionRate || 0}%`,
+          `${patient.daysActiveRate || 0}%`,
           status
         ].map(field => `"${field}"`).join(',');
       });
       
       const csvContent = [headers.join(','), ...rows].join('\n');
       
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `patient_management_export_${timestamp}.csv`;
+      
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="patient_data_export.csv"');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.send(csvContent);
       
       // Audit log for CSV export
