@@ -30,6 +30,7 @@ ExerAI is a comprehensive hand rehabilitation assessment platform designed to pr
 ### Backend
 - **Framework**: Node.js/Express with TypeScript.
 - **API Design**: RESTful endpoints with role-based authentication (patients via access code, clinical staff via username/password). Token-based session management.
+- **Admin Analytics**: Dedicated endpoints for DASH progress tracking (`/api/admin/dash-progress/:patientCode`) with comprehensive trend analysis and clinical interpretation.
 
 ### Database Strategy
 - **Production**: PostgreSQL with Drizzle ORM for type-safe database interactions. Utilizes `@neondatabase/serverless` for serverless PostgreSQL connectivity.
@@ -45,6 +46,7 @@ ExerAI is a comprehensive hand rehabilitation assessment platform designed to pr
     - Role-based access for clinicians, researchers, administrators.
     - De-identified patient management.
     - Analytics Suite: Longitudinal analysis, predictive modeling, outcome tracking, compliance metrics.
+    - DASH Progress Tracking: Integrated longitudinal DASH score visualization with trend analysis, clinical interpretation, and improvement/decline indicators within patient detail modals.
     - Study Management for multi-cohort research.
 - **Data Processing**:
     - Motion Replay: Frame-by-frame visualization with interactive controls.
