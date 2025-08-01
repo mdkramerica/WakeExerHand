@@ -2351,9 +2351,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "DASH assessment not found" });
       }
 
-      // Verify this is a DASH assessment
-      const coreAssessment = await storage.getAssessmentById(userAssessment.assessmentId);
-      if (!coreAssessment || coreAssessment.name !== 'DASH Survey') {
+      // Verify this is a DASH assessment by checking assessmentId = 6 (DASH Survey)
+      if (userAssessment.assessmentId !== 6) {
         return res.status(400).json({ message: "Not a DASH assessment" });
       }
 
