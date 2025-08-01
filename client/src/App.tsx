@@ -98,7 +98,7 @@ function Router() {
       <Route path="/admin" component={AdminPortal} />
       <Route path="/admin/dashboard" component={AdminPortal} />
       <Route path="/admin/login" component={AdminPortal} />
-      <Route path="/admin/dash-results/:patientCode/:assessmentId" component={() => <AdminDashResults />} />
+      <Route path="/admin/dash-results/:patientCode/:assessmentId" component={AdminDashResults} />
       
       {/* Clinical Dashboard Routes */}
       <Route path="/clinical/login" component={ClinicalLogin} />
