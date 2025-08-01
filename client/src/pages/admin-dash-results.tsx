@@ -29,10 +29,30 @@ interface DashAssessment {
 export default function AdminDashResults() {
   const { patientCode, assessmentId } = useParams();
 
-  // Fetch DASH assessment data
+  // Fetch DASH assessment data with admin authentication
   const { data: dashData, isLoading, error } = useQuery({
     queryKey: [`/api/admin/dash-results/${patientCode}/${assessmentId}`],
     enabled: !!patientCode && !!assessmentId,
+    queryFn: async () => {
+      const adminToken = sessionStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin authentication required');
+      }
+      
+      const response = await fetch(`/api/admin/dash-results/${patientCode}/${assessmentId}`, {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+      
+      return response.json();
+    }
   });
 
   const assessment = dashData as DashAssessment;
