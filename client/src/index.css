@@ -294,12 +294,28 @@ body > div[style*="position:fixed"][style*="bottom"][style*="right"],
 [data-replit-cartographer],
 [id*="cartographer"],
 [class*="cartographer"],
-/* Target any development widgets or overlays */
-div[style*="position: fixed"]:not([class*="toast"]):not([id*="toast"]):not([data-toast]),
+/* Target any development widgets or overlays - AGGRESSIVE HIDING */
+div[style*="position: fixed"]:not([class*="toast"]):not([id*="toast"]):not([data-toast]):not([role="alert"]):not([aria-live]),
 iframe[style*="position: fixed"],
 /* Hide any widget that appears in corners */
 body > *:last-child[style*="position: fixed"][style*="bottom"],
-body > *:last-child[style*="position:fixed"][style*="bottom"] {
+body > *:last-child[style*="position:fixed"][style*="bottom"],
+/* Target blue elements specifically */
+*[style*="background-color: rgb(59, 130, 246)"],
+*[style*="background: rgb(59, 130, 246)"],
+*[style*="background-color: #3b82f6"],
+*[style*="background: #3b82f6"],
+/* Target any elements with blue color that are fixed positioned */
+div[style*="position: fixed"][style*="blue"],
+div[style*="position:fixed"][style*="blue"],
+/* Ultra-specific targeting for bottom-right elements */
+body > div:last-child[style*="position: fixed"],
+html > body > div:last-child[style*="position: fixed"],
+/* Target elements with width/height that could be widgets */
+*[style*="position: fixed"][style*="width: 4rem"],
+*[style*="position: fixed"][style*="height: 4rem"],
+*[style*="position:fixed"][style*="width:4rem"],
+*[style*="position:fixed"][style*="height:4rem"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -308,6 +324,8 @@ body > *:last-child[style*="position:fixed"][style*="bottom"] {
   position: absolute !important;
   left: -9999px !important;
   top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Force white on card-like components */
