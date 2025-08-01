@@ -203,6 +203,11 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     window.open(`/patient/${patient.code}/motion-replay/${assessmentId}`, '_blank');
   };
 
+  // View DASH results
+  const viewDashResults = (assessmentId: number) => {
+    window.open(`/admin/dash-results/${patient.code}/${assessmentId}`, '_blank');
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -339,15 +344,28 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => viewMotionReplay(assessment.id)}
-                          className="flex items-center gap-1"
-                        >
-                          <Eye className="w-4 h-4" />
-                          View Replay
-                        </Button>
+                        {/* Conditional button based on assessment type */}
+                        {assessment.assessmentName === 'DASH Survey' ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => viewDashResults(assessment.id)}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="w-4 h-4" />
+                            View Results
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => viewMotionReplay(assessment.id)}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="w-4 h-4" />
+                            View Replay
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="outline"

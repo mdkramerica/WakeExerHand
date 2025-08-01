@@ -2334,6 +2334,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin DASH Results endpoint
+  app.get("/api/admin/dash-results/:patientCode/:assessmentId", requireAdminAuth, async (req, res) => {
+    try {
+      const { patientCode, assessmentId } = req.params;
+      
+      // Get patient by code
+      const patient = await storage.getUserByCode(patientCode);
+      if (!patient) {
+        return res.status(404).json({ message: "Patient not found" });
+      }
+
+      // Get the specific DASH assessment
+      const userAssessment = await storage.getUserAssessmentById(parseInt(assessmentId));
+      if (!userAssessment || userAssessment.userId !== patient.id) {
+        return res.status(404).json({ message: "DASH assessment not found" });
+      }
+
+      // Verify this is a DASH assessment
+      const coreAssessment = await storage.getAssessmentById(userAssessment.assessmentId);
+      if (!coreAssessment || coreAssessment.name !== 'DASH Survey') {
+        return res.status(400).json({ message: "Not a DASH assessment" });
+      }
+
+      // Get DASH answers and score
+      const dashAnswers = userAssessment.dashAnswers || [];
+      const dashScore = parseFloat(userAssessment.dashScore || "0");
+
+      // Format response
+      const response = {
+        id: userAssessment.id,
+        userId: patient.id,
+        assessmentId: userAssessment.assessmentId,
+        completedAt: userAssessment.completedAt,
+        dashScore: dashScore,
+        answers: dashAnswers.map((answer: any) => ({
+          question: answer.question || `Question ${answer.questionId || ''}`,
+          answer: answer.answer || 0,
+          difficulty: answer.difficulty || 'No difficulty'
+        })),
+        user: {
+          alias: patient.firstName ? `${patient.firstName} ${patient.lastName?.charAt(0)}.` : `Patient ${patient.code}`,
+          code: patient.code,
+          injuryType: patient.injuryType || 'General Recovery'
+        }
+      };
+
+      res.json(response);
+
+      // Audit log
+      await auditLog(
+        req.user?.id || 'admin',
+        "dash_results_view",
+        `patient_code:${patientCode}`,
+        { 
+          patientCode,
+          assessmentId: parseInt(assessmentId),
+          dashScore,
+          viewDate: new Date().toISOString()
+        },
+        req
+      );
+      
+    } catch (error) {
+      console.error("DASH results fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch DASH results" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -52,6 +52,7 @@ import ClinicalLayout from "@/components/clinical-layout";
 
 // Admin Portal Components
 import AdminPortal from "@/pages/AdminPortal";
+import AdminDashResults from "@/pages/admin-dash-results";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -97,6 +98,7 @@ function Router() {
       <Route path="/admin" component={AdminPortal} />
       <Route path="/admin/dashboard" component={AdminPortal} />
       <Route path="/admin/login" component={AdminPortal} />
+      <Route path="/admin/dash-results/:patientCode/:assessmentId" component={() => <AdminDashResults />} />
       
       {/* Clinical Dashboard Routes */}
       <Route path="/clinical/login" component={ClinicalLogin} />
