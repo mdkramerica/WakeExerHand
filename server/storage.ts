@@ -1364,12 +1364,29 @@ export class DatabaseStorage implements IStorage {
     return studyVisit;
   }
 
-  async getQuickDashResponsesByAssessmentId(assessmentId: number): Promise<QuickDashResponse[]> {
+  async getQuickDashResponsesByAssessmentId(userAssessmentId: number): Promise<QuickDashResponse[]> {
     try {
+      // First get the user assessment to find the user_id
+      const [userAssessment] = await db
+        .select()
+        .from(userAssessments)
+        .where(eq(userAssessments.id, userAssessmentId));
+      
+      if (!userAssessment) {
+        console.log(`No user assessment found for ID ${userAssessmentId}`);
+        return [];
+      }
+
+      // Query DASH responses by patient_id (which corresponds to user_id) and assessment_id=6 (DASH survey)
       const results = await db
         .select()
         .from(quickDashResponses)
-        .where(eq(quickDashResponses.assessmentId, assessmentId));
+        .where(and(
+          eq(quickDashResponses.patientId, userAssessment.userId),
+          eq(quickDashResponses.assessmentId, 6) // 6 is the DASH survey assessment type
+        ));
+      
+      console.log(`Found ${results.length} DASH responses for user ${userAssessment.userId}, assessment type 6`);
       return results;
     } catch (error) {
       console.error("Error fetching DASH responses by assessment ID:", error);

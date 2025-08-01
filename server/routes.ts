@@ -2561,35 +2561,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // For DASH assessments (assessmentId 6), include questionnaire responses
+      // For DASH assessments (assessmentId 6), include comprehensive DASH data
       if (userAssessment.assessmentId === 6) {
+        downloadData.dashSurvey = {
+          dashScore: userAssessment.dashScore,
+          assessmentName: "DASH Survey (Disabilities of the Arm, Shoulder and Hand)",
+          postOpDay: userAssessment.postOpDay,
+          completedAt: userAssessment.completedAt,
+          qualityScore: userAssessment.qualityScore,
+          sessionNumber: userAssessment.sessionNumber,
+          description: "Complete DASH assessment including disability scoring and functional evaluation"
+        };
+
+        // Try to fetch detailed questionnaire responses from separate table
         try {
           const dashResponses = await storage.getQuickDashResponsesByAssessmentId(userAssessmentId);
           if (dashResponses && dashResponses.length > 0) {
             const dashResponse = dashResponses[0];
-            downloadData.dashSurvey = {
-              dashScore: userAssessment.dashScore,
-              responses: {
-                q1_difficulty_opening_jar: dashResponse.q1DifficultyOpeningJar,
-                q2_difficulty_writing: dashResponse.q2DifficultyWriting,
-                q3_difficulty_turning_key: dashResponse.q3DifficultyTurningKey,
-                q4_difficulty_heavy_household_chores: dashResponse.q4DifficultyHeavyHouseholdChores,
-                q5_difficulty_gardening: dashResponse.q5DifficultyGardening,
-                q6_difficulty_making_bed: dashResponse.q6DifficultyMakingBed,
-                q7_difficulty_carrying_shopping_bag: dashResponse.q7DifficultyCarryingShoppingBag,
-                q8_difficulty_carrying_heavy_object: dashResponse.q8DifficultyCarryingHeavyObject,
-                q9_arm_shoulder_hand_pain: dashResponse.q9ArmShoulderHandPain,
-                q10_tingling_in_arm: dashResponse.q10TinglingInArm,
-                q11_sleep_difficulty: dashResponse.q11SleepDifficulty
-              },
-              postOpDay: dashResponse.postOpDay,
-              studyWeek: dashResponse.studyWeek,
-              completedAt: dashResponse.completedAt
+            downloadData.dashSurvey.detailedResponses = {
+              q1_difficulty_opening_jar: dashResponse.q1DifficultyOpeningJar,
+              q2_difficulty_writing: dashResponse.q2DifficultyWriting,
+              q3_difficulty_turning_key: dashResponse.q3DifficultyTurningKey,
+              q4_difficulty_preparing_meal: dashResponse.q4DifficultyPreparingMeal,
+              q5_difficulty_pushing_door: dashResponse.q5DifficultyPushingDoor,
+              q6_difficulty_placing_object: dashResponse.q6DifficultyPlacingObject,
+              q7_arm_shoulder_hand_pain: dashResponse.q7ArmShoulderHandPain,
+              q8_arm_shoulder_hand_pain_activity: dashResponse.q8ArmShoulderHandPainActivity,
+              q9_tingling_arm_shoulder_hand: dashResponse.q9TinglingArmShoulderHand,
+              q10_weakness_arm_shoulder_hand: dashResponse.q10WeaknessArmShoulderHand,
+              q11_stiffness_arm_shoulder_hand: dashResponse.q11StiffnessArmShoulderHand,
+              totalScore: dashResponse.totalScore
             };
+          } else {
+            downloadData.dashSurvey.note = "DASH survey completed but detailed questionnaire responses not available in database";
           }
         } catch (error) {
-          console.log("Could not fetch DASH responses:", error);
-          // Continue without DASH responses if there's an error
+          console.log("Could not fetch detailed DASH responses:", error);
+          downloadData.dashSurvey.note = "DASH survey completed - detailed responses require separate questionnaire table";
         }
       } else {
         // For other assessments, include motion-related data
