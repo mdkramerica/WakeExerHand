@@ -2878,16 +2878,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           ${Object.keys(responses).length > 0 ? `
           <div class="responses-section">
-            <h2>Questionnaire Responses</h2>
+            <h2>QuickDASH Questionnaire Responses</h2>
             ${Object.keys(responses).map(key => {
               const questionNum = parseInt(key.replace('q', ''));
-              const responseValue = responses[key];
+              const responseValue = (responses as any)[key];
               const difficultyLabel = difficultyLabels[responseValue] || 'Unknown';
+              
+              // Map question keys to actual question text
+              const questionTexts: Record<string, string> = {
+                'q1': 'Open a tight or new jar',
+                'q2': 'Write',
+                'q3': 'Turn a key',
+                'q4': 'Prepare a meal',
+                'q5': 'Push open a heavy door',
+                'q6': 'Place an object on a shelf above your head',
+                'q7': 'Arm, shoulder or hand pain',
+                'q8': 'Arm, shoulder or hand pain when performing any specific activity',
+                'q9': 'Tingling (pins and needles) in your arm, shoulder or hand',
+                'q10': 'Weakness in your arm, shoulder or hand',
+                'q11': 'Stiffness in your arm, shoulder or hand'
+              };
+              
+              const questionText = questionTexts[key] || `Question ${questionNum}`;
               
               return `
                 <div class="response-item difficulty-${responseValue}">
-                  <div class="question-text">Question ${questionNum}: ${difficultyLabel}</div>
-                  <div class="difficulty-badge">${responseValue}/4</div>
+                  <div class="question-text">${questionText}</div>
+                  <div class="difficulty-badge">${difficultyLabel}</div>
                 </div>
               `;
             }).join('')}
