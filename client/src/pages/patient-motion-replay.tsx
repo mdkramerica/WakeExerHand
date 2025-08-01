@@ -365,7 +365,7 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
       <div className="flex justify-center">
         <Button onClick={onClose} variant="outline">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to History
+          Back to Dashboard
         </Button>
       </div>
     </div>
@@ -462,10 +462,10 @@ export default function PatientMotionReplayPage() {
                 Review your recorded movement for better understanding
               </p>
             </div>
-            <Link href={`/patient/${userCode}/history`}>
+            <Link href={`/patient/${userCode}`}>
               <Button variant="outline" className="flex items-center gap-2 border-gray-600 text-black font-semibold hover:bg-gray-100">
                 <ArrowLeft className="h-4 w-4" />
-                Back to History
+                Back to Dashboard
               </Button>
             </Link>
           </div>
@@ -520,7 +520,7 @@ export default function PatientMotionReplayPage() {
                 assessmentName={userAssessment.assessmentName || 'Assessment'}
                 userAssessmentId={assessmentId}
                 recordingData={motionFrames}
-                onClose={() => window.location.href = `/patient/${userCode}/history`}
+                onClose={() => window.location.href = `/patient/${userCode}`}
                 handedness={detectHandedness()}
               />
             </div>
@@ -532,9 +532,9 @@ export default function PatientMotionReplayPage() {
                 <p className="text-muted-foreground">
                   The requested assessment could not be found.
                 </p>
-                <Link href={`/patient/${userCode}/history`}>
+                <Link href={`/patient/${userCode}`}>
                   <Button variant="outline" className="mt-4">
-                    Back to History
+                    Back to Dashboard
                   </Button>
                 </Link>
               </CardContent>
