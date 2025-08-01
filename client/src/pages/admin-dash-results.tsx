@@ -107,24 +107,46 @@ export default function AdminDashResults() {
 
   const interpretation = getScoreInterpretation(dashScore);
 
-  // For now, create mock answers based on the DASH score since we're using the working endpoint
-  // but it doesn't include individual question answers in the same format
-  const generateSampleAnswers = (score: number) => {
-    const avgDifficulty = Math.ceil((score / 100) * 4) + 1;
-    return [
-      { question: "Difficulty opening a tight or new jar", answer: Math.min(5, avgDifficulty), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty)) },
-      { question: "Writing", answer: Math.min(5, avgDifficulty - 1), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty - 1)) },
-      { question: "Turn a key", answer: Math.min(5, avgDifficulty), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty)) },
-      { question: "Prepare a meal", answer: Math.min(5, avgDifficulty + 1), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty + 1)) },
-      { question: "Push open a heavy door", answer: Math.min(5, avgDifficulty), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty)) },
-      { question: "Place an object on a shelf above your head", answer: Math.min(5, avgDifficulty + 1), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty + 1)) },
-      { question: "Severity of arm, shoulder or hand pain", answer: Math.min(5, avgDifficulty), difficulty: getPainLevel(Math.min(5, avgDifficulty)) },
-      { question: "Arm, shoulder or hand pain when doing specific activity", answer: Math.min(5, avgDifficulty + 1), difficulty: getPainLevel(Math.min(5, avgDifficulty + 1)) },
-      { question: "Tingling in your arm, shoulder or hand", answer: Math.min(5, Math.max(1, avgDifficulty - 1)), difficulty: getDifficultyLevel(Math.min(5, Math.max(1, avgDifficulty - 1))) },
-      { question: "Weakness in your arm, shoulder or hand", answer: Math.min(5, avgDifficulty), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty)) },
-      { question: "Stiffness in your arm, shoulder or hand", answer: Math.min(5, avgDifficulty), difficulty: getDifficultyLevel(Math.min(5, avgDifficulty)) }
-    ];
-  };
+  // Parse actual DASH responses from the assessment data (same as patient view)
+  const dashResponses = userAssessment?.responses 
+    ? (typeof userAssessment.responses === 'string' 
+        ? JSON.parse(userAssessment.responses) 
+        : userAssessment.responses)
+    : {};
+
+  // Full 30-question DASH questionnaire
+  const DASH_QUESTIONS = [
+    "Open a tight or new jar",
+    "Write", 
+    "Turn a key",
+    "Prepare a meal",
+    "Push open a heavy door",
+    "Place an object on a shelf above your head",
+    "Do heavy household chores (e.g., wash walls, floors)",
+    "Garden or do yard work",
+    "Make a bed",
+    "Carry a shopping bag or briefcase",
+    "Carry a heavy object (over 10 lbs)",
+    "Change a light bulb overhead",
+    "Wash or blow dry your hair",
+    "Wash your back",
+    "Put on a pullover sweater",
+    "Use a knife to cut food",
+    "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)",
+    "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)",
+    "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)",
+    "Manage transportation needs (getting from one place to another)",
+    "Sexual activities",
+    "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?",
+    "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?",
+    "Arm, shoulder or hand pain",
+    "Arm, shoulder or hand pain when you performed any specific activity",
+    "Tingling (pins and needles) in your arm, shoulder or hand",
+    "Weakness in your arm, shoulder or hand",
+    "Stiffness in your arm, shoulder or hand",
+    "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?",
+    "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem"
+  ];
 
   const getDifficultyLevel = (score: number): string => {
     if (score === 1) return 'No difficulty';
@@ -135,6 +157,20 @@ export default function AdminDashResults() {
     return 'No difficulty';
   };
 
+  // Convert responses to the format expected by the component
+  const answers = DASH_QUESTIONS.map((question, index) => {
+    const questionNum = index + 1;
+    // Handle both response formats: "q1" format and "1" format
+    const response = dashResponses[`q${questionNum}`] || dashResponses[questionNum.toString()];
+    const answerValue = parseInt(response) || 1;
+    
+    return {
+      question,
+      answer: answerValue,
+      difficulty: getDifficultyLevel(answerValue)
+    };
+  }).filter(answer => answer.answer > 0); // Only show questions with actual responses
+
   const getPainLevel = (score: number): string => {
     if (score === 1) return 'None';
     if (score === 2) return 'Mild';
@@ -143,8 +179,6 @@ export default function AdminDashResults() {
     if (score === 5) return 'Extreme';
     return 'None';
   };
-
-  const answers = generateSampleAnswers(dashScore);
   
   // Group answers by difficulty level for better organization
   const groupedAnswers = answers.reduce((groups: Record<string, any[]>, answer) => {
