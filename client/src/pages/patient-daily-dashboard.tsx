@@ -321,41 +321,76 @@ export default function PatientDailyDashboard() {
 
         {/* Today's Progress Overview */}
         <div className="relative">
-          <Card className="relative bg-white border-2 border-gray-300 shadow-xl rounded-2xl overflow-hidden">
-            <CardHeader className="bg-gray-900 text-white py-6">
-              <CardTitle className="flex items-center space-x-3 text-2xl font-bold">
-                <div className="p-3 bg-white/20 rounded-full border border-white/40">
-                  <Target className="h-6 w-6 text-white" />
+          <Card className="bg-white border-2 border-teal-500 shadow-xl rounded-2xl overflow-hidden">
+            {/* Header with ExerAI branding */}
+            <div className="bg-teal-600 px-6 py-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-white rounded-lg p-2 shadow-md">
+                    <Target className="h-6 w-6 text-teal-600" />
+                  </div>
+                  <div>
+                    <span className="text-white font-bold text-xl">Today's Progress</span>
+                    <div className="text-teal-100 text-sm font-medium">Daily Assessment Tracking</div>
+                  </div>
                 </div>
-                <span className="text-white font-bold text-2xl" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Today's Progress</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6 bg-white">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-lg font-bold">
-                  <span className="text-gray-800">Completed</span>
-                  <span className="text-3xl font-black text-gray-800">{completedToday.length} of {totalToday}</span>
+                <div className="bg-teal-700 px-4 py-2 rounded-lg">
+                  <span className="text-white font-bold text-lg">{completedToday.length} / {totalToday}</span>
                 </div>
-                <div className="relative">
-                  <Progress value={completionPercentage} className="h-4 bg-gray-200" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-green-500 rounded-full opacity-30"></div>
+              </div>
+            </div>
+
+            <CardContent className="p-8 bg-white">
+              {/* Progress Display */}
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-xl font-bold text-gray-900">Completed</span>
+                  <span className="text-4xl font-black text-gray-900">{completedToday.length} of {totalToday}</span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="relative mb-6">
+                  <div className="h-6 bg-gray-200 rounded-full border-2 border-gray-300">
+                    <div 
+                      className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${completionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-center mt-2">
+                    <span className="text-lg font-bold text-teal-700">{Math.round(completionPercentage)}% Complete</span>
+                  </div>
                 </div>
               </div>
               
+              {/* Status Alert */}
               {completionPercentage === 100 ? (
-                <Alert className="bg-green-100 border-green-600 border-3">
-                  <CheckCircle className="h-8 w-8 text-green-700" />
-                  <AlertDescription className="text-green-900 font-bold text-lg">
-                    Outstanding! You've completed all {totalToday} assessments today! Keep building that streak - you're doing amazing work on your recovery journey!
-                  </AlertDescription>
-                </Alert>
+                <div className="bg-green-50 border-2 border-green-400 rounded-xl p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-green-500 rounded-full">
+                      <CheckCircle className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-black text-green-900 mb-1">Outstanding Work!</h4>
+                      <p className="text-green-800 font-bold">
+                        You've completed all {totalToday} assessments today! Keep building that streak - you're doing amazing work on your recovery journey!
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <Alert className="bg-blue-100 border-blue-600 border-3">
-                  <Clock className="h-8 w-8 text-blue-700" />
-                  <AlertDescription className="text-blue-900 font-bold text-lg">
-                    {todayAssessments.length} assessments remaining today. You've got this! Complete them all to keep your streak going.
-                  </AlertDescription>
-                </Alert>
+                <div className="bg-blue-50 border-2 border-blue-400 rounded-xl p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-blue-500 rounded-full">
+                      <Clock className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-black text-blue-900 mb-1">Keep Going!</h4>
+                      <p className="text-blue-800 font-bold">
+                        {todayAssessments.length} assessments remaining today. You've got this! Complete them all to keep your streak going.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
