@@ -689,7 +689,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                   placeholder="Search patients..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-12"
                 />
               </div>
               
