@@ -29,6 +29,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import { PatientHeader } from '@/components/patient-header';
+import exerLogoPath from "@assets/ExerLogoColor_1750399504621.png";
 
 interface DailyAssessment {
   id: number;
@@ -241,8 +242,12 @@ export default function PatientDailyDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md">
-                      <span className="text-teal-600 font-black text-xl">EX</span>
+                    <div className="bg-white rounded-lg p-2 shadow-md">
+                      <img 
+                        src={exerLogoPath} 
+                        alt="ExerAI" 
+                        className="h-8 w-auto"
+                      />
                     </div>
                     <div>
                       <span className="text-white font-bold text-xl">ExerAI</span>
