@@ -114,13 +114,13 @@ export default function VideoInstruction() {
 
           <div className="grid lg:grid-cols-2 gap-8">
             <div>
-              <div className="bg-gray-900 rounded-xl aspect-video mb-6 relative overflow-hidden">
+              <div className="bg-gray-900 rounded-xl aspect-video mb-6 relative overflow-hidden min-h-[400px] lg:min-h-[500px]">
                 <video 
                   controls
                   autoPlay
                   loop
                   muted
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                   onPlay={handleVideoPlay}
                   preload="metadata"
                 >
