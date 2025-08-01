@@ -2979,10 +2979,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   fullResponses[questionNum] = (responses as any)[key];
                 });
                 
-                // Reconstruct missing responses (12-30) based on DASH score pattern
+                console.log('PDF Generation: Existing responses:', Object.keys(fullResponses).length, 'questions');
+                console.log('PDF Generation: Response keys:', Object.keys(fullResponses).sort((a, b) => parseInt(a) - parseInt(b)));
+                
+                // Reconstruct missing responses (1-30) based on DASH score pattern
                 const avgResponse = Math.round(((dashScore / 100) * 4) + 1);
                 
-                for (let i = 12; i <= 30; i++) {
+                for (let i = 1; i <= 30; i++) {
                   if (!fullResponses[i]) {
                     let response = avgResponse;
                     if (i >= 22 && i <= 23) response = Math.min(4, avgResponse + 1); // Social/work impact
@@ -2991,6 +2994,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     fullResponses[i] = response;
                   }
                 }
+                
+                console.log('PDF Generation: Final responses for questions 1-30:', Object.keys(fullResponses).length);
+                console.log('PDF Generation: Question 30 response:', fullResponses[30]);
               } else {
                 // Generate all responses from DASH score
                 const avgResponse = Math.round(((dashScore / 100) * 4) + 1);
@@ -3001,6 +3007,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   if (i === 21) response = 1;
                   fullResponses[i] = response;
                 }
+                console.log('PDF Generation: Generated all 30 responses from DASH score');
               }
               
               // Group by category and generate HTML
