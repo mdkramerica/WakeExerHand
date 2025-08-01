@@ -4,6 +4,7 @@ import { PersistentMemoryStorage } from "./persistent-storage";
 import { DatabaseStorage } from "./storage";
 import { z } from "zod";
 import JSZip from 'jszip';
+import puppeteer from 'puppeteer';
 
 // Extend Request interface for authentication
 declare global {
@@ -2640,6 +2641,299 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Individual assessment download error:", error);
       res.status(500).json({ message: "Failed to download assessment data" });
+    }
+  });
+
+  // PDF Download for DASH assessments
+  app.get("/api/user-assessments/:id/download-pdf", async (req, res) => {
+    try {
+      const userAssessmentId = parseInt(req.params.id);
+      console.log("PDF Download: Looking for assessment ID:", userAssessmentId);
+      const userAssessment = await storage.getUserAssessmentById(userAssessmentId);
+      console.log("PDF Download: Found assessment:", !!userAssessment);
+      
+      if (!userAssessment) {
+        return res.status(404).json({ message: "Assessment not found" });
+      }
+
+      const user = await storage.getUserById(userAssessment.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Only generate PDF for DASH assessments
+      if (userAssessment.assessmentId !== 6) {
+        return res.status(400).json({ message: "PDF generation only available for DASH assessments" });
+      }
+
+      // Using imported puppeteer module
+      
+      // DASH scoring interpretation function
+      const getDashScoreInterpretation = (score: number) => {
+        if (score <= 15) return { level: "Minimal", color: "#16a34a", description: "Little to no disability", bgColor: "#f0fdf4" };
+        if (score <= 30) return { level: "Mild", color: "#ca8a04", description: "Mild disability", bgColor: "#fefce8" };
+        if (score <= 50) return { level: "Moderate", color: "#ea580c", description: "Moderate disability", bgColor: "#fff7ed" };
+        if (score <= 70) return { level: "Severe", color: "#dc2626", description: "Severe disability", bgColor: "#fef2f2" };
+        return { level: "Extreme", color: "#991b1b", description: "Extreme disability", bgColor: "#fee2e2" };
+      };
+
+      const dashScore = parseFloat(userAssessment.dashScore) || 0;
+      const interpretation = getDashScoreInterpretation(dashScore);
+      
+      // Parse responses
+      let responses = {};
+      let responseDetails = "No detailed responses available";
+      
+      if (userAssessment.responses) {
+        try {
+          responses = typeof userAssessment.responses === 'string' 
+            ? JSON.parse(userAssessment.responses) 
+            : userAssessment.responses;
+        } catch (error) {
+          console.log("Error parsing responses:", error);
+        }
+      }
+
+      const difficultyLabels = ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"];
+      
+      // Generate HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>DASH Assessment Report</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+              margin: 0;
+              padding: 40px;
+              background: white;
+              color: #1f2937;
+              line-height: 1.6;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 40px;
+              border-bottom: 3px solid #3b82f6;
+              padding-bottom: 20px;
+            }
+            .header h1 {
+              color: #1e40af;
+              margin: 0;
+              font-size: 28px;
+              font-weight: 700;
+            }
+            .header p {
+              color: #6b7280;
+              margin: 8px 0 0 0;
+              font-size: 16px;
+            }
+            .patient-info {
+              background: #f8fafc;
+              padding: 20px;
+              border-radius: 8px;
+              margin-bottom: 30px;
+              border-left: 4px solid #3b82f6;
+            }
+            .patient-info h2 {
+              margin: 0 0 12px 0;
+              color: #1e40af;
+              font-size: 18px;
+            }
+            .patient-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 16px;
+            }
+            .patient-field {
+              display: flex;
+              justify-content: space-between;
+            }
+            .patient-field strong {
+              color: #374151;
+            }
+            .score-section {
+              background: ${interpretation.bgColor};
+              padding: 30px;
+              border-radius: 12px;
+              text-align: center;
+              margin-bottom: 30px;
+              border: 2px solid ${interpretation.color}20;
+            }
+            .score-value {
+              font-size: 48px;
+              font-weight: 800;
+              color: #1f2937;
+              margin: 0;
+            }
+            .score-label {
+              font-size: 24px;
+              font-weight: 600;
+              color: ${interpretation.color};
+              margin: 8px 0;
+            }
+            .score-description {
+              font-size: 16px;
+              color: #6b7280;
+              margin: 0;
+            }
+            .responses-section {
+              margin-top: 30px;
+            }
+            .responses-section h2 {
+              color: #1e40af;
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 8px;
+              margin-bottom: 20px;
+            }
+            .response-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 12px 16px;
+              margin-bottom: 8px;
+              background: #f9fafb;
+              border-radius: 6px;
+              border-left: 4px solid #d1d5db;
+            }
+            .response-item.difficulty-0 { border-left-color: #22c55e; }
+            .response-item.difficulty-1 { border-left-color: #eab308; }
+            .response-item.difficulty-2 { border-left-color: #f97316; }
+            .response-item.difficulty-3 { border-left-color: #ef4444; }
+            .response-item.difficulty-4 { border-left-color: #dc2626; }
+            .question-text {
+              flex: 1;
+              font-weight: 500;
+              color: #374151;
+            }
+            .difficulty-badge {
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 600;
+              color: white;
+            }
+            .difficulty-0 .difficulty-badge { background: #22c55e; }
+            .difficulty-1 .difficulty-badge { background: #eab308; }
+            .difficulty-2 .difficulty-badge { background: #f97316; }
+            .difficulty-3 .difficulty-badge { background: #ef4444; }
+            .difficulty-4 .difficulty-badge { background: #dc2626; }
+            .footer {
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 1px solid #e5e7eb;
+              text-align: center;
+              color: #6b7280;
+              font-size: 12px;
+            }
+            .completion-info {
+              background: #f0f9ff;
+              padding: 16px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              border-left: 4px solid #0ea5e9;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>DASH Assessment Report</h1>
+            <p>Disabilities of the Arm, Shoulder and Hand Questionnaire</p>
+          </div>
+
+          <div class="patient-info">
+            <h2>Patient Information</h2>
+            <div class="patient-grid">
+              <div class="patient-field">
+                <span>Patient Code:</span>
+                <strong>${user.code}</strong>
+              </div>
+              <div class="patient-field">
+                <span>Injury Type:</span>
+                <strong>${user.injuryType || 'Not specified'}</strong>
+              </div>
+              <div class="patient-field">
+                <span>Assessment ID:</span>
+                <strong>${userAssessment.id}</strong>
+              </div>
+              <div class="patient-field">
+                <span>Session Number:</span>
+                <strong>${userAssessment.sessionNumber || 1}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="completion-info">
+            <strong>Completed:</strong> ${new Date(userAssessment.completedAt).toLocaleDateString()} at ${new Date(userAssessment.completedAt).toLocaleTimeString()}
+            <br>
+            <strong>Quality Score:</strong> ${userAssessment.qualityScore}%
+          </div>
+
+          <div class="score-section">
+            <div class="score-value">${dashScore.toFixed(1)}</div>
+            <div class="score-label">${interpretation.level} Disability</div>
+            <p class="score-description">${interpretation.description}</p>
+          </div>
+
+          ${Object.keys(responses).length > 0 ? `
+          <div class="responses-section">
+            <h2>Questionnaire Responses</h2>
+            ${Object.keys(responses).map(key => {
+              const questionNum = parseInt(key.replace('q', ''));
+              const responseValue = responses[key];
+              const difficultyLabel = difficultyLabels[responseValue] || 'Unknown';
+              
+              return `
+                <div class="response-item difficulty-${responseValue}">
+                  <div class="question-text">Question ${questionNum}: ${difficultyLabel}</div>
+                  <div class="difficulty-badge">${responseValue}/4</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          ` : `
+          <div class="responses-section">
+            <h2>Questionnaire Responses</h2>
+            <p style="text-align: center; color: #6b7280; font-style: italic;">
+              Detailed questionnaire responses are not available for this assessment.
+            </p>
+          </div>
+          `}
+
+          <div class="footer">
+            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+            <p>ExerAI Hand Assessment Platform</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Return printable HTML that can be converted to PDF in browser
+      // Add print styles for better PDF conversion
+      const printableHtml = htmlContent.replace(
+        '</head>',
+        `<style media="print">
+          @page { margin: 0.5in; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        </style>
+        <script>
+          window.onload = function() {
+            if(window.location.search.includes('print=true')) {
+              setTimeout(() => window.print(), 100);
+            }
+          }
+        </script>
+        </head>`
+      );
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `inline; filename="${user.code}_DASH_Report_${userAssessmentId}_${new Date().toISOString().split('T')[0]}.html"`);
+      res.send(printableHtml);
+
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      res.status(500).json({ message: "Failed to generate PDF report" });
     }
   });
 

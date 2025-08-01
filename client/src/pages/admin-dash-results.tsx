@@ -3,8 +3,9 @@ import { useParams } from 'wouter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FileText, Target, User, Calendar, TrendingUp } from 'lucide-react';
+import { ArrowLeft, FileText, Target, User, Calendar, TrendingUp, Download } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface DashAnswer {
   question: string;
@@ -28,6 +29,18 @@ interface DashAssessment {
 
 export default function AdminDashResults() {
   const { patientCode, assessmentId } = useParams();
+  const { toast } = useToast();
+
+  // Download DASH assessment as PDF
+  const handlePdfDownload = () => {
+    // Open printable report in new window
+    window.open(`/api/user-assessments/${assessmentId}/download-pdf?print=true`, '_blank');
+    
+    toast({
+      title: "Report Opened",
+      description: "DASH report opened in new window. Use browser's print function to save as PDF."
+    });
+  };
 
   // Use the same working endpoint as patient side - /api/user-assessments/${assessmentId}/details
   const { data: assessmentData, isLoading, error } = useQuery({
@@ -60,14 +73,24 @@ export default function AdminDashResults() {
             <p className="text-gray-600 mb-4">
               The requested DASH assessment could not be found.
             </p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.close()}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Close Window
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handlePdfDownload}
+                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF Report
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.close()}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Close Window
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -158,6 +181,16 @@ export default function AdminDashResults() {
                 <h1 className="text-2xl font-bold text-gray-900">DASH Assessment Results</h1>
                 <p className="text-gray-600">Disabilities of the Arm, Shoulder and Hand Survey</p>
               </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={handlePdfDownload}
+                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+              >
+                <Download className="h-4 w-4" />
+                Download PDF Report
+              </Button>
             </div>
             <div className="flex items-center space-x-4 text-sm text-gray-600">
               <span className="flex items-center gap-1">

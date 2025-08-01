@@ -159,6 +159,17 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
     }
   };
 
+  // Download DASH assessment as PDF
+  const handlePdfDownload = (assessmentId: number) => {
+    // Open printable report in new window
+    window.open(`/api/user-assessments/${assessmentId}/download-pdf?print=true`, '_blank');
+    
+    toast({
+      title: "Report Opened",
+      description: "DASH report opened in new window. Use browser's print function to save as PDF."
+    });
+  };
+
   // Download all assessments as ZIP
   const downloadAllAssessments = async () => {
     try {
@@ -382,15 +393,28 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
                                 View Replay
                               </Button>
                             )}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => downloadAssessment(assessment)}
-                              className="flex items-center gap-1"
-                            >
-                              <Download className="w-4 h-4" />
-                              Download
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => downloadAssessment(assessment)}
+                                className="flex items-center gap-1"
+                              >
+                                <Download className="w-4 h-4" />
+                                JSON
+                              </Button>
+                              {assessment.assessmentName === 'DASH Survey' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handlePdfDownload(assessment.id)}
+                                  className="flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 border-red-200"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  PDF
+                                </Button>
+                              )}
+                            </div>
                             
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
