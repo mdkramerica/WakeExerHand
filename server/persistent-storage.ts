@@ -1478,4 +1478,8 @@ export class PersistentMemoryStorage implements IStorage {
   async resolveOutlierAlert(id: number): Promise<boolean> {
     return true; // Always succeed for compatibility
   }
+
+  async getQuickDashResponsesByAssessmentId(assessmentId: number): Promise<any[]> {
+    return []; // PersistentMemoryStorage doesn't support DASH responses
+  }
 }

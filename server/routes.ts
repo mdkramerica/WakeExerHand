@@ -2523,6 +2523,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Individual assessment download endpoint
+  app.get("/api/user-assessments/:id/download", async (req, res) => {
+    try {
+      const userAssessmentId = parseInt(req.params.id);
+      
+      if (isNaN(userAssessmentId)) {
+        return res.status(400).json({ message: "Invalid assessment ID" });
+      }
+
+      // Get the user assessment
+      const userAssessment = await storage.getUserAssessmentById(userAssessmentId);
+      if (!userAssessment) {
+        return res.status(404).json({ message: "Assessment not found" });
+      }
+
+      // Get the user details
+      const user = await storage.getUserById(userAssessment.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Prepare the download data
+      let downloadData: any = {
+        assessment: {
+          id: userAssessment.id,
+          userId: userAssessment.userId,
+          assessmentId: userAssessment.assessmentId,
+          patientCode: user.code,
+          completedAt: userAssessment.completedAt,
+          qualityScore: userAssessment.qualityScore,
+          isCompleted: userAssessment.isCompleted
+        },
+        user: {
+          code: user.code,
+          injuryType: user.injuryType
+        }
+      };
+
+      // For DASH assessments (assessmentId 6), include questionnaire responses
+      if (userAssessment.assessmentId === 6) {
+        try {
+          const dashResponses = await storage.getQuickDashResponsesByAssessmentId(userAssessmentId);
+          if (dashResponses && dashResponses.length > 0) {
+            const dashResponse = dashResponses[0];
+            downloadData.dashSurvey = {
+              dashScore: userAssessment.dashScore,
+              responses: {
+                q1_difficulty_opening_jar: dashResponse.q1DifficultyOpeningJar,
+                q2_difficulty_writing: dashResponse.q2DifficultyWriting,
+                q3_difficulty_turning_key: dashResponse.q3DifficultyTurningKey,
+                q4_difficulty_heavy_household_chores: dashResponse.q4DifficultyHeavyHouseholdChores,
+                q5_difficulty_gardening: dashResponse.q5DifficultyGardening,
+                q6_difficulty_making_bed: dashResponse.q6DifficultyMakingBed,
+                q7_difficulty_carrying_shopping_bag: dashResponse.q7DifficultyCarryingShoppingBag,
+                q8_difficulty_carrying_heavy_object: dashResponse.q8DifficultyCarryingHeavyObject,
+                q9_arm_shoulder_hand_pain: dashResponse.q9ArmShoulderHandPain,
+                q10_tingling_in_arm: dashResponse.q10TinglingInArm,
+                q11_sleep_difficulty: dashResponse.q11SleepDifficulty
+              },
+              postOpDay: dashResponse.postOpDay,
+              studyWeek: dashResponse.studyWeek,
+              completedAt: dashResponse.completedAt
+            };
+          }
+        } catch (error) {
+          console.log("Could not fetch DASH responses:", error);
+          // Continue without DASH responses if there's an error
+        }
+      } else {
+        // For other assessments, include motion-related data
+        downloadData.assessmentData = {
+          totalActiveRom: userAssessment.totalActiveRom,
+          indexFingerRom: userAssessment.indexFingerRom,
+          middleFingerRom: userAssessment.middleFingerRom,
+          ringFingerRom: userAssessment.ringFingerRom,
+          pinkyFingerRom: userAssessment.pinkyFingerRom,
+          kapandjiScore: userAssessment.kapandjiScore,
+          maxWristFlexion: userAssessment.maxWristFlexion,
+          maxWristExtension: userAssessment.maxWristExtension,
+          maxRadialDeviation: userAssessment.maxRadialDeviation,
+          maxUlnarDeviation: userAssessment.maxUlnarDeviation,
+          maxSupination: userAssessment.maxSupination,
+          maxPronation: userAssessment.maxPronation
+        };
+      }
+
+      // Set headers for JSON download
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="${user.code}_assessment_${userAssessmentId}_${new Date().toISOString().split('T')[0]}.json"`);
+      
+      // Send the data
+      res.json(downloadData);
+
+    } catch (error) {
+      console.error("Individual assessment download error:", error);
+      res.status(500).json({ message: "Failed to download assessment data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

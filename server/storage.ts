@@ -167,6 +167,7 @@ export interface IStorage {
   // Additional missing methods from routes
   getPatientAssessmentHistory(patientId: number): Promise<PatientAssessment[]>;
   createStudyVisit(visit: InsertStudyVisit): Promise<StudyVisit>;
+  getQuickDashResponsesByAssessmentId(assessmentId: number): Promise<QuickDashResponse[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1362,6 +1363,19 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return studyVisit;
   }
+
+  async getQuickDashResponsesByAssessmentId(assessmentId: number): Promise<QuickDashResponse[]> {
+    try {
+      const results = await db
+        .select()
+        .from(quickDashResponses)
+        .where(eq(quickDashResponses.assessmentId, assessmentId));
+      return results;
+    } catch (error) {
+      console.error("Error fetching DASH responses by assessment ID:", error);
+      return [];
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -1616,6 +1630,99 @@ export class MemStorage implements IStorage {
       this.userAssessments.set(userAssessmentId, { ...userAssessment, shareToken });
     }
     return shareToken;
+  }
+
+  async getQuickDashResponsesByAssessmentId(assessmentId: number): Promise<QuickDashResponse[]> {
+    // MemStorage doesn't support DASH responses - return empty array
+    return [];
+  }
+
+  // Missing method implementations for interface compliance
+  async getClinicalUser(id: number): Promise<ClinicalUser | undefined> { return undefined; }
+  async getClinicalUserByUsername(username: string): Promise<ClinicalUser | undefined> { return undefined; }
+  async createClinicalUser(user: InsertClinicalUser): Promise<ClinicalUser> { throw new Error('Not implemented in MemStorage'); }
+  async updateClinicalUser(id: number, updates: Partial<ClinicalUser>): Promise<ClinicalUser | undefined> { return undefined; }
+  async authenticateClinicalUser(username: string, password: string): Promise<ClinicalUser | null> { return null; }
+  async getAdminUser(id: number): Promise<AdminUser | undefined> { return undefined; }
+  async getAdminUserByUsername(username: string): Promise<AdminUser | undefined> { return undefined; }
+  async createAdminUser(user: InsertAdminUser): Promise<AdminUser> { throw new Error('Not implemented in MemStorage'); }
+  async updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined> { return undefined; }
+  async authenticateAdminUser(username: string, password: string): Promise<AdminUser | null> { return null; }
+  async getAdminComplianceData(): Promise<{ totalPatients: number; activePatients: number; totalAssessments: number; completedToday: number; }> {
+    return { totalPatients: 0, activePatients: 0, totalAssessments: 0, completedToday: 0 };
+  }
+  async getAdminPatients(): Promise<Array<{ id: number; patientId: string; code: string; injuryType: string; isActive: boolean; createdAt: string; lastVisit: string | null; }>> {
+    return [];
+  }
+  async generatePatientAccessCode(): Promise<string> { return Math.floor(100000 + Math.random() * 900000).toString(); }
+  async createAdminPatient(injuryType: string): Promise<{ id: number; patientId: string; code: string; injuryType: string; }> {
+    throw new Error('Not implemented in MemStorage');
+  }
+  async downloadPatientMotionData(userId: number): Promise<any> { return null; }
+  async getCohorts(): Promise<Cohort[]> { return []; }
+  async getCohort(id: number): Promise<Cohort | undefined> { return undefined; }
+  async createCohort(cohort: InsertCohort): Promise<Cohort> { throw new Error('Not implemented in MemStorage'); }
+  async updateCohort(id: number, updates: Partial<Cohort>): Promise<Cohort | undefined> { return undefined; }
+  async deleteCohort(id: number): Promise<boolean> { return false; }
+  async getPatients(clinicianId?: number): Promise<PatientWithDetails[]> { return []; }
+  async getPatient(id: number): Promise<Patient | undefined> { return undefined; }
+  async getPatientWithDetails(id: number): Promise<PatientWithDetails | undefined> { return undefined; }
+  async createPatient(patient: InsertPatient): Promise<Patient> { throw new Error('Not implemented in MemStorage'); }
+  async updatePatient(id: number, updates: Partial<Patient>): Promise<Patient | undefined> { return undefined; }
+  async deletePatient(id: number): Promise<boolean> { return false; }
+  async checkEligibility(patientId: number, cohortId: number): Promise<{ eligible: boolean; reasons: string[] }> {
+    return { eligible: true, reasons: [] };
+  }
+  async enrollPatient(enrollment: any): Promise<Patient> { throw new Error('Not implemented in MemStorage'); }
+  async generateAccessCode(): Promise<string> { return Math.floor(100000 + Math.random() * 900000).toString(); }
+  async getPatientByAccessCode(accessCode: string): Promise<Patient | undefined> { return undefined; }
+  async getAssessmentTypes(): Promise<AssessmentType[]> { return []; }
+  async getAssessmentType(id: number): Promise<AssessmentType | undefined> { return undefined; }
+  async createAssessmentType(assessmentType: InsertAssessmentType): Promise<AssessmentType> { throw new Error('Not implemented in MemStorage'); }
+  async updateAssessmentType(id: number, updates: Partial<AssessmentType>): Promise<AssessmentType | undefined> { return undefined; }
+  async getPatientAssessments(patientId: number, limit?: number): Promise<PatientAssessment[]> { return []; }
+  async getPatientAssessment(id: number): Promise<PatientAssessment | undefined> { return undefined; }
+  async createPatientAssessment(assessment: InsertPatientAssessment): Promise<PatientAssessment> { throw new Error('Not implemented in MemStorage'); }
+  async updatePatientAssessment(id: number, updates: Partial<PatientAssessment>): Promise<PatientAssessment | undefined> { return undefined; }
+  async getCohortAssessments(cohortId: number, limit?: number): Promise<PatientAssessment[]> { return []; }
+  async getCohortAnalytics(cohortId: number): Promise<CohortAnalytics | null> { return null; }
+  async getOutlierAlerts(patientId?: number): Promise<OutlierAlert[]> { return []; }
+  async createOutlierAlert(alert: InsertOutlierAlert): Promise<OutlierAlert> { throw new Error('Not implemented in MemStorage'); }
+  async resolveOutlierAlert(id: number): Promise<boolean> { return false; }
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> { throw new Error('Not implemented in MemStorage'); }
+  async getAuditLogs(userId?: number, limit?: number): Promise<AuditLog[]> { return []; }
+  async createDataExport(exportRequest: InsertDataExport): Promise<DataExport> { throw new Error('Not implemented in MemStorage'); }
+  async getDataExport(id: number): Promise<DataExport | undefined> { return undefined; }
+  async updateDataExport(id: number, updates: Partial<DataExport>): Promise<DataExport | undefined> { return undefined; }
+  async getUserById(id: number): Promise<User | undefined> { return this.getUser(id); }
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    const updatedUser = { ...user, ...updates };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  async deleteUser(id: number): Promise<boolean> {
+    return this.users.delete(id);
+  }
+  async getAssessmentsForInjuryType(injuryType: string): Promise<Assessment[]> {
+    return this.getAssessmentsForInjury(injuryType);
+  }
+  async deleteUserAssessment(id: number): Promise<boolean> {
+    return this.userAssessments.delete(id);
+  }
+  async resetUserAssessments(userId: number): Promise<void> {
+    for (const [id, assessment] of this.userAssessments) {
+      if (assessment.userId === userId) {
+        this.userAssessments.delete(id);
+      }
+    }
+  }
+  async getPatientAssessmentHistory(patientId: number): Promise<PatientAssessment[]> {
+    return [];
+  }
+  async createStudyVisit(visit: InsertStudyVisit): Promise<StudyVisit> {
+    throw new Error('Not implemented in MemStorage');
   }
 }
 
