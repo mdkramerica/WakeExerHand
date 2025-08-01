@@ -249,6 +249,7 @@ export const userAssessments = pgTable("user_assessments", {
   maxWristFlexion: numeric("max_wrist_flexion", { precision: 5, scale: 2 }),
   maxWristExtension: numeric("max_wrist_extension", { precision: 5, scale: 2 }),
   dashScore: numeric("dash_score", { precision: 5, scale: 2 }),
+  responses: jsonb("responses"), // DASH survey responses stored as JSON
   shareToken: text("share_token").unique(),
 });
 

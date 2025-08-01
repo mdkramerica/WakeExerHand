@@ -2566,38 +2566,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         downloadData.dashSurvey = {
           dashScore: userAssessment.dashScore,
           assessmentName: "DASH Survey (Disabilities of the Arm, Shoulder and Hand)",
-          postOpDay: userAssessment.postOpDay,
           completedAt: userAssessment.completedAt,
           qualityScore: userAssessment.qualityScore,
           sessionNumber: userAssessment.sessionNumber,
           description: "Complete DASH assessment including disability scoring and functional evaluation"
         };
 
-        // Try to fetch detailed questionnaire responses from separate table
-        try {
-          const dashResponses = await storage.getQuickDashResponsesByAssessmentId(userAssessmentId);
-          if (dashResponses && dashResponses.length > 0) {
-            const dashResponse = dashResponses[0];
-            downloadData.dashSurvey.detailedResponses = {
-              q1_difficulty_opening_jar: dashResponse.q1DifficultyOpeningJar,
-              q2_difficulty_writing: dashResponse.q2DifficultyWriting,
-              q3_difficulty_turning_key: dashResponse.q3DifficultyTurningKey,
-              q4_difficulty_preparing_meal: dashResponse.q4DifficultyPreparingMeal,
-              q5_difficulty_pushing_door: dashResponse.q5DifficultyPushingDoor,
-              q6_difficulty_placing_object: dashResponse.q6DifficultyPlacingObject,
-              q7_arm_shoulder_hand_pain: dashResponse.q7ArmShoulderHandPain,
-              q8_arm_shoulder_hand_pain_activity: dashResponse.q8ArmShoulderHandPainActivity,
-              q9_tingling_arm_shoulder_hand: dashResponse.q9TinglingArmShoulderHand,
-              q10_weakness_arm_shoulder_hand: dashResponse.q10WeaknessArmShoulderHand,
-              q11_stiffness_arm_shoulder_hand: dashResponse.q11StiffnessArmShoulderHand,
-              totalScore: dashResponse.totalScore
+        // Include DASH questionnaire responses if available
+        if (userAssessment.responses) {
+          try {
+            const responses = typeof userAssessment.responses === 'string' 
+              ? JSON.parse(userAssessment.responses) 
+              : userAssessment.responses;
+            
+            downloadData.dashSurvey.questionnaireResponses = {
+              q1_difficulty_opening_jar: responses.q1,
+              q2_difficulty_writing: responses.q2,
+              q3_difficulty_turning_key: responses.q3,
+              q4_difficulty_preparing_meal: responses.q4,
+              q5_difficulty_pushing_door: responses.q5,
+              q6_difficulty_placing_object: responses.q6,
+              q7_arm_shoulder_hand_pain: responses.q7,
+              q8_arm_shoulder_hand_pain_activity: responses.q8,
+              q9_tingling_arm_shoulder_hand: responses.q9,
+              q10_weakness_arm_shoulder_hand: responses.q10,
+              q11_stiffness_arm_shoulder_hand: responses.q11
             };
-          } else {
-            downloadData.dashSurvey.note = "DASH survey completed but detailed questionnaire responses not available in database";
+            
+            // Map response values to difficulty labels
+            const difficultyLabels = ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"];
+            downloadData.dashSurvey.responsesWithLabels = {};
+            for (let i = 1; i <= 11; i++) {
+              const responseValue = responses[`q${i}`];
+              if (responseValue !== undefined) {
+                downloadData.dashSurvey.responsesWithLabels[`q${i}`] = {
+                  value: responseValue,
+                  label: difficultyLabels[responseValue] || "Unknown"
+                };
+              }
+            }
+          } catch (error) {
+            console.log("Error parsing DASH responses:", error);
+            downloadData.dashSurvey.note = "DASH survey completed but response data could not be parsed";
           }
-        } catch (error) {
-          console.log("Could not fetch detailed DASH responses:", error);
-          downloadData.dashSurvey.note = "DASH survey completed - detailed responses require separate questionnaire table";
+        } else {
+          downloadData.dashSurvey.note = "DASH survey completed but detailed questionnaire responses not stored";
         }
       } else {
         // For other assessments, include motion-related data
