@@ -135,18 +135,7 @@ export default function Landing() {
 
           </div>
           
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex items-center justify-center space-x-4 text-sm text-gray-800">
-              <div className="flex items-center">
-                <Lock className="w-4 h-4 mr-1 text-green-600" />
-                <span>HIPAA Compliant</span>
-              </div>
-              <div className="flex items-center">
-                <ShieldX className="w-4 h-4 mr-1 text-green-600" />
-                <span>Privacy Protected</span>
-              </div>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>
