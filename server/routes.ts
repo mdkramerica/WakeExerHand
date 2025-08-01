@@ -2885,24 +2885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         <body>
           <div class="header">
             <div class="logo-section">
-              <svg class="logo" width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-                <!-- ExerAI Logo -->
-                <defs>
-                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
-                  </linearGradient>
-                </defs>
-                <!-- Stylized "E" icon -->
-                <rect x="2" y="8" width="20" height="24" rx="2" fill="url(#logoGradient)"/>
-                <rect x="6" y="12" width="12" height="3" fill="white"/>
-                <rect x="6" y="18" width="8" height="3" fill="white"/>
-                <rect x="6" y="24" width="12" height="3" fill="white"/>
-                <!-- ExerAI Text -->
-                <text x="30" y="16" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2c3e50">Exer</text>
-                <text x="30" y="28" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#3498db">AI</text>
-                <text x="70" y="22" font-family="Arial, sans-serif" font-size="10" fill="#7f8c8d">HAND ASSESSMENT</text>
-              </svg>
+              <img src="data:image/png;base64,$(cat /tmp/logo_single_line.txt)" alt="ExerAI Logo" class="logo" width="120" height="40" />
             </div>
             <div class="header-content">
               <h1>DASH Assessment Report</h1>
