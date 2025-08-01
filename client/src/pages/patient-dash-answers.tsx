@@ -76,7 +76,11 @@ export default function PatientDashAnswers() {
   }
 
   // Parse DASH responses from the assessment data
-  const dashResponses = userAssessment?.responses ? JSON.parse(userAssessment.responses) : {};
+  const dashResponses = userAssessment?.responses 
+    ? (typeof userAssessment.responses === 'string' 
+        ? JSON.parse(userAssessment.responses) 
+        : userAssessment.responses)
+    : {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -94,10 +98,10 @@ export default function PatientDashAnswers() {
                 Review your responses about arm, shoulder, and hand function
               </p>
             </div>
-            <Link href={`/patient/${userCode}/history`}>
+            <Link href={`/patient/${userCode}`}>
               <Button variant="outline" className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to History
+                Back to Dashboard
               </Button>
             </Link>
           </div>
