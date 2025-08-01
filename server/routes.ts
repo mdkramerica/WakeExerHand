@@ -2787,32 +2787,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
               padding-bottom: 8px;
               margin-bottom: 20px;
             }
+            .category-section {
+              margin-bottom: 30px;
+            }
+            .category-header {
+              font-size: 18px;
+              font-weight: 600;
+              color: #2c3e50;
+              background-color: #f8f9fa;
+              padding: 12px 16px;
+              border-radius: 6px;
+              margin-bottom: 15px;
+              border-left: 4px solid #3498db;
+            }
             .response-item {
               display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 12px 16px;
-              margin-bottom: 8px;
-              background: #f9fafb;
-              border-radius: 6px;
-              border-left: 4px solid #d1d5db;
+              align-items: flex-start;
+              padding: 15px;
+              margin-bottom: 10px;
+              background: #ffffff;
+              border: 1px solid #e9ecef;
+              border-radius: 8px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             }
-            .response-item.difficulty-0 { border-left-color: #22c55e; }
-            .response-item.difficulty-1 { border-left-color: #eab308; }
-            .response-item.difficulty-2 { border-left-color: #f97316; }
-            .response-item.difficulty-3 { border-left-color: #ef4444; }
-            .response-item.difficulty-4 { border-left-color: #dc2626; }
-            .question-text {
+            .response-item.difficulty-0 { border-left: 4px solid #22c55e; }
+            .response-item.difficulty-1 { border-left: 4px solid #eab308; }
+            .response-item.difficulty-2 { border-left: 4px solid #f97316; }
+            .response-item.difficulty-3 { border-left: 4px solid #ef4444; }
+            .response-item.difficulty-4 { border-left: 4px solid #dc2626; }
+            .question-number {
+              font-weight: 700;
+              color: #3498db;
+              margin-right: 15px;
+              font-size: 14px;
+              min-width: 35px;
+              text-align: center;
+              background-color: #ecf0f1;
+              padding: 5px 8px;
+              border-radius: 4px;
+            }
+            .question-content {
               flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            }
+            .question-text {
               font-weight: 500;
-              color: #374151;
+              color: #2c3e50;
+              line-height: 1.4;
+              margin-bottom: 5px;
             }
             .difficulty-badge {
-              padding: 4px 12px;
+              padding: 6px 12px;
               border-radius: 20px;
               font-size: 12px;
               font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
               color: white;
+              align-self: flex-start;
             }
             .difficulty-0 .difficulty-badge { background: #22c55e; }
             .difficulty-1 .difficulty-badge { background: #eab308; }
@@ -2879,83 +2913,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <div class="responses-section">
             <h2>Complete DASH Questionnaire Responses (30 Questions)</h2>
             ${(() => {
-              // Complete 30-question DASH questionnaire mapping
-              const allDashQuestions: Record<string, string> = {
-                'q1': 'Open a tight or new jar',
-                'q2': 'Write', 
-                'q3': 'Turn a key',
-                'q4': 'Prepare a meal',
-                'q5': 'Push open a heavy door',
-                'q6': 'Place an object on a shelf above your head',
-                'q7': 'Do heavy household chores (e.g., wash walls, wash floors)',
-                'q8': 'Garden or do yard work',
-                'q9': 'Make a bed',
-                'q10': 'Carry a shopping bag or briefcase',
-                'q11': 'Carry a heavy object (over 10 lbs)',
-                'q12': 'Change a lightbulb overhead',
-                'q13': 'Wash or blow dry your hair',
-                'q14': 'Wash your back',
-                'q15': 'Put on a pullover sweater',
-                'q16': 'Use a knife to cut food',
-                'q17': 'Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)',
-                'q18': 'Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)',
-                'q19': 'Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)',
-                'q20': 'Manage transportation needs (getting from one place to another)',
-                'q21': 'Sexual activities',
-                'q22': 'During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?',
-                'q23': 'During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?',
-                'q24': 'Arm, shoulder or hand pain',
-                'q25': 'Arm, shoulder or hand pain when you performed any specific activity',
-                'q26': 'Tingling (pins and needles) in your arm, shoulder or hand',
-                'q27': 'Weakness in your arm, shoulder or hand',
-                'q28': 'Stiffness in your arm, shoulder or hand',
-                'q29': 'During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?',
-                'q30': 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem'
-              };
+              // Complete 30-question DASH questionnaire with categories
+              const dashQuestionsWithCategories = [
+                { id: 1, question: 'Open a tight or new jar', category: 'Physical Function' },
+                { id: 2, question: 'Write', category: 'Physical Function' },
+                { id: 3, question: 'Turn a key', category: 'Physical Function' },
+                { id: 4, question: 'Prepare a meal', category: 'Physical Function' },
+                { id: 5, question: 'Push open a heavy door', category: 'Physical Function' },
+                { id: 6, question: 'Place an object on a shelf above your head', category: 'Physical Function' },
+                { id: 7, question: 'Do heavy household chores (e.g., wash walls, wash floors)', category: 'Physical Function' },
+                { id: 8, question: 'Garden or do yard work', category: 'Physical Function' },
+                { id: 9, question: 'Make a bed', category: 'Physical Function' },
+                { id: 10, question: 'Carry a shopping bag or briefcase', category: 'Physical Function' },
+                { id: 11, question: 'Carry a heavy object (over 10 lbs)', category: 'Physical Function' },
+                { id: 12, question: 'Change a lightbulb overhead', category: 'Physical Function' },
+                { id: 13, question: 'Wash or blow dry your hair', category: 'Physical Function' },
+                { id: 14, question: 'Wash your back', category: 'Physical Function' },
+                { id: 15, question: 'Put on a pullover sweater', category: 'Physical Function' },
+                { id: 16, question: 'Use a knife to cut food', category: 'Physical Function' },
+                { id: 17, question: 'Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)', category: 'Physical Function' },
+                { id: 18, question: 'Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)', category: 'Physical Function' },
+                { id: 19, question: 'Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)', category: 'Physical Function' },
+                { id: 20, question: 'Manage transportation needs (getting from one place to another)', category: 'Physical Function' },
+                { id: 21, question: 'Sexual activities', category: 'Physical Function' },
+                { id: 22, question: 'During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?', category: 'Social Function' },
+                { id: 23, question: 'During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?', category: 'Role Function' },
+                { id: 24, question: 'Arm, shoulder or hand pain', category: 'Symptoms' },
+                { id: 25, question: 'Arm, shoulder or hand pain when you performed any specific activity', category: 'Symptoms' },
+                { id: 26, question: 'Tingling (pins and needles) in your arm, shoulder or hand', category: 'Symptoms' },
+                { id: 27, question: 'Weakness in your arm, shoulder or hand', category: 'Symptoms' },
+                { id: 28, question: 'Stiffness in your arm, shoulder or hand', category: 'Symptoms' },
+                { id: 29, question: 'During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?', category: 'Symptoms' },
+                { id: 30, question: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem', category: 'Social Function' }
+              ];
               
               // If we have stored responses, use them; otherwise reconstruct from DASH score
-              let fullResponses: Record<string, number> = {};
+              let fullResponses: Record<number, number> = {};
               
               if (Object.keys(responses).length > 0) {
                 // Use existing responses for questions 1-11
-                fullResponses = { ...responses };
+                Object.keys(responses).forEach(key => {
+                  const questionNum = parseInt(key.replace('q', ''));
+                  fullResponses[questionNum] = (responses as any)[key];
+                });
                 
                 // Reconstruct missing responses (12-30) based on DASH score pattern
-                // DASH score of 54.2 indicates moderate to severe disability
-                // Average response would be: ((54.2/100) * 4) + 1 = 3.17 (around 3)
                 const avgResponse = Math.round(((dashScore / 100) * 4) + 1);
                 
                 for (let i = 12; i <= 30; i++) {
-                  const key = 'q' + i;
-                  if (!fullResponses[key]) {
-                    // Add some variation based on question type
+                  if (!fullResponses[i]) {
                     let response = avgResponse;
                     if (i >= 22 && i <= 23) response = Math.min(4, avgResponse + 1); // Social/work impact
                     if (i >= 24 && i <= 30) response = Math.max(2, avgResponse - 1); // Symptoms
                     if (i === 21) response = 1; // Sexual activities - often not applicable/no difficulty
-                    fullResponses[key] = response;
+                    fullResponses[i] = response;
                   }
                 }
               } else {
                 // Generate all responses from DASH score
                 const avgResponse = Math.round(((dashScore / 100) * 4) + 1);
                 for (let i = 1; i <= 30; i++) {
-                  const key = 'q' + i;
                   let response = avgResponse;
                   if (i >= 22 && i <= 23) response = Math.min(4, avgResponse + 1);
                   if (i >= 24 && i <= 30) response = Math.max(2, avgResponse - 1);
                   if (i === 21) response = 1;
-                  fullResponses[key] = response;
+                  fullResponses[i] = response;
                 }
               }
               
-              return Object.keys(allDashQuestions).map(key => {
-                const responseValue = fullResponses[key] || 1;
-                const difficultyLabel = difficultyLabels[responseValue - 1] || 'No Difficulty';
-                const questionText = allDashQuestions[key];
-                
-                return '\\n                <div class="response-item difficulty-' + Math.max(0, responseValue - 1) + '">\\n                  <div class="question-text">' + questionText + '</div>\\n                  <div class="difficulty-badge">' + difficultyLabel + '</div>\\n                </div>';
-              }).join('');
+              // Group by category and generate HTML
+              const categories = ['Physical Function', 'Social Function', 'Role Function', 'Symptoms'];
+              let html = '';
+              
+              categories.forEach(category => {
+                const categoryQuestions = dashQuestionsWithCategories.filter(q => q.category === category);
+                if (categoryQuestions.length > 0) {
+                  html += '<div class="category-section"><h3 class="category-header">' + category + '</h3>';
+                  
+                  categoryQuestions.forEach(q => {
+                    const responseValue = fullResponses[q.id] || 1;
+                    const difficultyLabel = difficultyLabels[responseValue - 1] || 'No Difficulty';
+                    
+                    html += '<div class="response-item difficulty-' + (responseValue - 1) + '">';
+                    html += '<div class="question-number">Q' + q.id + '</div>';
+                    html += '<div class="question-content">';
+                    html += '<div class="question-text">' + q.question + '</div>';
+                    html += '<div class="difficulty-badge">' + difficultyLabel + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                  });
+                  
+                  html += '</div>';
+                }
+              });
+              
+              return html;
             })()}
           </div>
 
