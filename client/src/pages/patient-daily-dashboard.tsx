@@ -235,44 +235,48 @@ export default function PatientDailyDashboard() {
 
         {/* Clean ExerAI-Branded Streak Card */}
         <div className="relative">
-          <Card className="bg-white border-2 border-teal-200 shadow-xl rounded-2xl overflow-hidden">
+          <Card className="bg-white border-2 border-teal-500 shadow-xl rounded-2xl overflow-hidden">
             {/* Header with ExerAI branding */}
-            <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
+            <div className="bg-teal-600 px-6 py-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
-                      <span className="text-teal-600 font-bold text-lg">EX</span>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-teal-600 font-black text-xl">EX</span>
                     </div>
-                    <span className="text-white font-bold text-lg">ExerAI</span>
+                    <div>
+                      <span className="text-white font-bold text-xl">ExerAI</span>
+                      <div className="text-teal-100 text-sm font-medium">Recovery Progress</div>
+                    </div>
                   </div>
-                  <span className="text-white font-bold text-xl">Recovery Progress</span>
                 </div>
-                <div className="flex items-center space-x-2 text-white/90">
+                <div className="flex items-center space-x-2 text-white bg-teal-700 px-3 py-2 rounded-lg">
                   <Trophy className="h-5 w-5" />
-                  <span className="text-sm font-medium">Day {patient.daysSinceStart}</span>
+                  <span className="font-semibold">Day {patient.daysSinceStart}</span>
                 </div>
               </div>
             </div>
 
-            <CardContent className="p-8">
+            <CardContent className="p-8 bg-white">
               {/* Main Streak Display */}
               <div className="text-center mb-8">
-                <div className="flex items-center justify-center space-x-4 mb-4">
-                  <div className="p-4 bg-teal-100 rounded-full">
-                    {getStreakIcon(streakData?.currentStreak || 0)}
+                <div className="flex items-center justify-center space-x-6 mb-6">
+                  <div className="p-5 bg-teal-100 rounded-full border-4 border-teal-200">
+                    <div className="text-teal-600">
+                      {getStreakIcon(streakData?.currentStreak || 0)}
+                    </div>
                   </div>
                   <div>
-                    <div className="text-6xl font-bold text-gray-900 mb-1">
+                    <div className="text-7xl font-black text-gray-900 mb-2 leading-none">
                       {streakData?.currentStreak || 0}
                     </div>
-                    <div className="text-lg font-semibold text-gray-600">Day Streak</div>
+                    <div className="text-xl font-bold text-gray-700">Day Streak</div>
                   </div>
                 </div>
                 
                 {/* Motivational Message */}
-                <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
-                  <p className="text-lg font-semibold text-teal-800">
+                <div className="bg-teal-50 border-2 border-teal-200 rounded-xl p-5">
+                  <p className="text-lg font-bold text-teal-900">
                     {getHealthcareStreakMessage(streakData?.currentStreak || 0)}
                   </p>
                 </div>
@@ -280,29 +284,29 @@ export default function PatientDailyDashboard() {
 
               {/* Statistics Grid */}
               <div className="grid grid-cols-2 gap-6">
-                <div className="text-center bg-gray-50 rounded-xl p-6">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                <div className="text-center bg-gray-100 rounded-xl p-6 border-2 border-gray-300">
+                  <div className="text-4xl font-black text-gray-900 mb-3">
                     {streakData?.totalCompletions || 0}
                   </div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="text-base font-bold text-gray-800 mb-2">
                     Total Completions
                   </div>
-                  <div className="flex items-center justify-center text-teal-600">
-                    <Target className="h-4 w-4 mr-1" />
-                    <span className="text-xs">Building strength</span>
+                  <div className="flex items-center justify-center text-teal-700">
+                    <Target className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-semibold">Building strength</span>
                   </div>
                 </div>
                 
-                <div className="text-center bg-gray-50 rounded-xl p-6">
-                  <div className="text-3xl font-bold text-gray-900 mb-2">
+                <div className="text-center bg-gray-100 rounded-xl p-6 border-2 border-gray-300">
+                  <div className="text-4xl font-black text-gray-900 mb-3">
                     {streakData?.longestStreak || 0}
                   </div>
-                  <div className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="text-base font-bold text-gray-800 mb-2">
                     Best Streak
                   </div>
-                  <div className="flex items-center justify-center text-teal-600">
-                    <Star className="h-4 w-4 mr-1" />
-                    <span className="text-xs">Personal record</span>
+                  <div className="flex items-center justify-center text-teal-700">
+                    <Star className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-semibold">Personal record</span>
                   </div>
                 </div>
               </div>
