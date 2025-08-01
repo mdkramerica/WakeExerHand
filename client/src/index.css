@@ -257,31 +257,57 @@ body,
   background-color: #F9FAFB !important;
 }
 
-/* Hide Replit development error overlay */
+/* Hide Replit development error overlay and development tools */
 [data-vite-error-overlay],
 [data-error-overlay],
 .vite-error-overlay,
 #error-overlay,
 iframe[src*="error"],
-div[style*="position: fixed"][style*="bottom"][style*="right"][style*="background: white"],
-div[style*="position:fixed"][style*="bottom"][style*="right"][style*="background:white"],
-div[style*="position: fixed"][style*="z-index"][style*="background: white"],
-div[style*="position:fixed"][style*="z-index"][style*="background:white"],
-/* Target Replit-specific overlays */
+div[style*="position: fixed"][style*="bottom"][style*="right"],
+div[style*="position:fixed"][style*="bottom"][style*="right"],
+div[style*="position: fixed"][style*="z-index"][style*="background"],
+div[style*="position:fixed"][style*="z-index"][style*="background"],
+/* Target Replit-specific overlays and development tools */
 div[data-testid*="error"],
 div[data-cy*="error"],
 .replit-error-overlay,
 .runtime-error-overlay,
 div[style*="position: fixed"][style*="right: 0"][style*="bottom: 0"],
 div[style*="position:fixed"][style*="right:0"][style*="bottom:0"],
-/* Target small white boxes in corners */
-div[style*="width: 200px"][style*="height: 100px"][style*="position: fixed"],
-div[style*="width:200px"][style*="height:100px"][style*="position:fixed"] {
+/* Target cartographer and other development widgets */
+div[style*="position: fixed"][style*="bottom"],
+div[style*="position:fixed"][style*="bottom"],
+/* Target any blue boxes or development widgets */
+div[style*="background: blue"],
+div[style*="background:blue"],
+div[style*="background-color: blue"],
+div[style*="background-color:blue"],
+/* Target small boxes in corners regardless of color */
+div[style*="width: 200px"][style*="position: fixed"],
+div[style*="width:200px"][style*="position:fixed"],
+div[style*="height: 100px"][style*="position: fixed"],
+div[style*="height:100px"][style*="position:fixed"],
+/* Broader targeting for any fixed positioned elements in bottom right */
+body > div[style*="position: fixed"][style*="bottom"][style*="right"],
+body > div[style*="position:fixed"][style*="bottom"][style*="right"],
+/* Target Replit cartographer widget specifically */
+[data-replit-cartographer],
+[id*="cartographer"],
+[class*="cartographer"],
+/* Target any development widgets or overlays */
+div[style*="position: fixed"]:not([class*="toast"]):not([id*="toast"]):not([data-toast]),
+iframe[style*="position: fixed"],
+/* Hide any widget that appears in corners */
+body > *:last-child[style*="position: fixed"][style*="bottom"],
+body > *:last-child[style*="position:fixed"][style*="bottom"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  z-index: -1 !important;
+  z-index: -9999 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
 }
 
 /* Force white on card-like components */
