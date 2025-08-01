@@ -2968,9 +2968,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               let fullResponses: Record<number, number> = {};
               
               if (Object.keys(responses).length > 0) {
-                // Use existing responses for questions 1-11
+                // Handle both response formats: "q1" format and "1" format
                 Object.keys(responses).forEach(key => {
-                  const questionNum = parseInt(key.replace('q', ''));
+                  let questionNum: number;
+                  if (key.startsWith('q')) {
+                    questionNum = parseInt(key.replace('q', ''));
+                  } else {
+                    questionNum = parseInt(key);
+                  }
                   fullResponses[questionNum] = (responses as any)[key];
                 });
                 

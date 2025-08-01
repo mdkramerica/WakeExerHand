@@ -132,7 +132,8 @@ export default function PatientDashAnswers() {
                   <div className="space-y-4">
                     {DASH_QUESTIONS.map((question, index) => {
                       const questionNum = index + 1;
-                      const response = dashResponses[`q${questionNum}`];
+                      // Handle both response formats: "q1" format and "1" format
+                      const response = dashResponses[`q${questionNum}`] || dashResponses[questionNum.toString()];
                       const responseValue = parseInt(response) || 0;
                       
                       return (
@@ -185,9 +186,9 @@ export default function PatientDashAnswers() {
                 <p className="text-muted-foreground">
                   The requested DASH survey could not be found.
                 </p>
-                <Link href={`/patient/${userCode}/history`}>
+                <Link href={`/patient/${userCode}`}>
                   <Button variant="outline" className="mt-4">
-                    Back to History
+                    Back to Dashboard
                   </Button>
                 </Link>
               </CardContent>
