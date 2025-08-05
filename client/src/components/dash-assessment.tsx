@@ -193,46 +193,46 @@ const DASH_QUESTIONS = [
 // Official DASH response options for different question types
 const RESPONSE_OPTIONS = {
   difficulty: [
-    { value: 1, label: "No Difficulty" },
-    { value: 2, label: "Mild Difficulty" },
-    { value: 3, label: "Moderate Difficulty" },
-    { value: 4, label: "Severe Difficulty" },
-    { value: 5, label: "Unable" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ],
   interference: [
-    { value: 1, label: "Not at all" },
-    { value: 2, label: "Slightly" },
-    { value: 3, label: "Moderately" },
-    { value: 4, label: "Quite a bit" },
-    { value: 5, label: "Extremely" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ],
   limitation: [
-    { value: 1, label: "Not limited at all" },
-    { value: 2, label: "Slightly limited" },
-    { value: 3, label: "Moderately limited" },
-    { value: 4, label: "Very limited" },
-    { value: 5, label: "Unable" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ],
   severity: [
-    { value: 1, label: "None" },
-    { value: 2, label: "Mild" },
-    { value: 3, label: "Moderate" },
-    { value: 4, label: "Severe" },
-    { value: 5, label: "Extreme" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ],
   sleep: [
-    { value: 1, label: "No difficulty" },
-    { value: 2, label: "Mild difficulty" },
-    { value: 3, label: "Moderate difficulty" },
-    { value: 4, label: "Severe difficulty" },
-    { value: 5, label: "So much difficulty that I can't sleep" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ],
   agreement: [
-    { value: 1, label: "Strongly disagree" },
-    { value: 2, label: "Disagree" },
-    { value: 3, label: "Neither agree nor disagree" },
-    { value: 4, label: "Agree" },
-    { value: 5, label: "Strongly agree" }
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" }
   ]
 };
 
@@ -363,19 +363,98 @@ export default function DashAssessment({ onComplete, onCancel }: DashAssessmentP
             </div>
           </div>
 
+          {/* Response Scale Labels */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-center mb-3">
+              {currentQ.responseType === 'difficulty' && 'Please circle the number below the appropriate response:'}
+              {currentQ.responseType === 'interference' && 'Please circle the number below the appropriate response:'}
+              {currentQ.responseType === 'limitation' && 'Please circle the number below the appropriate response:'}
+              {currentQ.responseType === 'severity' && 'Please circle the number below the appropriate response:'}
+              {currentQ.responseType === 'sleep' && 'Please circle the number below the appropriate response:'}
+              {currentQ.responseType === 'agreement' && 'Please circle the number below the appropriate response:'}
+            </div>
+            <div className="grid grid-cols-5 gap-2 text-xs text-center font-medium mb-2">
+              {currentQ.responseType === 'difficulty' && (
+                <>
+                  <div>NO<br/>DIFFICULTY</div>
+                  <div>MILD<br/>DIFFICULTY</div>
+                  <div>MODERATE<br/>DIFFICULTY</div>
+                  <div>SEVERE<br/>DIFFICULTY</div>
+                  <div>UNABLE</div>
+                </>
+              )}
+              {currentQ.responseType === 'interference' && (
+                <>
+                  <div>NOT AT ALL</div>
+                  <div>SLIGHTLY</div>
+                  <div>MODERATELY</div>
+                  <div>QUITE<br/>A BIT</div>
+                  <div>EXTREMELY</div>
+                </>
+              )}
+              {currentQ.responseType === 'limitation' && (
+                <>
+                  <div>NOT LIMITED<br/>AT ALL</div>
+                  <div>SLIGHTLY<br/>LIMITED</div>
+                  <div>MODERATELY<br/>LIMITED</div>
+                  <div>VERY<br/>LIMITED</div>
+                  <div>UNABLE</div>
+                </>
+              )}
+              {currentQ.responseType === 'severity' && (
+                <>
+                  <div>NONE</div>
+                  <div>MILD</div>
+                  <div>MODERATE</div>
+                  <div>SEVERE</div>
+                  <div>EXTREME</div>
+                </>
+              )}
+              {currentQ.responseType === 'sleep' && (
+                <>
+                  <div>NO<br/>DIFFICULTY</div>
+                  <div>MILD<br/>DIFFICULTY</div>
+                  <div>MODERATE<br/>DIFFICULTY</div>
+                  <div>SEVERE<br/>DIFFICULTY</div>
+                  <div>SO MUCH DIFFICULTY<br/>THAT I CAN'T SLEEP</div>
+                </>
+              )}
+              {currentQ.responseType === 'agreement' && (
+                <>
+                  <div>STRONGLY<br/>DISAGREE</div>
+                  <div>DISAGREE</div>
+                  <div>NEITHER AGREE<br/>NOR DISAGREE</div>
+                  <div>AGREE</div>
+                  <div>STRONGLY<br/>AGREE</div>
+                </>
+              )}
+            </div>
+          </div>
+
           <RadioGroup
             value={responses[currentQuestion]?.toString() || ""}
             onValueChange={(value) => handleResponseChange(currentQuestion, parseInt(value))}
-            className="space-y-3"
+            className="mt-4"
           >
-            {(RESPONSE_OPTIONS[currentQ.responseType as keyof typeof RESPONSE_OPTIONS] || RESPONSE_OPTIONS.difficulty).map((option) => (
-              <div key={option.value} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50">
-                <RadioGroupItem value={option.value.toString()} id={`option-${option.value}`} />
-                <Label htmlFor={`option-${option.value}`} className="flex-1 cursor-pointer">
-                  <div className="font-medium">{option.label}</div>
-                </Label>
-              </div>
-            ))}
+            <div className="grid grid-cols-5 gap-4">
+              {(RESPONSE_OPTIONS[currentQ.responseType as keyof typeof RESPONSE_OPTIONS] || RESPONSE_OPTIONS.difficulty).map((option) => (
+                <div key={option.value} className="flex flex-col items-center space-y-2">
+                  <div className="flex items-center justify-center w-12 h-12 border-2 rounded-full hover:bg-gray-50">
+                    <RadioGroupItem 
+                      value={option.value.toString()} 
+                      id={`option-${option.value}`}
+                      className="w-6 h-6"
+                    />
+                  </div>
+                  <Label 
+                    htmlFor={`option-${option.value}`} 
+                    className="text-lg font-bold text-center cursor-pointer"
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </RadioGroup>
 
           <div className="flex justify-between items-center pt-6 border-t">
