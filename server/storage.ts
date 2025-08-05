@@ -576,7 +576,6 @@ export class DatabaseStorage implements IStorage {
         // DASH assessment data
         dashScore: assessment.dashScore,
         dashResponses: assessment.responses, // Complete DASH survey responses
-        kapandjiScore: assessment.dashScore, // Legacy field mapping
         
         // Metadata for analysis
         shareToken: assessment.shareToken

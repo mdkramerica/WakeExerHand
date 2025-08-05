@@ -191,7 +191,6 @@ Each file is named `[ACCESS_CODE]_data.json` and contains:
         "q3": 3,
         "responses": [...]
       },
-      "kapandjiScore": 8,
       
       "shareToken": "abc123def456"
     }
