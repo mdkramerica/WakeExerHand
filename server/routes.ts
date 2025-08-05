@@ -5,6 +5,7 @@ import { DatabaseStorage } from "./storage";
 import { z } from "zod";
 import JSZip from 'jszip';
 import puppeteer from 'puppeteer';
+import archiver from 'archiver';
 
 // Extend Request interface for authentication
 declare global {
@@ -1960,7 +1961,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AS-008: Export System Data
+  // AS-008: Export System Data (ZIP Download)
   app.get("/api/admin/export", requireAdminAuth, async (req, res) => {
     try {
       const patients = await storage.getAdminPatients();
@@ -1977,34 +1978,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       );
 
-      const exportData = {
+      // Create timestamp for filenames
+      const timestamp = new Date().toISOString().split('T')[0];
+      const zipFilename = `exer_ai_system_export_${timestamp}.zip`;
+
+      // Set response headers for zip download
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
+
+      // Create zip archive
+      const archive = archiver('zip', {
+        zlib: { level: 9 } // Maximum compression
+      });
+
+      archive.pipe(res);
+
+      // Add system summary
+      const systemSummary = {
         exportDate: new Date().toISOString(),
         systemSummary: complianceData,
-        patients: detailedPatients,
         metadata: {
           totalPatients: patients.length,
           exportVersion: '1.0',
-          systemType: 'HandCare Portal Admin Export'
+          systemType: 'ExerAI HandCare Portal Admin Export'
         }
       };
+      archive.append(JSON.stringify(systemSummary, null, 2), { name: 'system_summary.json' });
+
+      // Add patient list overview
+      const patientOverview = patients.map(p => ({
+        patientId: p.patientId,
+        code: p.code,
+        injuryType: p.injuryType,
+        postOpDay: p.postOpDay,
+        assessmentCompletionRate: p.assessmentCompletionRate,
+        daysActive: p.daysActive,
+        createdAt: p.createdAt,
+        lastVisit: p.lastVisit
+      }));
+      archive.append(JSON.stringify(patientOverview, null, 2), { name: 'patient_overview.json' });
+
+      // Add detailed patient data files
+      for (const patient of detailedPatients) {
+        const patientData = {
+          patient: {
+            patientId: patient.patientId,
+            code: patient.code,
+            injuryType: patient.injuryType,
+            postOpDay: patient.postOpDay,
+            createdAt: patient.createdAt
+          },
+          assessments: patient.assessments,
+          statistics: {
+            totalAssessments: patient.assessments.length,
+            assessmentCompletionRate: patient.assessmentCompletionRate,
+            daysActive: patient.daysActive
+          }
+        };
+        archive.append(JSON.stringify(patientData, null, 2), { name: `patients/${patient.code}_data.json` });
+      }
+
+      // Add CSV export for spreadsheet compatibility
+      const csvHeaders = [
+        'Patient ID', 'Patient Code', 'Injury Type', 'Post-Op Day',
+        'Assessment Completion Rate (%)', 'Days Active', 'Registration Date', 'Last Visit'
+      ];
+      const csvRows = patients.map(p => [
+        p.patientId, p.code, p.injuryType, p.postOpDay,
+        p.assessmentCompletionRate, p.daysActive,
+        new Date(p.createdAt).toLocaleDateString(),
+        p.lastVisit ? new Date(p.lastVisit).toLocaleDateString() : 'Never'
+      ]);
+      const csvContent = [csvHeaders.join(','), ...csvRows.map(row => row.map(field => `"${field}"`).join(','))].join('\n');
+      archive.append(csvContent, { name: 'patient_summary.csv' });
+
+      // Finalize the archive
+      await archive.finalize();
 
       // Audit log for admin export
       await auditLog(
         req.user?.id || 'admin',
-        "admin_export",
+        "admin_export_zip",
         "system_data",
         { 
-          exportType: 'full_system', 
+          exportType: 'full_system_zip', 
           patientCount: patients.length,
-          totalAssessments: detailedPatients.reduce((sum, p) => sum + p.assessments.length, 0)
+          totalAssessments: detailedPatients.reduce((sum, p) => sum + p.assessments.length, 0),
+          filename: zipFilename
         },
         req
       );
 
-      res.json(exportData);
     } catch (error) {
       console.error("Admin export error:", error);
-      res.status(500).json({ message: "Failed to export system data" });
+      if (!res.headersSent) {
+        res.status(500).json({ message: "Failed to export system data" });
+      }
     }
   });
 

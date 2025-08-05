@@ -97,6 +97,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [showPatientDetail, setShowPatientDetail] = useState(false);
   const [exportingCsv, setExportingCsv] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
   const { toast } = useToast();
 
   const getAuthHeaders = () => {
@@ -459,39 +460,46 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
   };
 
   const exportAllData = async () => {
+    setExportingData(true);
     try {
       const response = await fetch('/api/admin/export', {
         headers: getAuthHeaders()
       });
 
       if (response.ok) {
-        const data = await response.json();
+        // Handle zip file download
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
         
-        // Open data in new tab
-        const newWindow = window.open();
-        if (newWindow) {
-          newWindow.document.write(`
-            <html>
-              <head><title>HandCare Portal - System Export</title></head>
-              <body>
-                <h1>HandCare Portal System Export</h1>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
-              </body>
-            </html>
-          `);
-        }
+        // Extract filename from Content-Disposition header or create default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = contentDisposition 
+          ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+          : `exer_ai_system_export_${new Date().toISOString().split('T')[0]}.zip`;
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
         toast({
           title: "Export Complete",
-          description: "System data opened in new tab",
+          description: "System data downloaded as ZIP file with structured patient data",
         });
+      } else {
+        throw new Error('Export failed');
       }
     } catch (error) {
       toast({
-        title: "Error", 
-        description: "Failed to export system data",
+        title: "Export Failed", 
+        description: "Failed to export system data. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setExportingData(false);
     }
   };
 
@@ -521,9 +529,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button onClick={exportAllData} variant="outline" size="sm">
+              <Button onClick={exportAllData} variant="outline" size="sm" disabled={exportingData}>
                 <FileDown className="h-4 w-4 mr-2" />
-                Export Data
+                {exportingData ? "Exporting..." : "Export Data"}
               </Button>
               
               <div className="flex items-center space-x-2">
