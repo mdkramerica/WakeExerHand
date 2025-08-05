@@ -158,19 +158,28 @@ export default function PatientDashAnswers() {
                               <p className="text-gray-900 mt-1">{questionData.question}</p>
                             </div>
                             <div className="text-right">
-                              <Badge 
-                                variant="outline" 
-                                className={`${
-                                  responseValue === 0 ? 'border-gray-200 text-gray-700 bg-gray-50' :
-                                  responseValue === 1 ? 'border-green-200 text-green-700 bg-green-50' :
-                                  responseValue === 2 ? 'border-yellow-200 text-yellow-700 bg-yellow-50' :
-                                  responseValue === 3 ? 'border-orange-200 text-orange-700 bg-orange-50' :
-                                  responseValue === 4 ? 'border-red-200 text-red-700 bg-red-50' :
-                                  'border-red-300 text-red-800 bg-red-100'
-                                }`}
-                              >
-                                {responseLabel}
-                              </Badge>
+                              <div className="space-y-2">
+                                <Badge 
+                                  variant="outline" 
+                                  className={`${
+                                    responseValue === 0 ? 'border-gray-200 text-gray-700 bg-gray-50' :
+                                    responseValue === 1 ? 'border-green-200 text-green-700 bg-green-50' :
+                                    responseValue === 2 ? 'border-yellow-200 text-yellow-700 bg-yellow-50' :
+                                    responseValue === 3 ? 'border-orange-200 text-orange-700 bg-orange-50' :
+                                    responseValue === 4 ? 'border-red-200 text-red-700 bg-red-50' :
+                                    'border-red-300 text-red-800 bg-red-100'
+                                  } block text-center`}
+                                >
+                                  {responseLabel}
+                                </Badge>
+                                {responseValue > 0 && (
+                                  <div className="text-center">
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded font-mono">
+                                      Score: {responseValue}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

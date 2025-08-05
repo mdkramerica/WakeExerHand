@@ -114,86 +114,99 @@ export default function AdminDashResults() {
         : userAssessment.responses)
     : {};
 
-  // Full 30-question DASH questionnaire
+  // Full 30-question DASH questionnaire with response types
   const DASH_QUESTIONS = [
-    "Open a tight or new jar",
-    "Write", 
-    "Turn a key",
-    "Prepare a meal",
-    "Push open a heavy door",
-    "Place an object on a shelf above your head",
-    "Do heavy household chores (e.g., wash walls, floors)",
-    "Garden or do yard work",
-    "Make a bed",
-    "Carry a shopping bag or briefcase",
-    "Carry a heavy object (over 10 lbs)",
-    "Change a light bulb overhead",
-    "Wash or blow dry your hair",
-    "Wash your back",
-    "Put on a pullover sweater",
-    "Use a knife to cut food",
-    "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)",
-    "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)",
-    "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)",
-    "Manage transportation needs (getting from one place to another)",
-    "Sexual activities",
-    "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?",
-    "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?",
-    "Arm, shoulder or hand pain",
-    "Arm, shoulder or hand pain when you performed any specific activity",
-    "Tingling (pins and needles) in your arm, shoulder or hand",
-    "Weakness in your arm, shoulder or hand",
-    "Stiffness in your arm, shoulder or hand",
-    "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?",
-    "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem"
+    { id: 1, question: "Open a tight or new jar", responseType: "difficulty" },
+    { id: 2, question: "Write", responseType: "difficulty" }, 
+    { id: 3, question: "Turn a key", responseType: "difficulty" },
+    { id: 4, question: "Prepare a meal", responseType: "difficulty" },
+    { id: 5, question: "Push open a heavy door", responseType: "difficulty" },
+    { id: 6, question: "Place an object on a shelf above your head", responseType: "difficulty" },
+    { id: 7, question: "Do heavy household chores (e.g., wash walls, floors)", responseType: "difficulty" },
+    { id: 8, question: "Garden or do yard work", responseType: "difficulty" },
+    { id: 9, question: "Make a bed", responseType: "difficulty" },
+    { id: 10, question: "Carry a shopping bag or briefcase", responseType: "difficulty" },
+    { id: 11, question: "Carry a heavy object (over 10 lbs)", responseType: "difficulty" },
+    { id: 12, question: "Change a light bulb overhead", responseType: "difficulty" },
+    { id: 13, question: "Wash or blow dry your hair", responseType: "difficulty" },
+    { id: 14, question: "Wash your back", responseType: "difficulty" },
+    { id: 15, question: "Put on a pullover sweater", responseType: "difficulty" },
+    { id: 16, question: "Use a knife to cut food", responseType: "difficulty" },
+    { id: 17, question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)", responseType: "difficulty" },
+    { id: 18, question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)", responseType: "difficulty" },
+    { id: 19, question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)", responseType: "difficulty" },
+    { id: 20, question: "Manage transportation needs (getting from one place to another)", responseType: "difficulty" },
+    { id: 21, question: "Sexual activities", responseType: "difficulty" },
+    { id: 22, question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?", responseType: "interference" },
+    { id: 23, question: "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?", responseType: "limitation" },
+    { id: 24, question: "Arm, shoulder or hand pain", responseType: "severity" },
+    { id: 25, question: "Arm, shoulder or hand pain when you performed any specific activity", responseType: "severity" },
+    { id: 26, question: "Tingling (pins and needles) in your arm, shoulder or hand", responseType: "severity" },
+    { id: 27, question: "Weakness in your arm, shoulder or hand", responseType: "severity" },
+    { id: 28, question: "Stiffness in your arm, shoulder or hand", responseType: "severity" },
+    { id: 29, question: "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?", responseType: "sleep" },
+    { id: 30, question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem", responseType: "agreement" }
   ];
 
-  const getDifficultyLevel = (score: number): string => {
-    if (score === 1) return 'No difficulty';
-    if (score === 2) return 'Mild difficulty';
-    if (score === 3) return 'Moderate difficulty';
-    if (score === 4) return 'Severe difficulty';
-    if (score === 5) return 'Unable';
-    return 'No difficulty';
+  // Official DASH response labels by type
+  const RESPONSE_LABELS = {
+    difficulty: ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"],
+    interference: ["Not at all", "Slightly", "Moderately", "Quite a bit", "Extremely"],
+    limitation: ["Not limited at all", "Slightly limited", "Moderately limited", "Very limited", "Unable"],
+    severity: ["None", "Mild", "Moderate", "Severe", "Extreme"],
+    sleep: ["No difficulty", "Mild difficulty", "Moderate difficulty", "Severe difficulty", "So much difficulty that I can't sleep"],
+    agreement: ["Strongly disagree", "Disagree", "Neither agree nor disagree", "Agree", "Strongly agree"]
+  };
+
+  const getResponseLabel = (questionId: number, responseValue: number): string => {
+    const question = DASH_QUESTIONS.find(q => q.id === questionId);
+    if (!question || !question.responseType) return "Unknown";
+    
+    const labels = RESPONSE_LABELS[question.responseType as keyof typeof RESPONSE_LABELS];
+    return labels ? labels[responseValue - 1] || "Unknown" : "Unknown";
   };
 
   // Convert responses to the format expected by the component
-  const answers = DASH_QUESTIONS.map((question, index) => {
-    const questionNum = index + 1;
+  const answers = DASH_QUESTIONS.map((questionData) => {
+    const questionNum = questionData.id;
     // Handle both response formats: "q1" format and "1" format
     const response = dashResponses[`q${questionNum}`] || dashResponses[questionNum.toString()];
     const answerValue = parseInt(response) || 1;
     
     return {
-      question,
+      questionNum: questionNum,
+      question: questionData.question,
       answer: answerValue,
-      difficulty: getDifficultyLevel(answerValue)
+      responseLabel: getResponseLabel(questionNum, answerValue),
+      responseType: questionData.responseType
     };
   }).filter(answer => answer.answer > 0); // Only show questions with actual responses
 
-  const getPainLevel = (score: number): string => {
-    if (score === 1) return 'None';
-    if (score === 2) return 'Mild';
-    if (score === 3) return 'Moderate';
-    if (score === 4) return 'Severe';
-    if (score === 5) return 'Extreme';
-    return 'None';
-  };
-  
-  // Group answers by difficulty level for better organization
+
+  // Group answers by response type for better organization
   const groupedAnswers = answers.reduce((groups: Record<string, any[]>, answer) => {
-    const difficulty = answer.difficulty || 'No difficulty';
-    if (!groups[difficulty]) groups[difficulty] = [];
-    groups[difficulty].push(answer);
+    const responseType = answer.responseType || 'difficulty';
+    if (!groups[responseType]) groups[responseType] = [];
+    groups[responseType].push(answer);
     return groups;
   }, {});
 
-  const difficultyColors: Record<string, string> = {
-    'No difficulty': 'bg-green-100 text-green-800',
-    'Mild difficulty': 'bg-yellow-100 text-yellow-800', 
-    'Moderate difficulty': 'bg-orange-100 text-orange-800',
-    'Severe difficulty': 'bg-red-100 text-red-800',
-    'Unable': 'bg-red-200 text-red-900'
+  const responseTypeLabels: Record<string, string> = {
+    'difficulty': 'Physical Function - Difficulty',
+    'interference': 'Social Function - Interference',
+    'limitation': 'Role Function - Limitation', 
+    'severity': 'Symptoms - Severity',
+    'sleep': 'Sleep - Difficulty',
+    'agreement': 'Self-Perception - Agreement'
+  };
+
+  const responseTypeColors: Record<string, string> = {
+    'difficulty': 'bg-blue-100 text-blue-800',
+    'interference': 'bg-purple-100 text-purple-800',
+    'limitation': 'bg-indigo-100 text-indigo-800',
+    'severity': 'bg-orange-100 text-orange-800',
+    'sleep': 'bg-teal-100 text-teal-800',
+    'agreement': 'bg-green-100 text-green-800'
   };
 
   return (
@@ -305,13 +318,13 @@ export default function AdminDashResults() {
               </div>
             ) : (
               <div className="space-y-6">
-                {Object.entries(groupedAnswers).map(([difficulty, answers]) => (
-                  <div key={difficulty} className="space-y-3">
+                {Object.entries(groupedAnswers).map(([responseType, answers]) => (
+                  <div key={responseType} className="space-y-3">
                     <div className="flex items-center gap-2 mb-4">
-                      <Badge className={`${difficultyColors[difficulty] || 'bg-gray-100 text-gray-800'} text-sm px-3 py-1`}>
-                        {difficulty}
+                      <Badge className={`${responseTypeColors[responseType] || 'bg-gray-100 text-gray-800'} text-sm px-3 py-1`}>
+                        {responseTypeLabels[responseType] || responseType}
                       </Badge>
-                      <span className="text-sm text-gray-600">({answers.length} responses)</span>
+                      <span className="text-sm text-gray-600">({answers.length} question{answers.length !== 1 ? 's' : ''})</span>
                     </div>
                     
                     <div className="grid gap-3">
@@ -319,7 +332,15 @@ export default function AdminDashResults() {
                         <div key={index} className="bg-gray-50 rounded-lg p-4 border">
                           <div className="flex justify-between items-start gap-4">
                             <div className="flex-1">
-                              <p className="text-gray-900 font-medium">{answer.question}</p>
+                              <div className="flex items-start gap-2 mb-2">
+                                <span className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded font-mono">
+                                  Q{answer.questionNum}
+                                </span>
+                              </div>
+                              <p className="text-gray-900 font-medium mb-2">{answer.question}</p>
+                              <div className="text-sm text-gray-600 bg-white px-3 py-2 rounded border">
+                                <span className="font-medium">Response:</span> {answer.responseLabel}
+                              </div>
                             </div>
                             <div className="text-right">
                               <div className="text-lg font-bold text-gray-900">{answer.answer}</div>
