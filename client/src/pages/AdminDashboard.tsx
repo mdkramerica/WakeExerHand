@@ -640,17 +640,28 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                     <div>
                       <Label htmlFor="injuryType">Injury Type</Label>
                       <Select 
+                        key="new-patient-injury-select"
                         value={selectedInjuryType} 
                         onValueChange={setSelectedInjuryType}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger id="injuryType">
                           <SelectValue placeholder="Select injury type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Trigger Finger">Trigger Finger</SelectItem>
-                          <SelectItem value="Carpal Tunnel">Carpal Tunnel</SelectItem>
-                          <SelectItem value="Distal Radius Fracture">Distal Radius Fracture</SelectItem>
-                          <SelectItem value="CMC Arthroplasty">CMC Arthroplasty</SelectItem>
+                          {injuryTypes.length > 0 ? (
+                            injuryTypes.map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {type}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="Trigger Finger">Trigger Finger</SelectItem>
+                              <SelectItem value="Carpal Tunnel">Carpal Tunnel</SelectItem>
+                              <SelectItem value="Distal Radius Fracture">Distal Radius Fracture</SelectItem>
+                              <SelectItem value="CMC Arthroplasty">CMC Arthroplasty</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -693,7 +704,11 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                 />
               </div>
               
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select 
+                key="status-filter-select"
+                value={statusFilter} 
+                onValueChange={setStatusFilter}
+              >
                 <SelectTrigger 
                   className="w-48" 
                   style={{ 
@@ -885,16 +900,29 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-injury-type">Injury Type</Label>
-              <Select value={editInjuryType} onValueChange={setEditInjuryType}>
-                <SelectTrigger>
+              <Select 
+                key="edit-injury-type-select"
+                value={editInjuryType} 
+                onValueChange={setEditInjuryType}
+              >
+                <SelectTrigger id="edit-injury-type">
                   <SelectValue placeholder="Select injury type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {injuryTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
+                  {injuryTypes.length > 0 ? (
+                    injuryTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <>
+                      <SelectItem value="Trigger Finger">Trigger Finger</SelectItem>
+                      <SelectItem value="Carpal Tunnel">Carpal Tunnel</SelectItem>
+                      <SelectItem value="Distal Radius Fracture">Distal Radius Fracture</SelectItem>
+                      <SelectItem value="CMC Arthroplasty">CMC Arthroplasty</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
             </div>
