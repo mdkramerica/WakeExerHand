@@ -42,6 +42,7 @@ ExerAI is a comprehensive hand rehabilitation assessment platform designed to pr
     - Real-time hand motion tracking with confidence-based filtering (70% threshold).
     - Assessment Types: TAM (finger ROM), Kapandji (thumb opposition), Wrist (flexion/extension, radial/ulnar deviation, pronation/supination).
     - Quality Scoring: Multi-factor assessment including landmark detection and tracking stability.
+    - Instructional Video Demonstrations: Small looping video player in assessment recording interface to guide proper motion execution.
 - **Clinical Dashboard**:
     - Role-based access for clinicians, researchers, administrators.
     - De-identified patient management.

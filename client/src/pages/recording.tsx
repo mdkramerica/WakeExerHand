@@ -619,6 +619,35 @@ export default function Recording() {
                 <p className="text-gray-700 text-sm leading-relaxed">{assessment.instructions}</p>
               </div>
 
+              {/* Instructional Video Demo */}
+              {assessment?.videoUrl && (
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                    <Lightbulb className="w-4 h-4 text-yellow-600 mr-2" />
+                    Motion Demonstration
+                  </h4>
+                  <div className="relative">
+                    <video
+                      src={assessment.videoUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-32 object-cover rounded-lg bg-gray-900"
+                      style={{ aspectRatio: '4/3' }}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                      DEMO
+                    </div>
+                  </div>
+                  <p className="text-gray-600 text-xs mt-2 text-center">
+                    Watch this demonstration to understand the proper motion
+                  </p>
+                </div>
+              )}
+
               {/* Hand Status - Simplified */}
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
