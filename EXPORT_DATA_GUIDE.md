@@ -111,10 +111,15 @@ Each file is named `[ACCESS_CODE]_data.json` and contains:
 - Registration information
 
 **Assessment History:**
-- Complete motion tracking data
-- Range of motion measurements
-- DASH survey responses
+- Complete motion tracking data (romData JSON with full MediaPipe landmark data)
+- Individual finger ROM measurements (index, middle, ring, pinky fingers)
+- Detailed joint angle measurements (MCP, PIP, DIP joints for each finger)
+- Maximum joint angles and ranges
+- Wrist measurements (flexion, extension, maximum ranges)
+- Complete DASH survey responses (all 30 questions with individual answers)
+- DASH scores and clinical interpretations
 - Quality scores and confidence metrics
+- Exercise repetition data and patterns
 - Timestamp information for each assessment
 
 **Performance Statistics:**
@@ -137,15 +142,58 @@ Each file is named `[ACCESS_CODE]_data.json` and contains:
       "id": 156,
       "assessmentId": 2,
       "completedAt": "2025-08-05T14:22:15.000Z",
-      "romData": { /* motion tracking data */ },
-      "repetitionData": { /* repetition counts */ },
-      "qualityScore": 85,
-      "tamScore": 245,
-      "kapandjiScore": 8,
-      "wristFlexion": 65,
-      "wristExtension": 72,
       "handType": "right",
-      "isCompleted": true
+      "isCompleted": true,
+      
+      "romData": { 
+        "landmarks": [...], 
+        "confidence": 0.89,
+        "frameData": [...] 
+      },
+      "repetitionData": { 
+        "count": 12, 
+        "timing": [...],
+        "patterns": [...] 
+      },
+      "qualityScore": 85,
+      
+      "totalActiveRom": 245,
+      "tamScore": 245,
+      
+      "indexFingerRom": 62.5,
+      "middleFingerRom": 78.3,
+      "ringFingerRom": 71.2,
+      "pinkyFingerRom": 65.8,
+      
+      "maxMcpAngle": 85.4,
+      "maxPipAngle": 92.1,
+      "maxDipAngle": 68.7,
+      
+      "middleFingerMcp": 78.3,
+      "middleFingerPip": 89.2,
+      "middleFingerDip": 65.1,
+      "ringFingerMcp": 71.2,
+      "ringFingerPip": 82.4,
+      "ringFingerDip": 58.9,
+      "pinkyFingerMcp": 65.8,
+      "pinkyFingerPip": 79.1,
+      "pinkyFingerDip": 52.3,
+      
+      "wristFlexionAngle": 65.2,
+      "wristExtensionAngle": 72.8,
+      "maxWristFlexion": 68.5,
+      "maxWristExtension": 75.1,
+      
+      "dashScore": 28.5,
+      "dashResponses": {
+        "q1": 2,
+        "q2": 1,
+        "q3": 3,
+        "responses": [...]
+      },
+      "kapandjiScore": 8,
+      
+      "shareToken": "abc123def456"
     }
   ],
   "statistics": {

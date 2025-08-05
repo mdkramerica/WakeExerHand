@@ -529,18 +529,57 @@ export class DatabaseStorage implements IStorage {
         createdAt: user.createdAt
       },
       assessments: activeAssessments.map(assessment => ({
+        // Basic assessment metadata
         id: assessment.id,
         assessmentId: assessment.assessmentId,
         completedAt: assessment.completedAt,
-        romData: assessment.romData,
-        repetitionData: assessment.repetitionData,
-        qualityScore: assessment.qualityScore,
-        tamScore: assessment.totalActiveRom,
-        kapandjiScore: assessment.dashScore, // Using dashScore field as Kapandji score
-        wristFlexion: assessment.wristFlexionAngle,
-        wristExtension: assessment.wristExtensionAngle,
         handType: assessment.handType,
-        isCompleted: assessment.isCompleted // Include completion status for verification
+        isCompleted: assessment.isCompleted,
+        
+        // Complete motion tracking data
+        romData: assessment.romData, // Full ROM JSON data
+        repetitionData: assessment.repetitionData, // Full repetition JSON data
+        qualityScore: assessment.qualityScore,
+        
+        // Total Active Motion (TAM) measurements
+        totalActiveRom: assessment.totalActiveRom,
+        tamScore: assessment.totalActiveRom,
+        
+        // Individual finger ROM measurements
+        indexFingerRom: assessment.indexFingerRom,
+        middleFingerRom: assessment.middleFingerRom,
+        ringFingerRom: assessment.ringFingerRom,
+        pinkyFingerRom: assessment.pinkyFingerRom,
+        
+        // Maximum joint angles
+        maxMcpAngle: assessment.maxMcpAngle,
+        maxPipAngle: assessment.maxPipAngle,
+        maxDipAngle: assessment.maxDipAngle,
+        
+        // Individual finger joint angles
+        middleFingerMcp: assessment.middleFingerMcp,
+        middleFingerPip: assessment.middleFingerPip,
+        middleFingerDip: assessment.middleFingerDip,
+        ringFingerMcp: assessment.ringFingerMcp,
+        ringFingerPip: assessment.ringFingerPip,
+        ringFingerDip: assessment.ringFingerDip,
+        pinkyFingerMcp: assessment.pinkyFingerMcp,
+        pinkyFingerPip: assessment.pinkyFingerPip,
+        pinkyFingerDip: assessment.pinkyFingerDip,
+        
+        // Wrist measurements
+        wristFlexionAngle: assessment.wristFlexionAngle,
+        wristExtensionAngle: assessment.wristExtensionAngle,
+        maxWristFlexion: assessment.maxWristFlexion,
+        maxWristExtension: assessment.maxWristExtension,
+        
+        // DASH assessment data
+        dashScore: assessment.dashScore,
+        dashResponses: assessment.responses, // Complete DASH survey responses
+        kapandjiScore: assessment.dashScore, // Legacy field mapping
+        
+        // Metadata for analysis
+        shareToken: assessment.shareToken
       }))
     };
   }
