@@ -298,14 +298,14 @@ export default function Recording() {
       
       // Update session maximums for deviation
       if (data.wristDeviation.radialDeviation > sessionMaxDeviation.maxRadialDeviation) {
-        setSessionMaxDeviation(prev => ({
+        setSessionMaxDeviation((prev: any) => ({
           ...prev,
           maxRadialDeviation: data.wristDeviation.radialDeviation
         }));
       }
       
       if (data.wristDeviation.ulnarDeviation > sessionMaxDeviation.maxUlnarDeviation) {
-        setSessionMaxDeviation(prev => ({
+        setSessionMaxDeviation((prev: any) => ({
           ...prev,
           maxUlnarDeviation: data.wristDeviation.ulnarDeviation
         }));
@@ -613,12 +613,6 @@ export default function Recording() {
 
             {/* Side Panel */}
             <div className="space-y-4">
-              {/* Assessment Info */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-bold text-gray-900 text-lg mb-2">{assessment.name}</h3>
-                <p className="text-gray-700 text-sm leading-relaxed">{assessment.instructions}</p>
-              </div>
-
               {/* Instructional Video Demo */}
               {assessment?.videoUrl && (
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -633,20 +627,37 @@ export default function Recording() {
                       loop
                       muted
                       playsInline
-                      className="w-full h-32 object-cover rounded-lg bg-gray-900"
+                      preload="metadata"
+                      className="w-full h-32 object-cover rounded-lg bg-gray-900 border"
                       style={{ aspectRatio: '4/3' }}
+                      onError={(e) => {
+                        console.log('Video load error:', e);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      onLoadedData={() => {
+                        console.log('Video loaded successfully:', assessment.videoUrl);
+                      }}
                     >
                       Your browser does not support the video tag.
                     </video>
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-medium">
                       DEMO
                     </div>
+                    <div className="absolute top-2 left-2 bg-yellow-500 bg-opacity-90 text-white text-xs px-2 py-1 rounded font-medium">
+                      FOLLOW ALONG
+                    </div>
                   </div>
-                  <p className="text-gray-600 text-xs mt-2 text-center">
+                  <p className="text-gray-600 text-xs mt-2 text-center font-medium">
                     Watch this demonstration to understand the proper motion
                   </p>
                 </div>
               )}
+
+              {/* Assessment Info */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 text-lg mb-2">{assessment.name}</h3>
+                <p className="text-gray-700 text-sm leading-relaxed">{assessment.instructions}</p>
+              </div>
 
               {/* Hand Status - Simplified */}
               <div className="bg-white border border-gray-200 rounded-lg p-4">
