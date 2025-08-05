@@ -3025,6 +3025,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               categories.forEach(category => {
                 const categoryQuestions = dashQuestionsWithCategories.filter(q => q.category === category);
+                
                 if (categoryQuestions.length > 0) {
                   html += '<div class="category-section"><h3 class="category-header">' + category + '</h3>';
                   
@@ -3062,8 +3063,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const printableHtml = htmlContent.replace(
         '</head>',
         `<style media="print">
-          @page { margin: 0.5in; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { 
+            margin: 0.5in; 
+            size: A4;
+          }
+          body { 
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact; 
+            font-size: 11px;
+            line-height: 1.4;
+          }
+          .category-section {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          .response-item {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 8px;
+            padding: 10px;
+          }
+          .category-header {
+            page-break-after: avoid;
+          }
+          .footer {
+            page-break-before: avoid;
+          }
+          /* Ensure all content is visible */
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
+          }
         </style>
         <script>
           window.onload = function() {
