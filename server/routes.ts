@@ -2970,7 +2970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { id: 27, question: 'Weakness in your arm, shoulder or hand', category: 'Symptoms' },
                 { id: 28, question: 'Stiffness in your arm, shoulder or hand', category: 'Symptoms' },
                 { id: 29, question: 'During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?', category: 'Symptoms' },
-                { id: 30, question: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem', category: 'Social Function' }
+                { id: 30, question: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem', category: 'Self-Perception' }
               ];
               
               // If we have stored responses, use them; otherwise reconstruct from DASH score
@@ -3019,12 +3019,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.log('PDF Generation: Generated all 30 responses from DASH score');
               }
               
-              // Group by category and generate HTML
-              const categories = ['Physical Function', 'Social Function', 'Role Function', 'Symptoms'];
+              // Display questions sequentially (1-30) with logical category organization
+              // Process categories in this order: Physical Function, Social Function, Role Function, Symptoms, Self-Perception
+              const categoryOrder = ['Physical Function', 'Social Function', 'Role Function', 'Symptoms', 'Self-Perception'];
               let html = '';
               
-              categories.forEach(category => {
-                const categoryQuestions = dashQuestionsWithCategories.filter(q => q.category === category);
+              categoryOrder.forEach(category => {
+                const categoryQuestions = dashQuestionsWithCategories
+                  .filter(q => q.category === category)
+                  .sort((a, b) => a.id - b.id); // Sort by question number within category
                 
                 if (categoryQuestions.length > 0) {
                   html += '<div class="category-section"><h3 class="category-header">' + category + '</h3>';
