@@ -2703,7 +2703,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const difficultyLabels = ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"];
+
+      
+
       
       // Generate HTML content for PDF
       const htmlContent = `
@@ -2941,37 +2943,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ${(() => {
               // Complete 30-question DASH questionnaire with categories
               const dashQuestionsWithCategories = [
-                { id: 1, question: 'Open a tight or new jar', category: 'Physical Function' },
-                { id: 2, question: 'Write', category: 'Physical Function' },
-                { id: 3, question: 'Turn a key', category: 'Physical Function' },
-                { id: 4, question: 'Prepare a meal', category: 'Physical Function' },
-                { id: 5, question: 'Push open a heavy door', category: 'Physical Function' },
-                { id: 6, question: 'Place an object on a shelf above your head', category: 'Physical Function' },
-                { id: 7, question: 'Do heavy household chores (e.g., wash walls, wash floors)', category: 'Physical Function' },
-                { id: 8, question: 'Garden or do yard work', category: 'Physical Function' },
-                { id: 9, question: 'Make a bed', category: 'Physical Function' },
-                { id: 10, question: 'Carry a shopping bag or briefcase', category: 'Physical Function' },
-                { id: 11, question: 'Carry a heavy object (over 10 lbs)', category: 'Physical Function' },
-                { id: 12, question: 'Change a lightbulb overhead', category: 'Physical Function' },
-                { id: 13, question: 'Wash or blow dry your hair', category: 'Physical Function' },
-                { id: 14, question: 'Wash your back', category: 'Physical Function' },
-                { id: 15, question: 'Put on a pullover sweater', category: 'Physical Function' },
-                { id: 16, question: 'Use a knife to cut food', category: 'Physical Function' },
-                { id: 17, question: 'Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)', category: 'Physical Function' },
-                { id: 18, question: 'Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)', category: 'Physical Function' },
-                { id: 19, question: 'Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)', category: 'Physical Function' },
-                { id: 20, question: 'Manage transportation needs (getting from one place to another)', category: 'Physical Function' },
-                { id: 21, question: 'Sexual activities', category: 'Physical Function' },
-                { id: 22, question: 'During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?', category: 'Social Function' },
-                { id: 23, question: 'During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?', category: 'Role Function' },
-                { id: 24, question: 'Arm, shoulder or hand pain', category: 'Symptoms' },
-                { id: 25, question: 'Arm, shoulder or hand pain when you performed any specific activity', category: 'Symptoms' },
-                { id: 26, question: 'Tingling (pins and needles) in your arm, shoulder or hand', category: 'Symptoms' },
-                { id: 27, question: 'Weakness in your arm, shoulder or hand', category: 'Symptoms' },
-                { id: 28, question: 'Stiffness in your arm, shoulder or hand', category: 'Symptoms' },
-                { id: 29, question: 'During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?', category: 'Symptoms' },
-                { id: 30, question: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem', category: 'Self-Perception' }
+                { id: 1, question: 'Open a tight or new jar', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 2, question: 'Write', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 3, question: 'Turn a key', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 4, question: 'Prepare a meal', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 5, question: 'Push open a heavy door', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 6, question: 'Place an object on a shelf above your head', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 7, question: 'Do heavy household chores (e.g., wash walls, wash floors)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 8, question: 'Garden or do yard work', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 9, question: 'Make a bed', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 10, question: 'Carry a shopping bag or briefcase', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 11, question: 'Carry a heavy object (over 10 lbs)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 12, question: 'Change a lightbulb overhead', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 13, question: 'Wash or blow dry your hair', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 14, question: 'Wash your back', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 15, question: 'Put on a pullover sweater', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 16, question: 'Use a knife to cut food', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 17, question: 'Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 18, question: 'Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 19, question: 'Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 20, question: 'Manage transportation needs (getting from one place to another)', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 21, question: 'Sexual activities', category: 'Physical Function', responseType: 'difficulty' },
+                { id: 22, question: 'During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?', category: 'Social Function', responseType: 'interference' },
+                { id: 23, question: 'During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?', category: 'Role Function', responseType: 'limitation' },
+                { id: 24, question: 'Arm, shoulder or hand pain', category: 'Symptoms', responseType: 'severity' },
+                { id: 25, question: 'Arm, shoulder or hand pain when you performed any specific activity', category: 'Symptoms', responseType: 'severity' },
+                { id: 26, question: 'Tingling (pins and needles) in your arm, shoulder or hand', category: 'Symptoms', responseType: 'severity' },
+                { id: 27, question: 'Weakness in your arm, shoulder or hand', category: 'Symptoms', responseType: 'severity' },
+                { id: 28, question: 'Stiffness in your arm, shoulder or hand', category: 'Symptoms', responseType: 'severity' },
+                { id: 29, question: 'During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?', category: 'Symptoms', responseType: 'sleep' },
+                { id: 30, question: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem', category: 'Self-Perception', responseType: 'agreement' }
               ];
+
+              // Helper function to get the correct label for a response
+              const getResponseLabel = (questionId, responseValue) => {
+                const question = dashQuestionsWithCategories.find(q => q.id === questionId);
+                if (!question || !question.responseType) return "Unknown";
+                
+                const RESPONSE_LABELS = {
+                  difficulty: ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"],
+                  interference: ["Not at all", "Slightly", "Moderately", "Quite a bit", "Extremely"],
+                  limitation: ["Not limited at all", "Slightly limited", "Moderately limited", "Very limited", "Unable"],
+                  severity: ["None", "Mild", "Moderate", "Severe", "Extreme"],
+                  sleep: ["No difficulty", "Mild difficulty", "Moderate difficulty", "Severe difficulty", "So much difficulty that I can't sleep"],
+                  agreement: ["Strongly disagree", "Disagree", "Neither agree nor disagree", "Agree", "Strongly agree"]
+                };
+                
+                const labels = RESPONSE_LABELS[question.responseType];
+                return labels ? labels[responseValue - 1] || "Unknown" : "Unknown";
+              };
               
               // If we have stored responses, use them; otherwise reconstruct from DASH score
               let fullResponses: Record<number, number> = {};
@@ -3034,13 +3054,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   
                   categoryQuestions.forEach(q => {
                     const responseValue = fullResponses[q.id] || 1;
-                    const difficultyLabel = difficultyLabels[responseValue - 1] || 'No Difficulty';
+                    const responseLabel = getResponseLabel(q.id, responseValue);
                     
                     html += '<div class="response-item difficulty-' + (responseValue - 1) + '">';
                     html += '<div class="question-number">Q' + q.id + '</div>';
                     html += '<div class="question-content">';
                     html += '<div class="question-text">' + q.question + '</div>';
-                    html += '<div class="difficulty-badge">' + difficultyLabel + '</div>';
+                    html += '<div class="difficulty-badge">' + responseLabel + '</div>';
                     html += '</div>';
                     html += '</div>';
                   });
