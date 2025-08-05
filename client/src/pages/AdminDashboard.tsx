@@ -21,6 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { PatientDetailModal } from "@/components/patient-detail-modal";
+import { IsolatedSelect } from "@/components/isolated-select";
 import exerLogoPath from "@assets/ExerLogoColor_1750399504621.png";
 import {
   Users,
@@ -67,8 +68,10 @@ interface Patient {
   createdAt: string;
   lastVisit: string | null;
   surgeryDate: string | null;
-  postOpDay: number | null;
-  complianceRate: number;
+  postOpDay: number;
+  daysActive: number;
+  assessmentCompletionRate: number;
+  daysActiveRate: number;
 }
 
 export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
@@ -639,20 +642,18 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="injuryType">Injury Type</Label>
-                      <Select 
-                        value={selectedInjuryType} 
+                      <IsolatedSelect
+                        id="injuryType"
+                        value={selectedInjuryType}
                         onValueChange={setSelectedInjuryType}
-                      >
-                        <SelectTrigger id="injuryType">
-                          <SelectValue placeholder="Select injury type" />
-                        </SelectTrigger>
-                        <SelectContent className="z-50">
-                          <SelectItem value="Trigger Finger">Trigger Finger</SelectItem>
-                          <SelectItem value="Carpal Tunnel">Carpal Tunnel</SelectItem>
-                          <SelectItem value="Distal Radius Fracture">Distal Radius Fracture</SelectItem>
-                          <SelectItem value="CMC Arthroplasty">CMC Arthroplasty</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        placeholder="Select injury type"
+                        options={[
+                          { value: "Trigger Finger", label: "Trigger Finger" },
+                          { value: "Carpal Tunnel", label: "Carpal Tunnel" },
+                          { value: "Distal Radius Fracture", label: "Distal Radius Fracture" },
+                          { value: "CMC Arthroplasty", label: "CMC Arthroplasty" }
+                        ]}
+                      />
                     </div>
                     
                     <div>
@@ -693,28 +694,21 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                 />
               </div>
               
-              <Select 
-                value={statusFilter} 
-                onValueChange={setStatusFilter}
-              >
-                <SelectTrigger 
-                  className="w-48" 
-                  style={{ 
-                    backgroundColor: '#FFFFFF', 
-                    borderColor: '#D1D5DB', 
-                    color: '#1F2937' 
-                  }}
-                >
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent style={{ backgroundColor: '#FFFFFF', borderColor: '#D1D5DB' }}>
-                  <SelectItem value="all" style={{ backgroundColor: '#FFFFFF', color: '#1F2937' }}>All Status</SelectItem>
-                  <SelectItem value="active" style={{ backgroundColor: '#FFFFFF', color: '#1F2937' }}>Active</SelectItem>
-                  <SelectItem value="at-risk" style={{ backgroundColor: '#FFFFFF', color: '#1F2937' }}>At Risk</SelectItem>
-                  <SelectItem value="non-compliant" style={{ backgroundColor: '#FFFFFF', color: '#1F2937' }}>Non-Compliant</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 z-10" />
+                <IsolatedSelect
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                  placeholder="Filter by status"
+                  className="w-48 pl-10"
+                  options={[
+                    { value: "all", label: "All Status" },
+                    { value: "active", label: "Active" },
+                    { value: "at-risk", label: "At Risk" },
+                    { value: "non-compliant", label: "Non-Compliant" }
+                  ]}
+                />
+              </div>
             </div>
           </CardHeader>
           
@@ -888,20 +882,18 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-injury-type">Injury Type</Label>
-              <Select 
-                value={editInjuryType} 
+              <IsolatedSelect
+                id="edit-injury-type"
+                value={editInjuryType}
                 onValueChange={setEditInjuryType}
-              >
-                <SelectTrigger id="edit-injury-type">
-                  <SelectValue placeholder="Select injury type" />
-                </SelectTrigger>
-                <SelectContent className="z-50">
-                  <SelectItem value="Trigger Finger">Trigger Finger</SelectItem>
-                  <SelectItem value="Carpal Tunnel">Carpal Tunnel</SelectItem>
-                  <SelectItem value="Distal Radius Fracture">Distal Radius Fracture</SelectItem>
-                  <SelectItem value="CMC Arthroplasty">CMC Arthroplasty</SelectItem>
-                </SelectContent>
-              </Select>
+                placeholder="Select injury type"
+                options={[
+                  { value: "Trigger Finger", label: "Trigger Finger" },
+                  { value: "Carpal Tunnel", label: "Carpal Tunnel" },
+                  { value: "Distal Radius Fracture", label: "Distal Radius Fracture" },
+                  { value: "CMC Arthroplasty", label: "CMC Arthroplasty" }
+                ]}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="edit-surgery-date">Surgery Date (Optional)</Label>
