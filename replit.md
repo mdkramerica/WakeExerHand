@@ -48,6 +48,12 @@ ExerAI is a comprehensive hand rehabilitation assessment platform designed to pr
     - Analytics Suite: Longitudinal analysis, predictive modeling, outcome tracking, compliance metrics.
     - DASH Progress Tracking: Integrated longitudinal DASH score visualization with trend analysis, clinical interpretation, and improvement/decline indicators within patient detail modals.
     - Study Management for multi-cohort research.
+- **Data Export System**:
+    - ZIP-based export functionality with structured file organization.
+    - Comprehensive data package including system summary, patient overview, individual patient files, and CSV format.
+    - Soft-deletion filtering ensures data integrity in exports.
+    - Complete audit logging for compliance and security tracking.
+    - Professional compression and organized folder structure for clinical teams.
 - **Data Processing**:
     - Motion Replay: Frame-by-frame visualization with interactive controls.
     - ROM Calculations: Precise 3D vector mathematics.
