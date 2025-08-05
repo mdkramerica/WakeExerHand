@@ -18,45 +18,70 @@ import {
 import { PatientHeader } from '@/components/patient-header';
 
 const DASH_QUESTIONS = [
-  { id: 1, question: "Open a tight or new jar", category: "Physical Function" },
-  { id: 2, question: "Write", category: "Physical Function" },
-  { id: 3, question: "Turn a key", category: "Physical Function" },
-  { id: 4, question: "Prepare a meal", category: "Physical Function" },
-  { id: 5, question: "Push open a heavy door", category: "Physical Function" },
-  { id: 6, question: "Place an object on a shelf above your head", category: "Physical Function" },
-  { id: 7, question: "Do heavy household chores (e.g., wash walls, wash floors)", category: "Physical Function" },
-  { id: 8, question: "Garden or do yard work", category: "Physical Function" },
-  { id: 9, question: "Make a bed", category: "Physical Function" },
-  { id: 10, question: "Carry a shopping bag or briefcase", category: "Physical Function" },
-  { id: 11, question: "Carry a heavy object (over 10 lbs)", category: "Physical Function" },
-  { id: 12, question: "Change a lightbulb overhead", category: "Physical Function" },
-  { id: 13, question: "Wash or blow dry your hair", category: "Physical Function" },
-  { id: 14, question: "Wash your back", category: "Physical Function" },
-  { id: 15, question: "Put on a pullover sweater", category: "Physical Function" },
-  { id: 16, question: "Use a knife to cut food", category: "Physical Function" },
-  { id: 17, question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)", category: "Physical Function" },
-  { id: 18, question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)", category: "Physical Function" },
-  { id: 19, question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)", category: "Physical Function" },
-  { id: 20, question: "Manage transportation needs (getting from one place to another)", category: "Physical Function" },
-  { id: 21, question: "Sexual activities", category: "Physical Function" },
-  { id: 22, question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?", category: "Social Function" },
-  { id: 23, question: "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?", category: "Role Function" },
-  { id: 24, question: "Arm, shoulder or hand pain", category: "Symptoms" },
-  { id: 25, question: "Arm, shoulder or hand pain when you performed any specific activity", category: "Symptoms" },
-  { id: 26, question: "Tingling (pins and needles) in your arm, shoulder or hand", category: "Symptoms" },
-  { id: 27, question: "Weakness in your arm, shoulder or hand", category: "Symptoms" },
-  { id: 28, question: "Stiffness in your arm, shoulder or hand", category: "Symptoms" },
-  { id: 29, question: "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?", category: "Symptoms" },
-  { id: 30, question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem", category: "Social Function" }
+  { id: 1, question: "Open a tight or new jar.", category: "Physical Function", responseType: "difficulty" },
+  { id: 2, question: "Write.", category: "Physical Function", responseType: "difficulty" },
+  { id: 3, question: "Turn a key.", category: "Physical Function", responseType: "difficulty" },
+  { id: 4, question: "Prepare a meal.", category: "Physical Function", responseType: "difficulty" },
+  { id: 5, question: "Push open a heavy door.", category: "Physical Function", responseType: "difficulty" },
+  { id: 6, question: "Place an object on a shelf above your head.", category: "Physical Function", responseType: "difficulty" },
+  { id: 7, question: "Do heavy household chores (e.g., wash walls, wash floors).", category: "Physical Function", responseType: "difficulty" },
+  { id: 8, question: "Garden or do yard work.", category: "Physical Function", responseType: "difficulty" },
+  { id: 9, question: "Make a bed.", category: "Physical Function", responseType: "difficulty" },
+  { id: 10, question: "Carry a shopping bag or briefcase.", category: "Physical Function", responseType: "difficulty" },
+  { id: 11, question: "Carry a heavy object (over 10 lbs).", category: "Physical Function", responseType: "difficulty" },
+  { id: 12, question: "Change a lightbulb overhead.", category: "Physical Function", responseType: "difficulty" },
+  { id: 13, question: "Wash or blow dry your hair.", category: "Physical Function", responseType: "difficulty" },
+  { id: 14, question: "Wash your back.", category: "Physical Function", responseType: "difficulty" },
+  { id: 15, question: "Put on a pullover sweater.", category: "Physical Function", responseType: "difficulty" },
+  { id: 16, question: "Use a knife to cut food.", category: "Physical Function", responseType: "difficulty" },
+  { id: 17, question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.).", category: "Physical Function", responseType: "difficulty" },
+  { id: 18, question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.).", category: "Physical Function", responseType: "difficulty" },
+  { id: 19, question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.).", category: "Physical Function", responseType: "difficulty" },
+  { id: 20, question: "Manage transportation needs (getting from one place to another).", category: "Physical Function", responseType: "difficulty" },
+  { id: 21, question: "Sexual activities.", category: "Physical Function", responseType: "difficulty" },
+  { id: 22, question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbours or groups?", category: "Social Function", responseType: "interference" },
+  { id: 23, question: "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?", category: "Role Function", responseType: "limitation" },
+  { id: 24, question: "Arm, shoulder or hand pain.", category: "Symptoms", responseType: "severity" },
+  { id: 25, question: "Arm, shoulder or hand pain when you performed any specific activity.", category: "Symptoms", responseType: "severity" },
+  { id: 26, question: "Tingling (pins and needles) in your arm, shoulder or hand.", category: "Symptoms", responseType: "severity" },
+  { id: 27, question: "Weakness in your arm, shoulder or hand.", category: "Symptoms", responseType: "severity" },
+  { id: 28, question: "Stiffness in your arm, shoulder or hand.", category: "Symptoms", responseType: "severity" },
+  { id: 29, question: "During the past week, how much difficulty have you had sleeping because of the pain in your arm, shoulder or hand?", category: "Sleep Impact", responseType: "sleep" },
+  { id: 30, question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem.", category: "Self-Perception", responseType: "agreement" }
 ];
 
-const RESPONSE_OPTIONS = [
-  { value: 1, label: "No difficulty", description: "Not limited at all", color: "bg-green-100 text-green-800" },
-  { value: 2, label: "Mild difficulty", description: "Slightly limited", color: "bg-yellow-100 text-yellow-800" },
-  { value: 3, label: "Moderate difficulty", description: "Moderately limited", color: "bg-orange-100 text-orange-800" },
-  { value: 4, label: "Severe difficulty", description: "Very limited", color: "bg-red-100 text-red-800" },
-  { value: 5, label: "Unable", description: "Cannot perform", color: "bg-red-200 text-red-900" }
-];
+// Official DASH response labels by type
+const RESPONSE_LABELS = {
+  difficulty: ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"],
+  interference: ["Not at all", "Slightly", "Moderately", "Quite a bit", "Extremely"],
+  limitation: ["Not limited at all", "Slightly limited", "Moderately limited", "Very limited", "Unable"],
+  severity: ["None", "Mild", "Moderate", "Severe", "Extreme"],
+  sleep: ["No difficulty", "Mild difficulty", "Moderate difficulty", "Severe difficulty", "So much difficulty that I can't sleep"],
+  agreement: ["Strongly disagree", "Disagree", "Neither agree nor disagree", "Agree", "Strongly agree"]
+};
+
+// Helper function to get the correct label and color for a response
+const getResponseDetails = (questionId: number, responseValue: number) => {
+  const question = DASH_QUESTIONS.find(q => q.id === questionId);
+  if (!question || !question.responseType) return { label: "Unknown", color: "bg-gray-100 text-gray-800" };
+  
+  const labels = RESPONSE_LABELS[question.responseType as keyof typeof RESPONSE_LABELS];
+  const label = labels ? labels[responseValue - 1] || "Unknown" : "Unknown";
+  
+  // Color scheme based on severity (1=best, 5=worst)
+  const colors = [
+    "bg-green-100 text-green-800",
+    "bg-yellow-100 text-yellow-800", 
+    "bg-orange-100 text-orange-800",
+    "bg-red-100 text-red-800",
+    "bg-red-200 text-red-900"
+  ];
+  
+  return {
+    label,
+    color: colors[responseValue - 1] || "bg-gray-100 text-gray-800"
+  };
+};
 
 const getDashScoreInterpretation = (score: number) => {
   if (score <= 15) return { level: "Minimal", color: "text-green-600", description: "Little to no disability", bgColor: "bg-green-50" };
@@ -268,7 +293,7 @@ export default function DashResults() {
                         const response = parsedResponses[question.id];
                         if (!response) return null;
                         
-                        const responseOption = RESPONSE_OPTIONS.find(opt => opt.value === response);
+                        const responseDetails = getResponseDetails(question.id, response);
                         
                         return (
                           <div key={question.id} className="border rounded-lg p-4 bg-gray-50">
@@ -278,12 +303,9 @@ export default function DashResults() {
                                   {question.id}. {question.question}
                                 </p>
                                 <div className="flex items-center gap-2">
-                                  <Badge className={responseOption?.color}>
-                                    {responseOption?.label}
+                                  <Badge className={responseDetails.color}>
+                                    {responseDetails.label}
                                   </Badge>
-                                  <span className="text-sm text-gray-600">
-                                    {responseOption?.description}
-                                  </span>
                                 </div>
                               </div>
                               <div className="text-right">

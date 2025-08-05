@@ -6,47 +6,58 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, FileText, CheckCircle, Info } from 'lucide-react';
 import { PatientHeader } from '@/components/patient-header';
 
-// DASH questions - these are the standard questions used
+// Official DASH questions with response types
 const DASH_QUESTIONS = [
-  "Open a tight or new jar",
-  "Write",
-  "Turn a key",
-  "Prepare a meal",
-  "Push open a heavy door",
-  "Place an object on a shelf above your head",
-  "Do heavy household chores (e.g., wash walls, floors)",
-  "Garden or do yard work",
-  "Make a bed",
-  "Carry a shopping bag or briefcase",
-  "Carry a heavy object (over 10 lbs)",
-  "Change a light bulb overhead",
-  "Wash or blow dry your hair",
-  "Wash your back",
-  "Put on a pullover sweater",
-  "Use a knife to cut food",
-  "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)",
-  "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)",
-  "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)",
-  "Manage transportation needs (getting from one place to another)",
-  "Sexual activities",
-  "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?",
-  "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?",
-  "Arm, shoulder or hand pain",
-  "Arm, shoulder or hand pain when you performed any specific activity",
-  "Tingling (pins and needles) in your arm, shoulder or hand",
-  "Weakness in your arm, shoulder or hand",
-  "Stiffness in your arm, shoulder or hand",
-  "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?",
-  "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem"
+  { id: 1, question: "Open a tight or new jar.", responseType: "difficulty" },
+  { id: 2, question: "Write.", responseType: "difficulty" },
+  { id: 3, question: "Turn a key.", responseType: "difficulty" },
+  { id: 4, question: "Prepare a meal.", responseType: "difficulty" },
+  { id: 5, question: "Push open a heavy door.", responseType: "difficulty" },
+  { id: 6, question: "Place an object on a shelf above your head.", responseType: "difficulty" },
+  { id: 7, question: "Do heavy household chores (e.g., wash walls, wash floors).", responseType: "difficulty" },
+  { id: 8, question: "Garden or do yard work.", responseType: "difficulty" },
+  { id: 9, question: "Make a bed.", responseType: "difficulty" },
+  { id: 10, question: "Carry a shopping bag or briefcase.", responseType: "difficulty" },
+  { id: 11, question: "Carry a heavy object (over 10 lbs).", responseType: "difficulty" },
+  { id: 12, question: "Change a lightbulb overhead.", responseType: "difficulty" },
+  { id: 13, question: "Wash or blow dry your hair.", responseType: "difficulty" },
+  { id: 14, question: "Wash your back.", responseType: "difficulty" },
+  { id: 15, question: "Put on a pullover sweater.", responseType: "difficulty" },
+  { id: 16, question: "Use a knife to cut food.", responseType: "difficulty" },
+  { id: 17, question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.).", responseType: "difficulty" },
+  { id: 18, question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.).", responseType: "difficulty" },
+  { id: 19, question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.).", responseType: "difficulty" },
+  { id: 20, question: "Manage transportation needs (getting from one place to another).", responseType: "difficulty" },
+  { id: 21, question: "Sexual activities.", responseType: "difficulty" },
+  { id: 22, question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbours or groups?", responseType: "interference" },
+  { id: 23, question: "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?", responseType: "limitation" },
+  { id: 24, question: "Arm, shoulder or hand pain.", responseType: "severity" },
+  { id: 25, question: "Arm, shoulder or hand pain when you performed any specific activity.", responseType: "severity" },
+  { id: 26, question: "Tingling (pins and needles) in your arm, shoulder or hand.", responseType: "severity" },
+  { id: 27, question: "Weakness in your arm, shoulder or hand.", responseType: "severity" },
+  { id: 28, question: "Stiffness in your arm, shoulder or hand.", responseType: "severity" },
+  { id: 29, question: "During the past week, how much difficulty have you had sleeping because of the pain in your arm, shoulder or hand?", responseType: "sleep" },
+  { id: 30, question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem.", responseType: "agreement" }
 ];
 
-const DIFFICULTY_LABELS = [
-  "No Difficulty",
-  "Mild Difficulty", 
-  "Moderate Difficulty",
-  "Severe Difficulty",
-  "Unable"
-];
+// Official DASH response labels by type
+const RESPONSE_LABELS = {
+  difficulty: ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"],
+  interference: ["Not at all", "Slightly", "Moderately", "Quite a bit", "Extremely"],
+  limitation: ["Not limited at all", "Slightly limited", "Moderately limited", "Very limited", "Unable"],
+  severity: ["None", "Mild", "Moderate", "Severe", "Extreme"],
+  sleep: ["No difficulty", "Mild difficulty", "Moderate difficulty", "Severe difficulty", "So much difficulty that I can't sleep"],
+  agreement: ["Strongly disagree", "Disagree", "Neither agree nor disagree", "Agree", "Strongly agree"]
+};
+
+// Helper function to get the correct label for a response
+const getResponseLabel = (questionId: number, responseValue: number) => {
+  const question = DASH_QUESTIONS.find(q => q.id === questionId);
+  if (!question || !question.responseType) return "Unknown";
+  
+  const labels = RESPONSE_LABELS[question.responseType as keyof typeof RESPONSE_LABELS];
+  return labels ? labels[responseValue - 1] || "Unknown" : "Unknown";
+};
 
 export default function PatientDashAnswers() {
   const { userCode, assessmentId } = useParams<{ userCode: string; assessmentId: string }>();
@@ -132,31 +143,33 @@ export default function PatientDashAnswers() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {DASH_QUESTIONS.map((question, index) => {
-                      const questionNum = index + 1;
+                    {DASH_QUESTIONS.map((questionData) => {
+                      const questionNum = questionData.id;
                       // Handle both response formats: "q1" format and "1" format
                       const response = dashResponses[`q${questionNum}`] || dashResponses[questionNum.toString()];
                       const responseValue = parseInt(response) || 0;
+                      const responseLabel = responseValue > 0 ? getResponseLabel(questionNum, responseValue) : 'No Response';
                       
                       return (
                         <div key={questionNum} className="border-b border-gray-200 pb-4">
                           <div className="flex justify-between items-start gap-4">
                             <div className="flex-1">
                               <span className="text-sm font-medium text-gray-500">Question {questionNum}</span>
-                              <p className="text-gray-900 mt-1">{question}</p>
+                              <p className="text-gray-900 mt-1">{questionData.question}</p>
                             </div>
                             <div className="text-right">
                               <Badge 
                                 variant="outline" 
                                 className={`${
-                                  responseValue === 0 ? 'border-green-200 text-green-700 bg-green-50' :
-                                  responseValue === 1 ? 'border-blue-200 text-blue-700 bg-blue-50' :
+                                  responseValue === 0 ? 'border-gray-200 text-gray-700 bg-gray-50' :
+                                  responseValue === 1 ? 'border-green-200 text-green-700 bg-green-50' :
                                   responseValue === 2 ? 'border-yellow-200 text-yellow-700 bg-yellow-50' :
                                   responseValue === 3 ? 'border-orange-200 text-orange-700 bg-orange-50' :
-                                  'border-red-200 text-red-700 bg-red-50'
+                                  responseValue === 4 ? 'border-red-200 text-red-700 bg-red-50' :
+                                  'border-red-300 text-red-800 bg-red-100'
                                 }`}
                               >
-                                {DIFFICULTY_LABELS[responseValue] || 'No Response'}
+                                {responseLabel}
                               </Badge>
                             </div>
                           </div>
