@@ -119,6 +119,7 @@ export function PatientDetailModal({ patient, isOpen, onClose }: PatientDetailMo
         description: "The assessment has been permanently removed."
       });
       queryClient.invalidateQueries({ queryKey: [`/api/users/by-code/${patient?.code}/history`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/dash-progress/${patient?.code}`] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/patients'] });
     },
     onError: (error: any) => {

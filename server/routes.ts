@@ -2358,9 +2358,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all user assessments for this patient
       const userAssessments = await storage.getUserAssessments(patient.id);
       
-      // Filter for DASH assessments (assessmentId = 6) with scores
+      // Filter for DASH assessments (assessmentId = 6) with scores and not soft-deleted
       const dashAssessments = userAssessments
-        .filter(ua => ua.assessmentId === 6 && ua.dashScore && ua.completedAt)
+        .filter(ua => ua.assessmentId === 6 && ua.dashScore && ua.completedAt && ua.isCompleted)
         .map(ua => ({
           id: ua.id,
           score: parseFloat(ua.dashScore!),
