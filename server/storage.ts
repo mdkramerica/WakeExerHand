@@ -517,6 +517,9 @@ export class DatabaseStorage implements IStorage {
 
     const assessments = await this.getUserAssessments(userId);
     
+    // Filter out soft-deleted assessments (isCompleted: false)
+    const activeAssessments = assessments.filter(assessment => assessment.isCompleted);
+    
     return {
       patient: {
         id: user.id,
@@ -525,7 +528,7 @@ export class DatabaseStorage implements IStorage {
         injuryType: user.injuryType,
         createdAt: user.createdAt
       },
-      assessments: assessments.map(assessment => ({
+      assessments: activeAssessments.map(assessment => ({
         id: assessment.id,
         assessmentId: assessment.assessmentId,
         completedAt: assessment.completedAt,
@@ -536,7 +539,8 @@ export class DatabaseStorage implements IStorage {
         kapandjiScore: assessment.dashScore, // Using dashScore field as Kapandji score
         wristFlexion: assessment.wristFlexionAngle,
         wristExtension: assessment.wristExtensionAngle,
-        handType: assessment.handType
+        handType: assessment.handType,
+        isCompleted: assessment.isCompleted // Include completion status for verification
       }))
     };
   }

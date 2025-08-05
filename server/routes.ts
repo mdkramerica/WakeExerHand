@@ -1988,6 +1988,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
+      // Audit log for admin export
+      await auditLog(
+        req.user?.id || 'admin',
+        "admin_export",
+        "system_data",
+        { 
+          exportType: 'full_system', 
+          patientCount: patients.length,
+          totalAssessments: detailedPatients.reduce((sum, p) => sum + p.assessments.length, 0)
+        },
+        req
+      );
+
       res.json(exportData);
     } catch (error) {
       console.error("Admin export error:", error);
