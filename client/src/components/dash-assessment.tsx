@@ -10,163 +10,231 @@ import { useToast } from '@/hooks/use-toast';
 const DASH_QUESTIONS = [
   {
     id: 1,
-    question: "Open a tight or new jar",
-    category: "Physical Function"
+    question: "Open a tight or new jar.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 2,
-    question: "Write",
-    category: "Physical Function"
+    question: "Write.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 3,
-    question: "Turn a key",
-    category: "Physical Function"
+    question: "Turn a key.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 4,
-    question: "Prepare a meal",
-    category: "Physical Function"
+    question: "Prepare a meal.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 5,
-    question: "Push open a heavy door",
-    category: "Physical Function"
+    question: "Push open a heavy door.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 6,
-    question: "Place an object on a shelf above your head",
-    category: "Physical Function"
+    question: "Place an object on a shelf above your head.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 7,
-    question: "Do heavy household chores (e.g., wash walls, wash floors)",
-    category: "Physical Function"
+    question: "Do heavy household chores (e.g., wash walls, wash floors).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 8,
-    question: "Garden or do yard work",
-    category: "Physical Function"
+    question: "Garden or do yard work.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 9,
-    question: "Make a bed",
-    category: "Physical Function"
+    question: "Make a bed.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 10,
-    question: "Carry a shopping bag or briefcase",
-    category: "Physical Function"
+    question: "Carry a shopping bag or briefcase.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 11,
-    question: "Carry a heavy object (over 10 lbs)",
-    category: "Physical Function"
+    question: "Carry a heavy object (over 10 lbs).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 12,
-    question: "Change a lightbulb overhead",
-    category: "Physical Function"
+    question: "Change a lightbulb overhead.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 13,
-    question: "Wash or blow dry your hair",
-    category: "Physical Function"
+    question: "Wash or blow dry your hair.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 14,
-    question: "Wash your back",
-    category: "Physical Function"
+    question: "Wash your back.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 15,
-    question: "Put on a pullover sweater",
-    category: "Physical Function"
+    question: "Put on a pullover sweater.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 16,
-    question: "Use a knife to cut food",
-    category: "Physical Function"
+    question: "Use a knife to cut food.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 17,
-    question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.)",
-    category: "Physical Function"
+    question: "Recreational activities which require little effort (e.g., cardplaying, knitting, etc.).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 18,
-    question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.)",
-    category: "Physical Function"
+    question: "Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 19,
-    question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.)",
-    category: "Physical Function"
+    question: "Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 20,
-    question: "Manage transportation needs (getting from one place to another)",
-    category: "Physical Function"
+    question: "Manage transportation needs (getting from one place to another).",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 21,
-    question: "Sexual activities",
-    category: "Physical Function"
+    question: "Sexual activities.",
+    category: "Physical Function",
+    responseType: "difficulty"
   },
   {
     id: 22,
-    question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbors or groups?",
-    category: "Social Function"
+    question: "During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbours or groups?",
+    category: "Social Function",
+    responseType: "interference"
   },
   {
     id: 23,
     question: "During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?",
-    category: "Role Function"
+    category: "Role Function",
+    responseType: "limitation"
   },
   {
     id: 24,
-    question: "Arm, shoulder or hand pain",
-    category: "Symptoms"
+    question: "Arm, shoulder or hand pain.",
+    category: "Symptoms",
+    responseType: "severity"
   },
   {
     id: 25,
-    question: "Arm, shoulder or hand pain when you performed any specific activity",
-    category: "Symptoms"
+    question: "Arm, shoulder or hand pain when you performed any specific activity.",
+    category: "Symptoms",
+    responseType: "severity"
   },
   {
     id: 26,
-    question: "Tingling (pins and needles) in your arm, shoulder or hand",
-    category: "Symptoms"
+    question: "Tingling (pins and needles) in your arm, shoulder or hand.",
+    category: "Symptoms",
+    responseType: "severity"
   },
   {
     id: 27,
-    question: "Weakness in your arm, shoulder or hand",
-    category: "Symptoms"
+    question: "Weakness in your arm, shoulder or hand.",
+    category: "Symptoms",
+    responseType: "severity"
   },
   {
     id: 28,
-    question: "Stiffness in your arm, shoulder or hand",
-    category: "Symptoms"
+    question: "Stiffness in your arm, shoulder or hand.",
+    category: "Symptoms",
+    responseType: "severity"
   },
   {
     id: 29,
-    question: "During the past week, how much difficulty have you had sleeping as a result of the pain in your arm, shoulder or hand?",
-    category: "Symptoms"
+    question: "During the past week, how much difficulty have you had sleeping because of the pain in your arm, shoulder or hand?",
+    category: "Sleep Impact",
+    responseType: "sleep"
   },
   {
     id: 30,
-    question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem",
-    category: "Social Function"
+    question: "I feel less capable, less confident or less useful because of my arm, shoulder or hand problem.",
+    category: "Self-Perception",
+    responseType: "agreement"
   }
 ];
 
-const RESPONSE_OPTIONS = [
-  { value: 1, label: "No difficulty", description: "Not limited at all" },
-  { value: 2, label: "Mild difficulty", description: "Slightly limited" },
-  { value: 3, label: "Moderate difficulty", description: "Moderately limited" },
-  { value: 4, label: "Severe difficulty", description: "Very limited" },
-  { value: 5, label: "Unable", description: "Cannot perform" }
-];
+// Official DASH response options for different question types
+const RESPONSE_OPTIONS = {
+  difficulty: [
+    { value: 1, label: "No Difficulty" },
+    { value: 2, label: "Mild Difficulty" },
+    { value: 3, label: "Moderate Difficulty" },
+    { value: 4, label: "Severe Difficulty" },
+    { value: 5, label: "Unable" }
+  ],
+  interference: [
+    { value: 1, label: "Not at all" },
+    { value: 2, label: "Slightly" },
+    { value: 3, label: "Moderately" },
+    { value: 4, label: "Quite a bit" },
+    { value: 5, label: "Extremely" }
+  ],
+  limitation: [
+    { value: 1, label: "Not limited at all" },
+    { value: 2, label: "Slightly limited" },
+    { value: 3, label: "Moderately limited" },
+    { value: 4, label: "Very limited" },
+    { value: 5, label: "Unable" }
+  ],
+  severity: [
+    { value: 1, label: "None" },
+    { value: 2, label: "Mild" },
+    { value: 3, label: "Moderate" },
+    { value: 4, label: "Severe" },
+    { value: 5, label: "Extreme" }
+  ],
+  sleep: [
+    { value: 1, label: "No difficulty" },
+    { value: 2, label: "Mild difficulty" },
+    { value: 3, label: "Moderate difficulty" },
+    { value: 4, label: "Severe difficulty" },
+    { value: 5, label: "So much difficulty that I can't sleep" }
+  ],
+  agreement: [
+    { value: 1, label: "Strongly disagree" },
+    { value: 2, label: "Disagree" },
+    { value: 3, label: "Neither agree nor disagree" },
+    { value: 4, label: "Agree" },
+    { value: 5, label: "Strongly agree" }
+  ]
+};
 
 interface DashAssessmentProps {
   onComplete: (responses: Record<number, number>, dashScore: number) => void;
@@ -184,13 +252,19 @@ export default function DashAssessment({ onComplete, onCancel }: DashAssessmentP
 
   const calculateDashScore = (responses: Record<number, number>) => {
     const validResponses = Object.values(responses).filter(value => value > 0);
-    if (validResponses.length < 27) { // Need at least 27 of 30 questions answered
+    const missingQuestions = 30 - validResponses.length;
+    
+    // DASH score cannot be calculated if more than 3 items are missing
+    if (missingQuestions > 3) {
       return null;
     }
     
+    if (validResponses.length === 0) return null;
+    
+    // Official DASH formula: [(sum of n responses) - n] × 25 / n
     const sum = validResponses.reduce((acc, value) => acc + value, 0);
-    const average = sum / validResponses.length;
-    const dashScore = ((average - 1) / 4) * 100;
+    const n = validResponses.length;
+    const dashScore = ((sum - n) * 25) / n;
     return Math.round(dashScore * 10) / 10; // Round to 1 decimal place
   };
 
@@ -240,13 +314,14 @@ export default function DashAssessment({ onComplete, onCancel }: DashAssessmentP
     <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-center justify-center">
             <AlertCircle className="h-5 w-5 text-blue-600" />
-            DASH Assessment - Question {currentQuestion} of 30
+            <div>
+              <div className="text-xl font-bold">DISABILITIES OF THE ARM, SHOULDER AND HAND</div>
+              <div className="text-lg">THE DASH</div>
+              <div className="text-base font-normal">Question {currentQuestion} of 30</div>
+            </div>
           </CardTitle>
-          <CardDescription>
-            Disabilities of the Arm, Shoulder and Hand questionnaire
-          </CardDescription>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
               <span>Progress: {answeredQuestions}/30 questions completed</span>
@@ -257,16 +332,33 @@ export default function DashAssessment({ onComplete, onCancel }: DashAssessmentP
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {currentQuestion === 1 && (
+            <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200 mb-6">
+              <h3 className="text-lg font-bold text-center text-gray-900 mb-4">INSTRUCTIONS</h3>
+              <div className="text-sm text-gray-800 space-y-3">
+                <p>This questionnaire asks about your symptoms as well as your ability to perform certain activities.</p>
+                <p><strong>Please answer every question</strong>, based on your condition in the last week, by selecting the appropriate response.</p>
+                <p>If you did not have the opportunity to perform an activity in the past week, please make your best estimate on which response would be the most accurate.</p>
+                <p>It doesn't matter which hand or arm you use to perform the activity; please answer based on your ability regardless of how you perform the task.</p>
+              </div>
+            </div>
+          )}
+          
           <div className="bg-blue-50 p-4 rounded-lg">
             <div className="text-sm font-medium text-blue-800 mb-2">
               {currentQ.category}
             </div>
             <div className="text-lg font-medium text-gray-900">
               {currentQ.id <= 21 ? (
-                <>Please rate your ability to do the following activity in the past week:<br />
-                <span className="font-semibold">{currentQ.question}</span></>
+                <>Please rate your ability to do the following activity in the last week:<br />
+                <span className="font-semibold">{currentQ.id}. {currentQ.question}</span></>
+              ) : currentQ.id <= 23 ? (
+                <span className="font-semibold">{currentQ.id}. {currentQ.question}</span>
+              ) : currentQ.id <= 28 ? (
+                <>Please rate the severity of the following symptom in the last week:<br />
+                <span className="font-semibold">{currentQ.id}. {currentQ.question}</span></>
               ) : (
-                <span className="font-semibold">{currentQ.question}</span>
+                <span className="font-semibold">{currentQ.id}. {currentQ.question}</span>
               )}
             </div>
           </div>
@@ -276,12 +368,11 @@ export default function DashAssessment({ onComplete, onCancel }: DashAssessmentP
             onValueChange={(value) => handleResponseChange(currentQuestion, parseInt(value))}
             className="space-y-3"
           >
-            {RESPONSE_OPTIONS.map((option) => (
+            {(RESPONSE_OPTIONS[currentQ.responseType as keyof typeof RESPONSE_OPTIONS] || RESPONSE_OPTIONS.difficulty).map((option) => (
               <div key={option.value} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-gray-50">
                 <RadioGroupItem value={option.value.toString()} id={`option-${option.value}`} />
                 <Label htmlFor={`option-${option.value}`} className="flex-1 cursor-pointer">
                   <div className="font-medium">{option.label}</div>
-                  <div className="text-sm text-gray-600">{option.description}</div>
                 </Label>
               </div>
             ))}

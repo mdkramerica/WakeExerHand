@@ -8,111 +8,309 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { FileText, ArrowRight } from 'lucide-react';
 
-const quickDashSchema = z.object({
-  q1_difficulty_opening_jar: z.number().min(1).max(5),
-  q2_difficulty_writing: z.number().min(1).max(5),
-  q3_difficulty_turning_key: z.number().min(1).max(5),
-  q4_difficulty_preparing_meal: z.number().min(1).max(5),
-  q5_difficulty_pushing_door: z.number().min(1).max(5),
-  q6_difficulty_placing_object: z.number().min(1).max(5),
-  q7_arm_shoulder_hand_pain: z.number().min(1).max(5),
-  q8_arm_shoulder_hand_pain_activity: z.number().min(1).max(5),
-  q9_tingling_arm_shoulder_hand: z.number().min(1).max(5),
-  q10_weakness_arm_shoulder_hand: z.number().min(1).max(5),
-  q11_stiffness_arm_shoulder_hand: z.number().min(1).max(5),
+const dashSchema = z.object({
+  q1_open_jar: z.number().min(1).max(5),
+  q2_write: z.number().min(1).max(5),
+  q3_turn_key: z.number().min(1).max(5),
+  q4_prepare_meal: z.number().min(1).max(5),
+  q5_push_heavy_door: z.number().min(1).max(5),
+  q6_place_object_shelf: z.number().min(1).max(5),
+  q7_heavy_household_chores: z.number().min(1).max(5),
+  q8_garden_yard_work: z.number().min(1).max(5),
+  q9_make_bed: z.number().min(1).max(5),
+  q10_carry_shopping_bag: z.number().min(1).max(5),
+  q11_carry_heavy_object: z.number().min(1).max(5),
+  q12_change_lightbulb: z.number().min(1).max(5),
+  q13_wash_blow_dry_hair: z.number().min(1).max(5),
+  q14_wash_back: z.number().min(1).max(5),
+  q15_put_on_sweater: z.number().min(1).max(5),
+  q16_use_knife_cut_food: z.number().min(1).max(5),
+  q17_recreational_little_effort: z.number().min(1).max(5),
+  q18_recreational_force_impact: z.number().min(1).max(5),
+  q19_recreational_move_arm_freely: z.number().min(1).max(5),
+  q20_manage_transportation: z.number().min(1).max(5),
+  q21_sexual_activities: z.number().min(1).max(5),
+  q22_social_activities_interference: z.number().min(1).max(5),
+  q23_work_limitation: z.number().min(1).max(5),
+  q24_arm_shoulder_hand_pain: z.number().min(1).max(5),
+  q25_pain_specific_activity: z.number().min(1).max(5),
+  q26_tingling: z.number().min(1).max(5),
+  q27_weakness: z.number().min(1).max(5),
+  q28_stiffness: z.number().min(1).max(5),
+  q29_difficulty_sleeping: z.number().min(1).max(5),
+  q30_feel_less_capable: z.number().min(1).max(5),
 });
 
-type QuickDashData = z.infer<typeof quickDashSchema>;
+type DashData = z.infer<typeof dashSchema>;
 
-interface QuickDashQuestionnaireProps {
-  onSubmit: (responses: QuickDashData) => void;
+interface DashQuestionnaireProps {
+  onSubmit: (responses: DashData) => void;
   onSkip: () => void;
   isLoading?: boolean;
 }
 
-const questions = [
+const dashQuestions = [
+  // Questions 1-21: Physical Function - NO DIFFICULTY to UNABLE scale
   {
-    id: 'q1_difficulty_opening_jar',
-    text: 'Open a tight or new jar',
-    category: 'Physical Function'
+    id: 'q1_open_jar',
+    text: 'Open a tight or new jar.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q2_difficulty_writing',
-    text: 'Write',
-    category: 'Physical Function'
+    id: 'q2_write',
+    text: 'Write.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q3_difficulty_turning_key',
-    text: 'Turn a key',
-    category: 'Physical Function'
+    id: 'q3_turn_key',
+    text: 'Turn a key.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q4_difficulty_preparing_meal',
-    text: 'Prepare a meal',
-    category: 'Physical Function'
+    id: 'q4_prepare_meal',
+    text: 'Prepare a meal.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q5_difficulty_pushing_door',
-    text: 'Push open a heavy door',
-    category: 'Physical Function'
+    id: 'q5_push_heavy_door',
+    text: 'Push open a heavy door.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q6_difficulty_placing_object',
-    text: 'Place an object on a shelf above your head',
-    category: 'Physical Function'
+    id: 'q6_place_object_shelf',
+    text: 'Place an object on a shelf above your head.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q7_arm_shoulder_hand_pain',
-    text: 'Arm, shoulder or hand pain',
-    category: 'Symptoms'
+    id: 'q7_heavy_household_chores',
+    text: 'Do heavy household chores (e.g., wash walls, wash floors).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q8_arm_shoulder_hand_pain_activity',
-    text: 'Arm, shoulder or hand pain when performing any specific activity',
-    category: 'Symptoms'
+    id: 'q8_garden_yard_work',
+    text: 'Garden or do yard work.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q9_tingling_arm_shoulder_hand',
-    text: 'Tingling (pins and needles) in your arm, shoulder or hand',
-    category: 'Symptoms'
+    id: 'q9_make_bed',
+    text: 'Make a bed.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q10_weakness_arm_shoulder_hand',
-    text: 'Weakness in your arm, shoulder or hand',
-    category: 'Symptoms'
+    id: 'q10_carry_shopping_bag',
+    text: 'Carry a shopping bag or briefcase.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
   },
   {
-    id: 'q11_stiffness_arm_shoulder_hand',
-    text: 'Stiffness in your arm, shoulder or hand',
-    category: 'Symptoms'
+    id: 'q11_carry_heavy_object',
+    text: 'Carry a heavy object (over 10 lbs).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q12_change_lightbulb',
+    text: 'Change a lightbulb overhead.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q13_wash_blow_dry_hair',
+    text: 'Wash or blow dry your hair.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q14_wash_back',
+    text: 'Wash your back.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q15_put_on_sweater',
+    text: 'Put on a pullover sweater.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q16_use_knife_cut_food',
+    text: 'Use a knife to cut food.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q17_recreational_little_effort',
+    text: 'Recreational activities which require little effort (e.g., cardplaying, knitting, etc.).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q18_recreational_force_impact',
+    text: 'Recreational activities in which you take some force or impact through your arm, shoulder or hand (e.g., golf, hammering, tennis, etc.).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q19_recreational_move_arm_freely',
+    text: 'Recreational activities in which you move your arm freely (e.g., playing frisbee, badminton, etc.).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q20_manage_transportation',
+    text: 'Manage transportation needs (getting from one place to another).',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  {
+    id: 'q21_sexual_activities',
+    text: 'Sexual activities.',
+    category: 'Physical Function',
+    responseType: 'difficulty'
+  },
+  // Question 22: Social Function - NOT AT ALL to EXTREMELY scale
+  {
+    id: 'q22_social_activities_interference',
+    text: 'During the past week, to what extent has your arm, shoulder or hand problem interfered with your normal social activities with family, friends, neighbours or groups?',
+    category: 'Social Function',
+    responseType: 'interference'
+  },
+  // Question 23: Role Function - NOT LIMITED AT ALL to UNABLE scale
+  {
+    id: 'q23_work_limitation',
+    text: 'During the past week, were you limited in your work or other regular daily activities as a result of your arm, shoulder or hand problem?',
+    category: 'Role Function',
+    responseType: 'limitation'
+  },
+  // Questions 24-28: Symptoms - NONE to EXTREME scale
+  {
+    id: 'q24_arm_shoulder_hand_pain',
+    text: 'Arm, shoulder or hand pain.',
+    category: 'Symptoms',
+    responseType: 'severity'
+  },
+  {
+    id: 'q25_pain_specific_activity',
+    text: 'Arm, shoulder or hand pain when you performed any specific activity.',
+    category: 'Symptoms',
+    responseType: 'severity'
+  },
+  {
+    id: 'q26_tingling',
+    text: 'Tingling (pins and needles) in your arm, shoulder or hand.',
+    category: 'Symptoms',
+    responseType: 'severity'
+  },
+  {
+    id: 'q27_weakness',
+    text: 'Weakness in your arm, shoulder or hand.',
+    category: 'Symptoms',
+    responseType: 'severity'
+  },
+  {
+    id: 'q28_stiffness',
+    text: 'Stiffness in your arm, shoulder or hand.',
+    category: 'Symptoms',
+    responseType: 'severity'
+  },
+  // Question 29: Sleep - NO DIFFICULTY to SO MUCH DIFFICULTY scale
+  {
+    id: 'q29_difficulty_sleeping',
+    text: 'During the past week, how much difficulty have you had sleeping because of the pain in your arm, shoulder or hand?',
+    category: 'Sleep Impact',
+    responseType: 'sleep'
+  },
+  // Question 30: Self-perception - STRONGLY DISAGREE to STRONGLY AGREE scale
+  {
+    id: 'q30_feel_less_capable',
+    text: 'I feel less capable, less confident or less useful because of my arm, shoulder or hand problem.',
+    category: 'Self-Perception',
+    responseType: 'agreement'
   },
 ];
 
-const responseOptions = [
-  { value: 1, label: 'No difficulty / None' },
-  { value: 2, label: 'Mild difficulty / Mild' },
-  { value: 3, label: 'Moderate difficulty / Moderate' },
-  { value: 4, label: 'Severe difficulty / Severe' },
-  { value: 5, label: 'Unable / Extreme' },
-];
+// Different response options for different question types
+const responseOptions = {
+  difficulty: [
+    { value: 1, label: 'No Difficulty' },
+    { value: 2, label: 'Mild Difficulty' },
+    { value: 3, label: 'Moderate Difficulty' },
+    { value: 4, label: 'Severe Difficulty' },
+    { value: 5, label: 'Unable' },
+  ],
+  interference: [
+    { value: 1, label: 'Not at all' },
+    { value: 2, label: 'Slightly' },
+    { value: 3, label: 'Moderately' },
+    { value: 4, label: 'Quite a bit' },
+    { value: 5, label: 'Extremely' },
+  ],
+  limitation: [
+    { value: 1, label: 'Not limited at all' },
+    { value: 2, label: 'Slightly limited' },
+    { value: 3, label: 'Moderately limited' },
+    { value: 4, label: 'Very limited' },
+    { value: 5, label: 'Unable' },
+  ],
+  severity: [
+    { value: 1, label: 'None' },
+    { value: 2, label: 'Mild' },
+    { value: 3, label: 'Moderate' },
+    { value: 4, label: 'Severe' },
+    { value: 5, label: 'Extreme' },
+  ],
+  sleep: [
+    { value: 1, label: 'No difficulty' },
+    { value: 2, label: 'Mild difficulty' },
+    { value: 3, label: 'Moderate difficulty' },
+    { value: 4, label: 'Severe difficulty' },
+    { value: 5, label: "So much difficulty that I can't sleep" },
+  ],
+  agreement: [
+    { value: 1, label: 'Strongly disagree' },
+    { value: 2, label: 'Disagree' },
+    { value: 3, label: 'Neither agree nor disagree' },
+    { value: 4, label: 'Agree' },
+    { value: 5, label: 'Strongly agree' },
+  ],
+};
 
-export default function QuickDashQuestionnaire({ onSubmit, onSkip, isLoading }: QuickDashQuestionnaireProps) {
-  const form = useForm<QuickDashData>({
-    resolver: zodResolver(quickDashSchema),
+export default function DashQuestionnaire({ onSubmit, onSkip, isLoading }: DashQuestionnaireProps) {
+  const form = useForm<DashData>({
+    resolver: zodResolver(dashSchema),
   });
 
-  const handleSubmit = (data: QuickDashData) => {
+  const handleSubmit = (data: DashData) => {
     onSubmit(data);
   };
 
   const calculateScore = () => {
     const values = form.getValues();
     const scores = Object.values(values).filter(v => typeof v === 'number');
-    if (scores.length === 0) return 0;
     
+    // DASH score cannot be calculated if more than 3 items are missing
+    const totalQuestions = 30;
+    const answeredQuestions = scores.length;
+    const missingQuestions = totalQuestions - answeredQuestions;
+    
+    if (missingQuestions > 3) {
+      return null; // Cannot calculate score
+    }
+    
+    if (answeredQuestions === 0) return 0;
+    
+    // Official DASH formula: [(sum of n responses) - 1] × 25 / n
     const sum = scores.reduce((acc, score) => acc + score, 0);
-    const avgScore = sum / scores.length;
-    return ((avgScore - 1) / 4) * 100; // Convert to 0-100 scale
+    return ((sum - answeredQuestions) * 25) / answeredQuestions;
   };
 
   const currentScore = calculateScore();
