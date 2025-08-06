@@ -34,8 +34,18 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
   app.use(express.json({ limit: '10mb' })); // Increase limit for motion data
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-  // Serve attached assets statically
-  app.use('/attached_assets', express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), '../attached_assets')));
+  // Serve attached assets statically with proper MIME types
+  app.use('/attached_assets', express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), '../attached_assets'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.mov')) {
+        res.setHeader('Content-Type', 'video/quicktime');
+      } else if (filePath.endsWith('.mp4')) {
+        res.setHeader('Content-Type', 'video/mp4');
+      } else if (filePath.endsWith('.webm')) {
+        res.setHeader('Content-Type', 'video/webm');
+      }
+    }
+  }));
 
   app.use((req, res, next) => {
     const start = Date.now();

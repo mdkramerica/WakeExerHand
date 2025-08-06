@@ -620,6 +620,7 @@ export default function Recording() {
                     <Lightbulb className="w-4 h-4 text-yellow-600 mr-2" />
                     Motion Demonstration
                   </h4>
+
                   <div className="relative">
                     <video
                       src={assessment.videoUrl}
@@ -631,7 +632,7 @@ export default function Recording() {
                       className="w-full h-32 object-cover rounded-lg bg-gray-900 border"
                       style={{ aspectRatio: '4/3' }}
                       onError={(e) => {
-                        console.log('Video load error:', e);
+                        console.error('Video load error:', e, 'URL:', assessment.videoUrl);
                         e.currentTarget.style.display = 'none';
                       }}
                       onLoadedData={() => {
