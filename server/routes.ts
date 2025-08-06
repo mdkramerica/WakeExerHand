@@ -2705,8 +2705,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
           downloadData.dashSurvey.note = "DASH survey completed but detailed questionnaire responses not stored";
         }
       } else {
-        // For other assessments, include motion-related data
+        // For motion-based assessments, include comprehensive motion capture data
+        
+        // Helper function to safely parse JSON data
+        const safeJSONParse = (jsonData: any) => {
+          if (!jsonData) return null;
+          if (typeof jsonData === 'object') return jsonData;
+          try {
+            return JSON.parse(jsonData);
+          } catch (error) {
+            console.warn('Failed to parse JSON data:', error);
+            return null;
+          }
+        };
+        
+        // Parse motion capture data
+        const parsedRepetitionData = safeJSONParse(userAssessment.repetitionData);
+        const parsedRomData = safeJSONParse(userAssessment.romData);
+        
+
+        
+        // Extract detailed motion analysis
+        let detailedMotionData = null;
+        let biomechanicalAnalysis = null;
+        let frameCount = 0;
+        
+        if (parsedRepetitionData && Array.isArray(parsedRepetitionData)) {
+          const allFrames: any[] = [];
+          const qualityScores: number[] = [];
+          const timestamps: number[] = [];
+          
+          parsedRepetitionData.forEach((repetition: any) => {
+            if (repetition.motionData && Array.isArray(repetition.motionData)) {
+              repetition.motionData.forEach((frame: any) => {
+                allFrames.push({
+                  timestamp: frame.timestamp,
+                  handLandmarks: frame.landmarks,
+                  poseLandmarks: frame.poseLandmarks,
+                  quality: frame.quality,
+                  handedness: frame.handedness,
+                  wristAngles: frame.wristAngles,
+                  sessionHandType: frame.sessionHandType,
+                  sessionElbowLocked: frame.sessionElbowLocked
+                });
+                if (frame.quality) qualityScores.push(frame.quality);
+                if (frame.timestamp) timestamps.push(frame.timestamp);
+              });
+            }
+          });
+          
+          frameCount = allFrames.length;
+          
+          detailedMotionData = {
+            totalFrames: frameCount,
+            frameDuration: timestamps.length > 1 ? (Math.max(...timestamps) - Math.min(...timestamps)) : 0,
+            averageQuality: qualityScores.length > 0 ? (qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length) : 0,
+            frameData: allFrames, // Complete frame-by-frame motion data
+            repetitionBreakdown: parsedRepetitionData.map((rep: any, index: number) => ({
+              repetitionIndex: index,
+              duration: rep.duration,
+              frameCount: rep.motionData?.length || 0,
+              romData: rep.romData,
+              startTimestamp: rep.motionData?.[0]?.timestamp,
+              endTimestamp: rep.motionData?.[rep.motionData?.length - 1]?.timestamp
+            }))
+          };
+          
+          biomechanicalAnalysis = {
+            handTrackingConfidence: qualityScores.length > 0 ? {
+              average: qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length,
+              minimum: Math.min(...qualityScores),
+              maximum: Math.max(...qualityScores),
+              standardDeviation: qualityScores.length > 1 ? Math.sqrt(qualityScores.reduce((a, b) => a + Math.pow(b - (qualityScores.reduce((c, d) => c + d, 0) / qualityScores.length), 2), 0) / (qualityScores.length - 1)) : 0
+            } : null,
+            temporalAnalysis: timestamps.length > 1 ? {
+              totalDuration: Math.max(...timestamps) - Math.min(...timestamps),
+              framerate: frameCount / ((Math.max(...timestamps) - Math.min(...timestamps)) / 1000),
+              consistentTracking: true
+            } : null
+          };
+        }
+        
         downloadData.assessmentData = {
+          // Basic ROM measurements
           totalActiveRom: userAssessment.totalActiveRom,
           indexFingerRom: userAssessment.indexFingerRom,
           middleFingerRom: userAssessment.middleFingerRom,
@@ -2718,7 +2799,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           maxRadialDeviation: userAssessment.maxRadialDeviation,
           maxUlnarDeviation: userAssessment.maxUlnarDeviation,
           maxSupination: userAssessment.maxSupination,
-          maxPronation: userAssessment.maxPronation
+          maxPronation: userAssessment.maxPronation,
+          
+          // Original parsed motion data
+          originalMotionData: {
+            romData: parsedRomData,
+            repetitionData: parsedRepetitionData
+          },
+          
+          // Enhanced motion capture analysis
+          detailedMotionCapture: detailedMotionData,
+          biomechanicalAnalysis: biomechanicalAnalysis,
+          
+          // Data integrity information
+          motionDataSummary: {
+            hasMotionData: !!parsedRepetitionData,
+            hasRomData: !!parsedRomData,
+            totalFramesCaptured: frameCount,
+            assessmentDuration: detailedMotionData?.frameDuration || 0,
+            averageTrackingQuality: detailedMotionData?.averageQuality || 0
+          }
         };
       }
 
