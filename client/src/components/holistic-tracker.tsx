@@ -35,6 +35,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
   const [currentHandLandmarks, setCurrentHandLandmarks] = useState<any[]>([]);
   const [currentPoseLandmarks, setCurrentPoseLandmarks] = useState<any[]>([]);
   
+  // Add frame dimension tracking
+  const [frameWidth, setFrameWidth] = useState<number>(640);
+  const [frameHeight, setFrameHeight] = useState<number>(480);
+  
   // Add temporal stability for hand type detection
   const lastHandTypeRef = useRef<'LEFT' | 'RIGHT' | 'UNKNOWN'>('UNKNOWN');
   const handTypeConfidenceRef = useRef(0);
@@ -275,7 +279,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
       
       onUpdate({
         error: 'Camera tracking initialization failed. Please refresh the page and ensure stable internet connection.',
-        trackingAvailable: false
+        trackingAvailable: false,
+        frameWidth: frameWidth,
+        frameHeight: frameHeight,
+        recordingResolution: `${frameWidth}x${frameHeight}`
       });
     } finally {
       setIsInitializing(false);
@@ -493,7 +500,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
         sessionHandType: lastHandTypeRef.current, // Store the locked hand type for session consistency
         sessionElbowIndex: sessionElbowData.elbowIndex,
         sessionWristIndex: sessionElbowData.wristIndex,
-        sessionElbowLocked: sessionElbowData.isLocked
+        sessionElbowLocked: sessionElbowData.isLocked,
+        frameWidth: frameWidth,
+        frameHeight: frameHeight,
+        recordingResolution: `${frameWidth}x${frameHeight}`
       });
     } catch (error) {
       console.warn('Holistic processing error:', error);
@@ -512,7 +522,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
         detectedHandSide: 'UNKNOWN',
         sessionElbowIndex: undefined,
         sessionWristIndex: undefined,
-        sessionElbowLocked: false
+        sessionElbowLocked: false,
+        frameWidth: frameWidth,
+        frameHeight: frameHeight,
+        recordingResolution: `${frameWidth}x${frameHeight}`
       });
     }
   }, [isWristAssessment, onUpdate]);
@@ -634,6 +647,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
             canvas.width = width;
             canvas.height = height;
             
+            // Store frame dimensions for motion data
+            setFrameWidth(width);
+            setFrameHeight(height);
+            
             console.log(`🎨 Canvas configured: ${width}x${height}`);
             
             // Force video play with multiple attempts
@@ -698,7 +715,10 @@ export default function HolisticTracker({ onUpdate, isRecording, assessmentType,
         handDetected: false,
         landmarksCount: 0,
         trackingQuality: "Camera Error",
-        handPosition: "Failed"
+        handPosition: "Failed",
+        frameWidth: frameWidth,
+        frameHeight: frameHeight,
+        recordingResolution: `${frameWidth}x${frameHeight}`
       });
     }
   }, [holisticInitialized, isRecording]);

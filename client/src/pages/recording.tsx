@@ -417,7 +417,10 @@ export default function Recording() {
           sessionElbowIndex: data.sessionElbowIndex,
           sessionWristIndex: data.sessionWristIndex,
           sessionElbowLocked: data.sessionElbowLocked,
-          quality: data.trackingQuality === "Excellent" ? 90 : data.trackingQuality === "Good" ? 70 : 50
+          quality: data.trackingQuality === "Excellent" ? 90 : data.trackingQuality === "Good" ? 70 : 50,
+          frameWidth: data.frameWidth || 640,
+          frameHeight: data.frameHeight || 480,
+          recordingResolution: data.recordingResolution || `${data.frameWidth || 640}x${data.frameHeight || 480}`
         };
         
         setRecordingMotionData(prev => {
