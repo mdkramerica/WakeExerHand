@@ -310,28 +310,112 @@ For DASH (Disabilities of the Arm, Shoulder and Hand) surveys:
   "description": "Complete DASH assessment...", // Description
   
   "questionnaireResponses": {
-    "q1_difficulty_opening_jar": 2,      // Response values (0-4 scale)
-    "q2_difficulty_writing": 1,
-    "q3_difficulty_turning_key": 3,
-    // ... questions 4-11
+    // Physical Function Questions (1-21) - 1-5 scale
+    "q1_open_jar": 2,
+    "q2_write": 1,
+    "q3_turn_key": 3,
+    "q4_prepare_meal": 2,
+    "q5_push_heavy_door": 1,
+    "q6_place_object_shelf": 2,
+    "q7_heavy_household_chores": 4,
+    "q8_garden_yard_work": 3,
+    "q9_make_bed": 2,
+    "q10_carry_shopping_bag": 3,
+    "q11_carry_heavy_object": 4,
+    "q12_change_lightbulb": 2,
+    "q13_wash_blow_dry_hair": 1,
+    "q14_wash_back": 3,
+    "q15_put_on_sweater": 2,
+    "q16_use_knife_cut_food": 1,
+    "q17_recreational_little_effort": 2,
+    "q18_recreational_force_impact": 4,
+    "q19_recreational_move_arm_freely": 3,
+    "q20_manage_transportation": 1,
+    "q21_sexual_activities": 2,
+    
+    // Social Function Questions (22-23)
+    "q22_social_activities_interference": 3, // 1-5 scale (interference)
+    "q23_work_limitation": 2,                // 1-5 scale (limitation)
+    
+    // Symptoms Questions (24-30)
+    "q24_arm_shoulder_hand_pain": 3,         // 1-5 scale (severity)
+    "q25_pain_specific_activity": 4,         // 1-5 scale (severity)
+    "q26_tingling": 2,                       // 1-5 scale (severity)
+    "q27_weakness": 3,                       // 1-5 scale (severity)
+    "q28_stiffness": 4,                      // 1-5 scale (severity)
+    "q29_difficulty_sleeping": 2,            // 1-5 scale (sleep trouble)
+    "q30_feel_less_capable": 3               // 1-5 scale (agreement)
   },
   
   "responsesWithLabels": {
-    "q1": {
+    "q1_open_jar": {
       "value": 2,
-      "label": "Moderate Difficulty"       // Human-readable labels
+      "label": "Mild Difficulty",
+      "category": "difficulty",
+      "questionNumber": 1
     },
-    // ... all responses with labels
+    "q22_social_activities_interference": {
+      "value": 3,
+      "label": "Moderately",
+      "category": "interference",
+      "questionNumber": 22
+    },
+    "q30_feel_less_capable": {
+      "value": 3,
+      "label": "Neither agree nor disagree",
+      "category": "agreement",
+      "questionNumber": 30
+    }
+    // ... all 30 responses with labels
   }
 }
 ```
 
-### DASH Response Scale
-- **0**: No Difficulty
-- **1**: Mild Difficulty  
-- **2**: Moderate Difficulty
-- **3**: Severe Difficulty
-- **4**: Unable
+### DASH Response Scales
+
+The DASH questionnaire uses different 1-5 scales based on question category:
+
+**Physical Function (Questions 1-21) - Difficulty Scale:**
+- **1**: No Difficulty
+- **2**: Mild Difficulty  
+- **3**: Moderate Difficulty
+- **4**: Severe Difficulty
+- **5**: Unable
+
+**Social Function - Interference (Question 22):**
+- **1**: Not at all
+- **2**: Slightly
+- **3**: Moderately
+- **4**: Quite a bit
+- **5**: Extremely
+
+**Social Function - Limitation (Question 23):**
+- **1**: Not limited at all
+- **2**: Slightly limited
+- **3**: Moderately limited
+- **4**: Very limited
+- **5**: Unable
+
+**Symptoms - Severity (Questions 24-28):**
+- **1**: None
+- **2**: Mild
+- **3**: Moderate
+- **4**: Severe
+- **5**: Extreme
+
+**Sleep (Question 29):**
+- **1**: No trouble
+- **2**: Mild trouble
+- **3**: Moderate trouble
+- **4**: Severe trouble
+- **5**: So much trouble I could not sleep
+
+**Agreement (Question 30):**
+- **1**: Strongly disagree
+- **2**: Disagree
+- **3**: Neither agree nor disagree
+- **4**: Agree
+- **5**: Strongly agree
 
 ---
 

@@ -2671,32 +2671,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ? JSON.parse(userAssessment.responses) 
               : userAssessment.responses;
             
+            // Include all 30 DASH questionnaire responses with proper field mapping
             downloadData.dashSurvey.questionnaireResponses = {
-              q1_difficulty_opening_jar: responses.q1,
-              q2_difficulty_writing: responses.q2,
-              q3_difficulty_turning_key: responses.q3,
-              q4_difficulty_preparing_meal: responses.q4,
-              q5_difficulty_pushing_door: responses.q5,
-              q6_difficulty_placing_object: responses.q6,
-              q7_arm_shoulder_hand_pain: responses.q7,
-              q8_arm_shoulder_hand_pain_activity: responses.q8,
-              q9_tingling_arm_shoulder_hand: responses.q9,
-              q10_weakness_arm_shoulder_hand: responses.q10,
-              q11_stiffness_arm_shoulder_hand: responses.q11
+              // Physical Function Questions (1-21)
+              q1_open_jar: responses.q1_open_jar,
+              q2_write: responses.q2_write,
+              q3_turn_key: responses.q3_turn_key,
+              q4_prepare_meal: responses.q4_prepare_meal,
+              q5_push_heavy_door: responses.q5_push_heavy_door,
+              q6_place_object_shelf: responses.q6_place_object_shelf,
+              q7_heavy_household_chores: responses.q7_heavy_household_chores,
+              q8_garden_yard_work: responses.q8_garden_yard_work,
+              q9_make_bed: responses.q9_make_bed,
+              q10_carry_shopping_bag: responses.q10_carry_shopping_bag,
+              q11_carry_heavy_object: responses.q11_carry_heavy_object,
+              q12_change_lightbulb: responses.q12_change_lightbulb,
+              q13_wash_blow_dry_hair: responses.q13_wash_blow_dry_hair,
+              q14_wash_back: responses.q14_wash_back,
+              q15_put_on_sweater: responses.q15_put_on_sweater,
+              q16_use_knife_cut_food: responses.q16_use_knife_cut_food,
+              q17_recreational_little_effort: responses.q17_recreational_little_effort,
+              q18_recreational_force_impact: responses.q18_recreational_force_impact,
+              q19_recreational_move_arm_freely: responses.q19_recreational_move_arm_freely,
+              q20_manage_transportation: responses.q20_manage_transportation,
+              q21_sexual_activities: responses.q21_sexual_activities,
+              
+              // Social Function Questions (22-23)
+              q22_social_activities_interference: responses.q22_social_activities_interference,
+              q23_work_limitation: responses.q23_work_limitation,
+              
+              // Symptoms Questions (24-30)
+              q24_arm_shoulder_hand_pain: responses.q24_arm_shoulder_hand_pain,
+              q25_pain_specific_activity: responses.q25_pain_specific_activity,
+              q26_tingling: responses.q26_tingling,
+              q27_weakness: responses.q27_weakness,
+              q28_stiffness: responses.q28_stiffness,
+              q29_difficulty_sleeping: responses.q29_difficulty_sleeping,
+              q30_feel_less_capable: responses.q30_feel_less_capable
             };
             
-            // Map response values to difficulty labels
-            const difficultyLabels = ["No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"];
+            // Map response values to appropriate labels based on question category
+            const responseLabels = {
+              difficulty: ["", "No Difficulty", "Mild Difficulty", "Moderate Difficulty", "Severe Difficulty", "Unable"],
+              interference: ["", "Not at all", "Slightly", "Moderately", "Quite a bit", "Extremely"],
+              limitation: ["", "Not limited at all", "Slightly limited", "Moderately limited", "Very limited", "Unable"],
+              severity: ["", "None", "Mild", "Moderate", "Severe", "Extreme"],
+              sleep: ["", "No trouble", "Mild trouble", "Moderate trouble", "Severe trouble", "So much trouble I could not sleep"],
+              agreement: ["", "Strongly disagree", "Disagree", "Neither agree nor disagree", "Agree", "Strongly agree"]
+            };
+            
             downloadData.dashSurvey.responsesWithLabels = {};
-            for (let i = 1; i <= 11; i++) {
-              const responseValue = responses[`q${i}`];
+            
+            // Map each response with appropriate labels
+            Object.keys(responses).forEach(questionKey => {
+              const responseValue = responses[questionKey];
               if (responseValue !== undefined) {
-                downloadData.dashSurvey.responsesWithLabels[`q${i}`] = {
+                let category = 'difficulty'; // Default category
+                
+                // Determine response category based on question number
+                const questionNum = parseInt(questionKey.replace('q', '').split('_')[0]);
+                if (questionNum >= 1 && questionNum <= 21) category = 'difficulty';
+                else if (questionNum === 22) category = 'interference';
+                else if (questionNum === 23) category = 'limitation';
+                else if (questionNum >= 24 && questionNum <= 28) category = 'severity';
+                else if (questionNum === 29) category = 'sleep';
+                else if (questionNum === 30) category = 'agreement';
+                
+                downloadData.dashSurvey.responsesWithLabels[questionKey] = {
                   value: responseValue,
-                  label: difficultyLabels[responseValue] || "Unknown"
+                  label: responseLabels[category][responseValue] || "Unknown",
+                  category: category,
+                  questionNumber: questionNum
                 };
               }
-            }
+            });
           } catch (error) {
             console.log("Error parsing DASH responses:", error);
             downloadData.dashSurvey.note = "DASH survey completed but response data could not be parsed";
