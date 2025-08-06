@@ -620,7 +620,9 @@ export default function Recording() {
                     <Lightbulb className="w-4 h-4 text-yellow-600 mr-2" />
                     Motion Demonstration
                   </h4>
-
+                  <div className="text-xs text-gray-500 mb-2">
+                    Video: {assessment.videoUrl}
+                  </div>
                   <div className="relative">
                     <video
                       src={assessment.videoUrl}
@@ -628,18 +630,28 @@ export default function Recording() {
                       loop
                       muted
                       playsInline
-                      preload="metadata"
+                      controls
+                      preload="auto"
                       className="w-full h-32 object-cover rounded-lg bg-gray-900 border"
                       style={{ aspectRatio: '4/3' }}
                       onError={(e) => {
                         console.error('Video load error:', e, 'URL:', assessment.videoUrl);
-                        e.currentTarget.style.display = 'none';
+                        const target = e.currentTarget;
+                        target.style.backgroundColor = 'red';
+                        target.style.color = 'white';
+                        target.style.display = 'flex';
+                        target.style.alignItems = 'center';
+                        target.style.justifyContent = 'center';
+                        target.textContent = `Error loading: ${assessment.videoUrl}`;
                       }}
                       onLoadedData={() => {
                         console.log('Video loaded successfully:', assessment.videoUrl);
                       }}
+                      onCanPlay={() => {
+                        console.log('Video can play:', assessment.videoUrl);
+                      }}
                     >
-                      Your browser does not support the video tag.
+                      Video not supported
                     </video>
                     <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-medium">
                       DEMO
