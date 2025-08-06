@@ -622,7 +622,7 @@ export default function Recording() {
                   </h4>
                   
                   <div className="mb-3">
-                    <div className="bg-yellow-500 bg-opacity-90 text-white text-sm px-3 py-2 rounded font-medium text-center">
+                    <div className="bg-yellow-500 text-white text-sm px-3 py-2 rounded-lg font-bold text-center shadow-md border-2 border-yellow-400">
                       FOLLOW ALONG
                     </div>
                   </div>
