@@ -620,9 +620,7 @@ export default function Recording() {
                     <Lightbulb className="w-4 h-4 text-yellow-600 mr-2" />
                     Motion Demonstration
                   </h4>
-                  <div className="text-xs text-gray-500 mb-2">
-                    Video: {assessment.videoUrl}
-                  </div>
+
                   <div className="relative">
                     <video
                       src={assessment.videoUrl}
@@ -630,25 +628,15 @@ export default function Recording() {
                       loop
                       muted
                       playsInline
-                      controls
-                      preload="auto"
+                      preload="metadata"
                       className="w-full h-32 object-cover rounded-lg bg-gray-900 border"
                       style={{ aspectRatio: '4/3' }}
                       onError={(e) => {
                         console.error('Video load error:', e, 'URL:', assessment.videoUrl);
-                        const target = e.currentTarget;
-                        target.style.backgroundColor = 'red';
-                        target.style.color = 'white';
-                        target.style.display = 'flex';
-                        target.style.alignItems = 'center';
-                        target.style.justifyContent = 'center';
-                        target.textContent = `Error loading: ${assessment.videoUrl}`;
+                        e.currentTarget.style.display = 'none';
                       }}
                       onLoadedData={() => {
                         console.log('Video loaded successfully:', assessment.videoUrl);
-                      }}
-                      onCanPlay={() => {
-                        console.log('Video can play:', assessment.videoUrl);
                       }}
                     >
                       Video not supported
