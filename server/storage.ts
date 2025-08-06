@@ -520,66 +520,182 @@ export class DatabaseStorage implements IStorage {
     // Filter out soft-deleted assessments (isCompleted: false)
     const activeAssessments = assessments.filter(assessment => assessment.isCompleted);
     
+    // Helper function to safely parse JSON data
+    const safeJSONParse = (jsonData: any) => {
+      if (!jsonData) return null;
+      if (typeof jsonData === 'object') return jsonData;
+      try {
+        return JSON.parse(jsonData);
+      } catch (error) {
+        console.warn('Failed to parse JSON data:', error);
+        return null;
+      }
+    };
+    
     return {
       patient: {
         id: user.id,
         patientId: `P${user.id.toString().padStart(3, '0')}`,
         code: user.code,
         injuryType: user.injuryType,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        surgeryDate: user.surgeryDate,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
       },
-      assessments: activeAssessments.map(assessment => ({
-        // Basic assessment metadata
-        id: assessment.id,
-        assessmentId: assessment.assessmentId,
-        completedAt: assessment.completedAt,
-        handType: assessment.handType,
-        isCompleted: assessment.isCompleted,
+      assessments: activeAssessments.map(assessment => {
+        // Parse motion capture data
+        const parsedRepetitionData = safeJSONParse(assessment.repetitionData);
+        const parsedRomData = safeJSONParse(assessment.romData);
+        const parsedDashResponses = safeJSONParse(assessment.responses);
         
-        // Complete motion tracking data
-        romData: assessment.romData, // Full ROM JSON data
-        repetitionData: assessment.repetitionData, // Full repetition JSON data
-        qualityScore: assessment.qualityScore,
+        // Extract detailed motion analysis
+        let detailedMotionData = null;
+        let biomechanicalAnalysis = null;
+        let frameCount = 0;
         
-        // Total Active Motion (TAM) measurements
-        totalActiveRom: assessment.totalActiveRom,
-        tamScore: assessment.totalActiveRom,
+        if (parsedRepetitionData && Array.isArray(parsedRepetitionData)) {
+          const allFrames = [];
+          const qualityScores = [];
+          const timestamps = [];
+          
+          parsedRepetitionData.forEach((repetition: any) => {
+            if (repetition.motionData && Array.isArray(repetition.motionData)) {
+              repetition.motionData.forEach((frame: any) => {
+                allFrames.push({
+                  timestamp: frame.timestamp,
+                  handLandmarks: frame.landmarks,
+                  poseLandmarks: frame.poseLandmarks,
+                  quality: frame.quality,
+                  handedness: frame.handedness,
+                  wristAngles: frame.wristAngles,
+                  sessionHandType: frame.sessionHandType,
+                  sessionElbowLocked: frame.sessionElbowLocked
+                });
+                if (frame.quality) qualityScores.push(frame.quality);
+                if (frame.timestamp) timestamps.push(frame.timestamp);
+              });
+            }
+          });
+          
+          frameCount = allFrames.length;
+          
+          detailedMotionData = {
+            totalFrames: frameCount,
+            frameDuration: timestamps.length > 1 ? (Math.max(...timestamps) - Math.min(...timestamps)) : 0,
+            averageQuality: qualityScores.length > 0 ? (qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length) : 0,
+            frameData: allFrames, // Complete frame-by-frame motion data
+            repetitionBreakdown: parsedRepetitionData.map((rep: any, index: number) => ({
+              repetitionIndex: index,
+              duration: rep.duration,
+              frameCount: rep.motionData?.length || 0,
+              romData: rep.romData,
+              startTimestamp: rep.motionData?.[0]?.timestamp,
+              endTimestamp: rep.motionData?.[rep.motionData?.length - 1]?.timestamp
+            }))
+          };
+          
+          biomechanicalAnalysis = {
+            handTrackingConfidence: qualityScores.length > 0 ? {
+              average: qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length,
+              minimum: Math.min(...qualityScores),
+              maximum: Math.max(...qualityScores),
+              standardDeviation: qualityScores.length > 1 ? Math.sqrt(qualityScores.reduce((a, b) => a + Math.pow(b - (qualityScores.reduce((c, d) => c + d, 0) / qualityScores.length), 2), 0) / (qualityScores.length - 1)) : 0
+            } : null,
+            temporalAnalysis: timestamps.length > 1 ? {
+              totalDuration: Math.max(...timestamps) - Math.min(...timestamps),
+              framerate: frameCount / ((Math.max(...timestamps) - Math.min(...timestamps)) / 1000),
+              consistentTracking: true
+            } : null
+          };
+        }
         
-        // Individual finger ROM measurements
-        indexFingerRom: assessment.indexFingerRom,
-        middleFingerRom: assessment.middleFingerRom,
-        ringFingerRom: assessment.ringFingerRom,
-        pinkyFingerRom: assessment.pinkyFingerRom,
-        
-        // Maximum joint angles
-        maxMcpAngle: assessment.maxMcpAngle,
-        maxPipAngle: assessment.maxPipAngle,
-        maxDipAngle: assessment.maxDipAngle,
-        
-        // Individual finger joint angles
-        middleFingerMcp: assessment.middleFingerMcp,
-        middleFingerPip: assessment.middleFingerPip,
-        middleFingerDip: assessment.middleFingerDip,
-        ringFingerMcp: assessment.ringFingerMcp,
-        ringFingerPip: assessment.ringFingerPip,
-        ringFingerDip: assessment.ringFingerDip,
-        pinkyFingerMcp: assessment.pinkyFingerMcp,
-        pinkyFingerPip: assessment.pinkyFingerPip,
-        pinkyFingerDip: assessment.pinkyFingerDip,
-        
-        // Wrist measurements
-        wristFlexionAngle: assessment.wristFlexionAngle,
-        wristExtensionAngle: assessment.wristExtensionAngle,
-        maxWristFlexion: assessment.maxWristFlexion,
-        maxWristExtension: assessment.maxWristExtension,
-        
-        // DASH assessment data
-        dashScore: assessment.dashScore,
-        dashResponses: assessment.responses, // Complete DASH survey responses
-        
-        // Metadata for analysis
-        shareToken: assessment.shareToken
-      }))
+        return {
+          // Assessment identification
+          id: assessment.id,
+          assessmentId: assessment.assessmentId,
+          assessmentName: assessment.assessment?.name || 'Unknown Assessment',
+          completedAt: assessment.completedAt,
+          handType: assessment.handType,
+          isCompleted: assessment.isCompleted,
+          
+          // Original motion data (preserved for compatibility)
+          romData: parsedRomData,
+          repetitionData: parsedRepetitionData,
+          qualityScore: assessment.qualityScore,
+          
+          // Enhanced motion capture analysis
+          detailedMotionCapture: detailedMotionData,
+          biomechanicalAnalysis: biomechanicalAnalysis,
+          
+          // Total Active Motion (TAM) measurements
+          totalActiveRom: assessment.totalActiveRom,
+          tamScore: assessment.totalActiveRom,
+          
+          // Individual finger ROM measurements
+          fingerRomMeasurements: {
+            indexFinger: assessment.indexFingerRom,
+            middleFinger: assessment.middleFingerRom,
+            ringFinger: assessment.ringFingerRom,
+            pinkyFinger: assessment.pinkyFingerRom
+          },
+          
+          // Joint angle measurements
+          jointAngles: {
+            maximum: {
+              mcp: assessment.maxMcpAngle,
+              pip: assessment.maxPipAngle,
+              dip: assessment.maxDipAngle
+            },
+            individual: {
+              middleFinger: {
+                mcp: assessment.middleFingerMcp,
+                pip: assessment.middleFingerPip,
+                dip: assessment.middleFingerDip
+              },
+              ringFinger: {
+                mcp: assessment.ringFingerMcp,
+                pip: assessment.ringFingerPip,
+                dip: assessment.ringFingerDip
+              },
+              pinkyFinger: {
+                mcp: assessment.pinkyFingerMcp,
+                pip: assessment.pinkyFingerPip,
+                dip: assessment.pinkyFingerDip
+              }
+            }
+          },
+          
+          // Wrist measurements
+          wristMeasurements: {
+            flexionExtension: {
+              flexionAngle: assessment.wristFlexionAngle,
+              extensionAngle: assessment.wristExtensionAngle,
+              maxFlexion: assessment.maxWristFlexion,
+              maxExtension: assessment.maxWristExtension
+            }
+          },
+          
+          // DASH assessment data
+          dashAssessment: assessment.dashScore ? {
+            score: assessment.dashScore,
+            responses: parsedDashResponses,
+            completedAt: assessment.completedAt
+          } : null,
+          
+          // Metadata and sharing
+          metadata: {
+            shareToken: assessment.shareToken,
+            dataIntegrity: {
+              hasMotionData: !!parsedRepetitionData,
+              hasRomData: !!parsedRomData,
+              frameCount: frameCount,
+              assessmentDuration: detailedMotionData?.frameDuration || 0
+            }
+          }
+        };
+      })
     };
   }
 
