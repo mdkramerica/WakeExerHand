@@ -620,6 +620,12 @@ export default function Recording() {
                     <Lightbulb className="w-4 h-4 text-yellow-600 mr-2" />
                     Motion Demonstration
                   </h4>
+                  
+                  <div className="mb-3">
+                    <div className="bg-yellow-500 bg-opacity-90 text-white text-sm px-3 py-2 rounded font-medium text-center">
+                      FOLLOW ALONG
+                    </div>
+                  </div>
 
                   <div className="relative">
                     <video
@@ -629,7 +635,7 @@ export default function Recording() {
                       muted
                       playsInline
                       preload="metadata"
-                      className="w-full h-32 object-cover rounded-lg bg-gray-900 border"
+                      className="w-full h-48 object-cover rounded-lg bg-gray-900 border"
                       style={{ aspectRatio: '4/3' }}
                       onError={(e) => {
                         console.error('Video load error:', e, 'URL:', assessment.videoUrl);
@@ -643,9 +649,6 @@ export default function Recording() {
                     </video>
                     <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-medium">
                       DEMO
-                    </div>
-                    <div className="absolute top-2 left-2 bg-yellow-500 bg-opacity-90 text-white text-xs px-2 py-1 rounded font-medium">
-                      FOLLOW ALONG
                     </div>
                   </div>
                   <p className="text-gray-600 text-xs mt-2 text-center font-medium">
