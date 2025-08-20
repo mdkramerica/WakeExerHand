@@ -167,6 +167,7 @@ export default function Recording() {
             console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
             
             // Set up time monitoring interval (update every 100ms)  
+            console.log('🕒 Setting up timer interval...');
             recordingIntervalRef.current = setInterval(() => {
               const elapsed = (Date.now() - actualStartTime) / 1000;
               const remaining = Math.max(0, Math.ceil(15 - elapsed));
@@ -174,6 +175,7 @@ export default function Recording() {
               setRecordingTimer(remaining);
               console.log(`⏱️ TIMER UPDATE: ${remaining}s remaining (elapsed: ${elapsed.toFixed(1)}s)`);
             }, 100);
+            console.log('✅ Timer interval created:', recordingIntervalRef.current);
             
             // Force stop recording after exactly 15 seconds
             recordingTimeoutRef.current = setTimeout(() => {
@@ -637,7 +639,7 @@ export default function Recording() {
                         <span className="text-white text-sm font-medium">Recording</span>
                       </div>
                       <div className="text-white font-mono text-lg">
-                        {formatTime(recordingTimer)}
+                        {recordingTimer}s
                       </div>
                     </div>
                     
