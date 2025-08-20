@@ -195,16 +195,7 @@ export default function Recording() {
             // Force stop recording after exactly 15 seconds
             recordingTimeoutRef.current = setTimeout(() => {
               console.log('⏰ FORCE STOP: 15 seconds elapsed, terminating recording');
-              setIsRecording(false);
-              if (recordingIntervalRef.current) {
-                clearInterval(recordingIntervalRef.current);
-                recordingIntervalRef.current = null;
-              }
-              setTimeout(() => {
-                recordingStartTimeRef.current = null;
-                setRecordingStartTime(null);
-                handleRepetitionComplete();
-              }, 100);
+              stopRecording(); // Use the proper stop function instead of just setIsRecording(false)
             }, 15000); // Exactly 15 seconds
             // Keep the locked session hand type from record button press
             resetRecordingSession();
@@ -654,7 +645,7 @@ export default function Recording() {
                         <span className="text-white text-sm font-medium">Recording</span>
                       </div>
                       <div className="text-white font-mono text-lg">
-                        {recordingTimer}s
+                        {formatTime(recordingTimer)}
                       </div>
                     </div>
                     
@@ -748,7 +739,7 @@ export default function Recording() {
                   <div className="bg-gray-900 text-white px-4 py-2 rounded-lg">
                     <div className="text-center">
                       <div className="text-white text-xl font-mono">
-                        {formatTime(recordingTimer)}
+                        {recordingTimer}s remaining
                       </div>
                       <div className="text-red-400 text-xs mt-1">Recording...</div>
                     </div>
