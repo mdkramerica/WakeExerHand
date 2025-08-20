@@ -53,7 +53,9 @@ export default function VideoInstruction() {
   };
 
   const handleProceedToRecording = () => {
-    startAssessmentMutation.mutate();
+    console.log('🎬 VIDEO INSTRUCTION: Navigating to recording page (NO auto-start)');
+    // Remove the auto-start mutation - let the recording page handle it properly
+    // startAssessmentMutation.mutate(); // REMOVED: This was auto-starting recording
     const recordUrl = code ? `/assessment/${id}/record/${code}` : `/assessment/${id}/record`;
     setLocation(recordUrl);
   };
