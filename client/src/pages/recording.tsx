@@ -196,9 +196,6 @@ export default function Recording() {
           return prev - 1;
         });
       }, 1000);
-    } else if (isRecording) {
-      // Recording is now managed by time-based system, no interval needed
-      interval = null;
     }
     return () => {
       clearInterval(interval);
@@ -483,6 +480,24 @@ export default function Recording() {
       if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15 && data.handDetected && data.landmarks && data.landmarks.length > 0) {
         console.log(`Recording motion data: ${data.landmarks.length} landmarks detected, elapsed: ${recordingElapsed.toFixed(1)}s`);
         
+        // Create motion frame first
+        const motionFrame = {
+          timestamp: recordingElapsed,
+          landmarks: data.landmarks.map((landmark: any) => ({
+            x: parseFloat(landmark.x) || 0,
+            y: parseFloat(landmark.y) || 0,
+            z: parseFloat(landmark.z) || 0
+          })),
+          poseLandmarks: data.poseLandmarks || [],
+          wristAngles: data.wristAngles || null,
+          handedness: sessionHandType !== 'UNKNOWN' ? sessionHandType : (data.sessionHandType || data.lockedHandType || data.detectedHandSide || data.handType || "LEFT"),
+          sessionHandType: sessionHandType !== 'UNKNOWN' ? sessionHandType : (data.sessionHandType || data.lockedHandType || data.detectedHandSide || "LEFT"),
+          sessionElbowIndex: data.sessionElbowIndex,
+          cameraWidth: data.cameraWidth || 640,
+          cameraHeight: data.cameraHeight || 480,
+          qualityScore: 1.0
+        };
+        
         // Store successful frame for potential interpolation
         lastSuccessfulFrameRef.current = motionFrame;
         
@@ -498,37 +513,13 @@ export default function Recording() {
           return newCount;
         });
         
-        // Use elbow-referenced wrist angles from the tracker for wrist assessments
-        let frameWristAngles = null;
+        // Add wrist angle data if needed for wrist assessments  
         if (assessment?.name?.toLowerCase().includes('wrist') || assessment?.name?.toLowerCase().includes('flexion') || assessment?.name?.toLowerCase().includes('extension')) {
-          frameWristAngles = data.wristAngles; // Use the elbow-referenced calculation from holistic tracker
-          console.log(`🔍 RECORDING DEBUG - Frame wrist angles received:`, frameWristAngles);
-          if (frameWristAngles) {
-            console.log(`✅ Frame elbow-referenced wrist angles: Flexion=${frameWristAngles.wristFlexionAngle}°, Extension=${frameWristAngles.wristExtensionAngle}°, Hand=${frameWristAngles.handType}`);
-          } else {
-            console.log(`❌ No wrist angles received from holistic tracker during recording`);
+          if (data.wristAngles) {
+            motionFrame.wristAngles = data.wristAngles;
+            console.log(`✅ Added wrist angles to frame: Flexion=${data.wristAngles.wristFlexionAngle}°, Extension=${data.wristAngles.wristExtensionAngle}°`);
           }
         }
-        
-        const motionFrame = {
-          timestamp: currentTime,
-          landmarks: data.landmarks.map((landmark: any) => ({
-            x: parseFloat(landmark.x) || 0,
-            y: parseFloat(landmark.y) || 0,
-            z: parseFloat(landmark.z) || 0
-          })),
-          poseLandmarks: data.poseLandmarks || [],
-          wristAngles: frameWristAngles || data.wristAngles || null,
-          handedness: sessionHandType !== 'UNKNOWN' ? sessionHandType : (data.sessionHandType || data.lockedHandType || data.detectedHandSide || data.handType || "LEFT"),
-          sessionHandType: sessionHandType !== 'UNKNOWN' ? sessionHandType : (data.sessionHandType || data.lockedHandType || data.detectedHandSide || "LEFT"),
-          sessionElbowIndex: data.sessionElbowIndex,
-          sessionWristIndex: data.sessionWristIndex,
-          sessionElbowLocked: data.sessionElbowLocked,
-          quality: data.trackingQuality === "Excellent" ? 90 : data.trackingQuality === "Good" ? 70 : 50,
-          frameWidth: data.frameWidth || 640,
-          frameHeight: data.frameHeight || 480,
-          recordingResolution: data.recordingResolution || `${data.frameWidth || 640}x${data.frameHeight || 480}`
-        };
         
         setRecordingMotionData(prev => {
           const newData = [...prev, motionFrame];
