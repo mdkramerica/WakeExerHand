@@ -166,11 +166,13 @@ export default function Recording() {
             
             console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
             
-            // Set up time monitoring interval (update every 100ms)
+            // Set up time monitoring interval (update every 100ms)  
             recordingIntervalRef.current = setInterval(() => {
               const elapsed = (Date.now() - actualStartTime) / 1000;
+              const remaining = Math.max(0, Math.ceil(15 - elapsed));
               setRecordingElapsedTime(elapsed);
-              setRecordingTimer(Math.max(0, Math.ceil(15 - elapsed)));
+              setRecordingTimer(remaining);
+              console.log(`⏱️ TIMER UPDATE: ${remaining}s remaining (elapsed: ${elapsed.toFixed(1)}s)`);
             }, 100);
             
             // Force stop recording after exactly 15 seconds
@@ -191,7 +193,7 @@ export default function Recording() {
             resetRecordingSession();
             console.log('🔄 Recording started - maintaining locked hand type:', sessionHandType);
             setMaxROM({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
-            return 0;
+            return 15; // Start with 15 seconds, will be updated by time interval
           }
           return prev - 1;
         });
