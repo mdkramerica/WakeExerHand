@@ -146,6 +146,9 @@ export interface IStorage {
   getUserByCode(code: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  
+  // Access code validation methods
+  getPatientByAccessCode(accessCode: string): Promise<Patient | undefined>;
   deleteUser(id: number): Promise<boolean>;
   getAssessments(): Promise<Assessment[]>;
   getAssessmentsForInjury(injuryType: string): Promise<Assessment[]>;
@@ -1298,6 +1301,14 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async getPatientByAccessCode(accessCode: string): Promise<Patient | undefined> {
+    const [patient] = await db
+      .select()
+      .from(patients)
+      .where(eq(patients.accessCode, accessCode));
+    return patient || undefined;
+  }
+
   async deleteUser(id: number): Promise<boolean> {
     try {
       // Delete all user assessments first (cascade delete)
@@ -1879,6 +1890,12 @@ export class MemStorage implements IStorage {
   }
   async deleteUser(id: number): Promise<boolean> {
     return this.users.delete(id);
+  }
+
+  async getPatientByAccessCode(accessCode: string): Promise<Patient | undefined> {
+    // Memory storage doesn't have patients table, so return undefined
+    // This will fall back to legacy behavior for development
+    return undefined;
   }
   async getAssessmentsForInjuryType(injuryType: string): Promise<Assessment[]> {
     return this.getAssessmentsForInjury(injuryType);

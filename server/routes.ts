@@ -564,11 +564,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code } = z.object({ code: z.string().min(6) }).parse(req.body);
       
+      // First check if this access code was created by an admin
+      const adminCreatedPatient = await storage.getPatientByAccessCode(code);
+      
+      if (!adminCreatedPatient) {
+        return res.status(404).json({ message: "Access code not found. Please contact your healthcare provider." });
+      }
+      
+      // Access code is valid, now check if user already exists
       let user = await storage.getUserByCode(code);
       
       if (!user) {
-        // Create new user with any valid 6-digit code
-        user = await storage.createUser({ code });
+        // Create new user with the validated access code and patient data
+        user = await storage.createUser({ 
+          code,
+          injuryType: adminCreatedPatient.injuryType,
+          isFirstTime: true
+        });
         
         if (!user) {
           return res.status(400).json({ message: "Failed to create user" });
@@ -581,6 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasInjuryType: !!user.injuryType 
       });
     } catch (error) {
+      console.error('Verify code error:', error);
       res.status(400).json({ message: "Invalid code format" });
     }
   });
