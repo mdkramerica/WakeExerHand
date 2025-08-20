@@ -700,16 +700,13 @@ export default function Recording() {
                 
                 {/* Countdown timer overlay during countdown */}
                 {isCountingDown && (
-                  <div className="absolute top-4 left-4">
-                    <div className="bg-black bg-opacity-90 rounded-lg px-4 py-3">
-                      <div className="text-center">
-                        <div className="text-yellow-400 text-2xl font-bold font-mono">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 z-10">
+                    <div className="bg-red-600 rounded-full w-32 h-32 flex items-center justify-center shadow-2xl animate-pulse">
+                      <div className="text-center text-white">
+                        <div className="text-6xl font-bold font-mono">
                           {countdownTimer}
                         </div>
-                        <div className="text-white text-xs mt-1">Get Ready</div>
-                        <div className="text-gray-300 text-xs mt-2">
-                          🎯 Target: 450+ frames
-                        </div>
+                        <div className="text-sm mt-2">Get Ready</div>
                       </div>
                     </div>
                   </div>
@@ -733,8 +730,8 @@ export default function Recording() {
                     <span className="text-lg font-semibold">RECORD</span>
                   </Button>
                 ) : isCountingDown ? (
-                  <div className="px-8 py-4 rounded-lg bg-yellow-500 flex items-center justify-center shadow-lg">
-                    <div className="text-white text-xl font-bold">{countdownTimer}</div>
+                  <div className="px-8 py-4 rounded-lg bg-yellow-500 flex items-center justify-center shadow-lg animate-pulse">
+                    <div className="text-white text-xl font-bold">Starting in {countdownTimer}...</div>
                   </div>
                 ) : (
                   <Button
