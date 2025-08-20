@@ -564,27 +564,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { code } = z.object({ code: z.string().min(6) }).parse(req.body);
       
-      // First check if this access code was created by an admin
+      // Check if user already exists (legacy users or returning patients)
+      let user = await storage.getUserByCode(code);
+      
+      if (user) {
+        // Existing user found - allow login
+        res.json({ 
+          user, 
+          isFirstTime: user.isFirstTime !== false,
+          hasInjuryType: !!user.injuryType 
+        });
+        return;
+      }
+      
+      // User doesn't exist, check if this is a valid admin-created access code
       const adminCreatedPatient = await storage.getPatientByAccessCode(code);
       
       if (!adminCreatedPatient) {
         return res.status(404).json({ message: "Access code not found. Please contact your healthcare provider." });
       }
       
-      // Access code is valid, now check if user already exists
-      let user = await storage.getUserByCode(code);
+      // Valid admin-created code, create new user
+      user = await storage.createUser({ 
+        code,
+        injuryType: adminCreatedPatient.injuryType,
+        isFirstTime: true
+      });
       
       if (!user) {
-        // Create new user with the validated access code and patient data
-        user = await storage.createUser({ 
-          code,
-          injuryType: adminCreatedPatient.injuryType,
-          isFirstTime: true
-        });
-        
-        if (!user) {
-          return res.status(400).json({ message: "Failed to create user" });
-        }
+        return res.status(400).json({ message: "Failed to create user" });
       }
       
       res.json({ 
