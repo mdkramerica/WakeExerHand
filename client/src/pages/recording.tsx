@@ -138,11 +138,15 @@ export default function Recording() {
   const assessment = (assessmentData as any)?.assessment;
 
   useEffect(() => {
+    console.log(`🔍 USEEFFECT TRIGGERED: isCountingDown=${isCountingDown}, isRecording=${isRecording}`);
     let interval: NodeJS.Timeout;
     if (isCountingDown) {
+      console.log('✅ Countdown started - setting up interval');
       interval = setInterval(() => {
         setCountdownTimer((prev: number) => {
+          console.log(`⏰ COUNTDOWN TICK: ${prev} seconds remaining`);
           if (prev <= 1) {
+            console.log('🎯 COUNTDOWN COMPLETE - Starting recording!');
             setIsCountingDown(false);
             setIsRecording(true);
             setRecordingTimer(15); // 15 second recording duration
