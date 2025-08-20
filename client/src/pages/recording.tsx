@@ -147,8 +147,9 @@ export default function Recording() {
 
   const assessment = (assessmentData as any)?.assessment;
 
+  // Countdown timer effect - handles 3-2-1 countdown
   useEffect(() => {
-    console.log(`🔍 USEEFFECT TRIGGERED: isCountingDown=${isCountingDown}, isRecording=${isRecording}`);
+    console.log(`🔍 COUNTDOWN USEEFFECT: isCountingDown=${isCountingDown}`);
     let interval: NodeJS.Timeout;
     if (isCountingDown) {
       console.log('✅ Countdown started - setting up interval');
@@ -159,8 +160,10 @@ export default function Recording() {
             console.log('🎯 COUNTDOWN COMPLETE - Starting recording!');
             setIsCountingDown(false);
             console.log('🎯 COUNTDOWN COMPLETE - Setting isRecording to TRUE');
+            
+            // Initialize recording state
             setIsRecording(true);
-            setRecordingTimer(15); // 15 second recording duration
+            setRecordingTimer(15);
             const startTime = Date.now();
             recordingStartTimeRef.current = startTime;
             setRecordingMotionData([]);
@@ -174,52 +177,72 @@ export default function Recording() {
             setRecordingQualityWarning('');
             
             // Initialize time-based recording
-            const actualStartTime = Date.now();
-            setRecordingStartTime(actualStartTime);
+            setRecordingStartTime(startTime);
             setRecordingElapsedTime(0);
             lastSuccessfulFrameRef.current = null;
             
-            console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
-            
-            // Set up time monitoring interval (update every 100ms)  
-            console.log('🕒 Setting up timer interval...');
-            recordingIntervalRef.current = setInterval(() => {
-              const elapsed = (Date.now() - actualStartTime) / 1000;
-              const remaining = Math.max(0, Math.ceil(15 - elapsed));
-              setRecordingElapsedTime(elapsed);
-              setRecordingTimer(remaining);
-              console.log(`⏱️ TIMER UPDATE: ${remaining}s remaining (elapsed: ${elapsed.toFixed(1)}s)`);
-            }, 100);
-            console.log('✅ Timer interval created:', recordingIntervalRef.current);
-            
-            // Force stop recording after exactly 15 seconds
-            recordingTimeoutRef.current = setTimeout(() => {
-              console.log('⏰ FORCE STOP: 15 seconds elapsed, terminating recording');
-              stopRecording(); // Use the proper stop function instead of just setIsRecording(false)
-            }, 15000); // Exactly 15 seconds
             // Keep the locked session hand type from record button press
             resetRecordingSession();
             console.log('🔄 Recording started - maintaining locked hand type:', sessionHandType);
             setMaxROM({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
-            return 15; // Start with 15 seconds, will be updated by time interval
+            
+            console.log('🎬 RECORDING INITIALIZED - Timer will be started by recording effect');
+            return 0; // Reset countdown
           }
           return prev - 1;
         });
       }, 1000);
     }
     return () => {
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
+    };
+  }, [isCountingDown]);
+
+  // Recording timer effect - handles 15-second countdown and auto-stop
+  useEffect(() => {
+    console.log(`🔍 RECORDING USEEFFECT: isRecording=${isRecording}`);
+    if (isRecording && recordingStartTimeRef.current) {
+      const actualStartTime = recordingStartTimeRef.current;
+      console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
+      
+      // Set up time monitoring interval (update every 100ms)  
+      console.log('🕒 Setting up timer interval...');
+      recordingIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - actualStartTime) / 1000;
+        const remaining = Math.max(0, Math.ceil(15 - elapsed));
+        setRecordingElapsedTime(elapsed);
+        setRecordingTimer(remaining);
+        console.log(`⏱️ TIMER UPDATE: ${remaining}s remaining (elapsed: ${elapsed.toFixed(1)}s)`);
+        
+        // Auto-stop when timer reaches 0
+        if (remaining <= 0) {
+          console.log('⏰ TIMER REACHED 0 - Auto-stopping recording');
+          stopRecording();
+        }
+      }, 100);
+      console.log('✅ Timer interval created:', recordingIntervalRef.current);
+      
+      // Force stop recording after exactly 15 seconds as backup
+      recordingTimeoutRef.current = setTimeout(() => {
+        console.log('⏰ FORCE STOP: 15 seconds elapsed, terminating recording');
+        stopRecording();
+      }, 15000);
+    }
+    
+    return () => {
       // Cleanup time-based recording intervals
       if (recordingIntervalRef.current) {
+        console.log('🧹 Cleaning up recording timer interval');
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;
       }
       if (recordingTimeoutRef.current) {
+        console.log('🧹 Cleaning up recording timeout');
         clearTimeout(recordingTimeoutRef.current);
         recordingTimeoutRef.current = null;
       }
     };
-  }, [isRecording, isCountingDown]);
+  }, [isRecording]);
 
   const startRecording = () => {
     // Lock the current detected hand type immediately when record button is pressed
@@ -233,17 +256,22 @@ export default function Recording() {
   };
 
   const stopRecording = () => {
-    setIsRecording(false);
+    console.log('⏸️ STOP RECORDING: Manual/Auto stop requested');
     
-    // Clean up time-based recording intervals
+    // Clear intervals first to prevent further updates
     if (recordingIntervalRef.current) {
+      console.log('🧹 Clearing recording timer interval');
       clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = null;
     }
     if (recordingTimeoutRef.current) {
+      console.log('🧹 Clearing recording timeout');
       clearTimeout(recordingTimeoutRef.current);
       recordingTimeoutRef.current = null;
     }
+    
+    // Update state
+    setIsRecording(false);
     
     // Validate recording quality
     const captureRate = expectedFrames > 0 ? (framesCaptured / expectedFrames) * 100 : 0;
