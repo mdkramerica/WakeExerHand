@@ -31,6 +31,13 @@ export default function Recording() {
   const [recordingMotionData, setRecordingMotionData] = useState<any[]>([]);
   const recordingMotionDataRef = useRef<any[]>([]);
   const recordingStartTimeRef = useRef<number | null>(null);
+  
+  // Motion capture monitoring
+  const [framesCaptured, setFramesCaptured] = useState(0);
+  const [expectedFrames, setExpectedFrames] = useState(0);
+  const [lastFrameTime, setLastFrameTime] = useState<number | null>(null);
+  const [handDetectionLost, setHandDetectionLost] = useState(false);
+  const [recordingQualityWarning, setRecordingQualityWarning] = useState('');
   const [currentROM, setCurrentROM] = useState<JointAngles>({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
   const [maxROM, setMaxROM] = useState<JointAngles>({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
   const [allFingersROM, setAllFingersROM] = useState({
@@ -136,6 +143,15 @@ export default function Recording() {
             recordingStartTimeRef.current = startTime;
             setRecordingMotionData([]);
             recordingMotionDataRef.current = [];
+            
+            // Initialize motion capture tracking
+            setFramesCaptured(0);
+            setExpectedFrames(0);
+            setLastFrameTime(null);
+            setHandDetectionLost(false);
+            setRecordingQualityWarning('');
+            
+            console.log('🎬 RECORDING STARTED: Monitoring motion capture quality');
             // Keep the locked session hand type from record button press
             resetRecordingSession();
             console.log('🔄 Recording started - maintaining locked hand type:', sessionHandType);
@@ -150,12 +166,26 @@ export default function Recording() {
         setRecordingTimer((prev: number) => {
           if (prev <= 0) {
             setIsRecording(false);
+            console.log(`🏁 RECORDING COMPLETE: ${framesCaptured} frames captured vs ${expectedFrames} expected`);
+            
+            // Validate recording quality
+            const captureRate = expectedFrames > 0 ? (framesCaptured / expectedFrames) * 100 : 0;
+            if (captureRate < 80) {
+              setRecordingQualityWarning(`Warning: Only ${framesCaptured}/${expectedFrames} frames captured (${captureRate.toFixed(1)}%)`);
+              console.log(`⚠️ LOW CAPTURE RATE: ${captureRate.toFixed(1)}% - Expected ~450 frames for 15s recording`);
+            }
+            
             setTimeout(() => {
               recordingStartTimeRef.current = null;
               handleRepetitionComplete();
             }, 100);
             return 15; // 15 second recording duration
           }
+          
+          // Update expected frame count (30 FPS target)
+          const secondsElapsed = 15 - prev + 1;
+          setExpectedFrames(Math.round(secondsElapsed * 30));
+          
           return prev - 1;
         });
       }, 1000);
@@ -277,6 +307,26 @@ export default function Recording() {
     console.log(`MediaPipe update: handDetected=${data.handDetected}, landmarks=${data.landmarks ? data.landmarks.length : 'none'}, isRecording=${isRecording}, elapsed=${recordingElapsed.toFixed(1)}s, startTime=${recordingStartTimeRef.current}`);
     console.log(`Current user injury type: ${currentUser?.injuryType}`);
     
+    // Monitor hand detection during recording
+    if (isRecording && recordingStartTimeRef.current) {
+      const timeSinceLastFrame = lastFrameTime ? currentTime - lastFrameTime : 0;
+      
+      if (!data.handDetected || !data.landmarks || data.landmarks.length === 0) {
+        // Hand detection lost - warn user if it's been too long
+        if (timeSinceLastFrame > 2000) { // 2 seconds without detection
+          setHandDetectionLost(true);
+          console.log(`⚠️ HAND DETECTION LOST for ${(timeSinceLastFrame/1000).toFixed(1)}s during recording`);
+        }
+      } else {
+        // Hand detection recovered
+        if (handDetectionLost) {
+          setHandDetectionLost(false);
+          console.log('✅ HAND DETECTION RECOVERED');
+        }
+        setLastFrameTime(currentTime);
+      }
+    }
+    
     setHandDetected(data.handDetected);
     setLandmarksCount(data.landmarksCount);
     setTrackingQuality(data.trackingQuality);
@@ -391,6 +441,18 @@ export default function Recording() {
       if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15 && data.handDetected && data.landmarks && data.landmarks.length > 0) {
         console.log(`Recording motion data: ${data.landmarks.length} landmarks detected, elapsed: ${recordingElapsed.toFixed(1)}s`);
         
+        // Update frame capture tracking
+        setFramesCaptured(prev => {
+          const newCount = prev + 1;
+          // Log frame capture progress every 30 frames (1 second)
+          if (newCount % 30 === 0) {
+            const expectedAtThisTime = Math.round(recordingElapsed * 30);
+            const captureRate = (newCount / expectedAtThisTime) * 100;
+            console.log(`🎬 CAPTURE PROGRESS: ${newCount} frames (${captureRate.toFixed(1)}% of expected)`);
+          }
+          return newCount;
+        });
+        
         // Use elbow-referenced wrist angles from the tracker for wrist assessments
         let frameWristAngles = null;
         if (assessment?.name?.toLowerCase().includes('wrist') || assessment?.name?.toLowerCase().includes('flexion') || assessment?.name?.toLowerCase().includes('extension')) {
@@ -431,6 +493,9 @@ export default function Recording() {
         
         // Also update ref for immediate access
         recordingMotionDataRef.current.push(motionFrame);
+        
+        // Update last successful frame time
+        setLastFrameTime(currentTime);
       } else if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15) {
         console.log(`Recording period but no valid landmarks: handDetected=${data.handDetected}, landmarks=${data.landmarks ? data.landmarks.length : 'none'}, elapsed=${recordingElapsed.toFixed(1)}s`);
       }
@@ -505,9 +570,9 @@ export default function Recording() {
                   showSkeletonOverlay={showSkeletonOverlay}
                 />
                 
-                {/* Recording indicator with countdown timer */}
+                {/* Recording indicator with countdown timer and frame tracking */}
                 {isRecording && (
-                  <div className="absolute top-4 left-4 bg-black bg-opacity-75 rounded-lg px-4 py-2">
+                  <div className="absolute top-4 left-4 bg-black bg-opacity-90 rounded-lg px-4 py-3 space-y-2">
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-red-500 rounded-full recording-indicator"></div>
@@ -517,7 +582,32 @@ export default function Recording() {
                         {formatTime(recordingTimer)}
                       </div>
                     </div>
-                    <div className="text-center mt-1">
+                    
+                    {/* Frame capture progress */}
+                    <div className="text-white text-sm">
+                      <div className="flex items-center space-x-2">
+                        <span>🎬</span>
+                        <span>Frames: {framesCaptured}/{expectedFrames}</span>
+                        {expectedFrames > 0 && (
+                          <span className={`font-mono ${
+                            (framesCaptured / expectedFrames) >= 0.8 ? 'text-green-400' : 
+                            (framesCaptured / expectedFrames) >= 0.6 ? 'text-yellow-400' : 'text-red-400'
+                          }`}>
+                            ({((framesCaptured / expectedFrames) * 100).toFixed(0)}%)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Hand detection warning */}
+                    {handDetectionLost && (
+                      <div className="flex items-center space-x-2 text-yellow-300">
+                        <span>⚠️</span>
+                        <span className="text-xs">Place hand in view</span>
+                      </div>
+                    )}
+                    
+                    <div className="text-center">
                       <div className="text-gray-300 text-xs">
                         {recordingTimer}s remaining
                       </div>
@@ -536,12 +626,15 @@ export default function Recording() {
                 {/* Countdown timer overlay during countdown */}
                 {isCountingDown && (
                   <div className="absolute top-4 left-4">
-                    <div className="bg-black bg-opacity-90 rounded-lg px-4 py-2">
+                    <div className="bg-black bg-opacity-90 rounded-lg px-4 py-3">
                       <div className="text-center">
                         <div className="text-yellow-400 text-2xl font-bold font-mono">
                           {countdownTimer}
                         </div>
                         <div className="text-white text-xs mt-1">Get Ready</div>
+                        <div className="text-gray-300 text-xs mt-2">
+                          🎯 Target: 450+ frames
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -843,6 +936,25 @@ export default function Recording() {
               </div>
             </div>
           </div>
+          
+          {/* Recording quality warning */}
+          {recordingQualityWarning && (
+            <div className="mt-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">⚠️</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-yellow-800">Recording Quality Notice</h3>
+                  <p className="text-yellow-700">{recordingQualityWarning}</p>
+                  <p className="text-yellow-600 text-sm mt-1">
+                    For best results, keep your hand clearly visible throughout the recording. You may want to record another repetition.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+          
         </CardContent>
       </Card>
     </div>
