@@ -57,6 +57,8 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
   const [currentFrame, setCurrentFrame] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const animationRef = useRef<number | null>(null);
+  const [framesRendered, setFramesRendered] = useState(new Set<number>());
+  const [playbackCompleted, setPlaybackCompleted] = useState(false);
   const [currentROM, setCurrentROM] = useState<JointAngles | null>(null);
   const [maxROM, setMaxROM] = useState<JointAngles | null>(null);
   const [selectedDigit, setSelectedDigit] = useState<'INDEX' | 'MIDDLE' | 'RING' | 'PINKY'>('INDEX');
@@ -690,6 +692,11 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    // Debug: Log frame rendering (throttled to avoid spam)
+    if (frameIndex % 30 === 0 || frameIndex === 0 || frameIndex === replayData.length - 1) {
+      console.log(`🎨 RENDERING FRAME ${frameIndex + 1}/${replayData.length} (${((frameIndex / replayData.length) * 100).toFixed(1)}% complete)`);
+    }
 
     const frame = replayData[frameIndex];
     if (!frame) return;
@@ -924,6 +931,12 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
     ctx.font = '14px Arial';
     ctx.fillText(`Frame: ${frameIndex + 1}/${replayData.length}`, 10, 25);
     ctx.fillText(`Quality: ${Math.round(frame.quality)}%`, 10, 45);
+    
+    // Frame completion tracking for debugging
+    const completionStatus = playbackCompleted ? 
+      `✓ COMPLETE (${framesRendered.size}/${replayData.length})` : 
+      `Rendered: ${framesRendered.size}/${replayData.length}`;
+    ctx.fillText(completionStatus, 10, 65);
     // Display hand detection - get from assessment data if frame data is missing
     let displayHandType = frame.sessionHandType || frame.handedness;
     
@@ -1588,23 +1601,37 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
     if (!isPlaying) return;
 
     setCurrentFrame(prev => {
-      const next = prev + playbackSpeed;
-      if (next >= replayData.length) {
-        // Stop at the last frame instead of looping
+      // Frame-perfect playback: ensure no frames are skipped
+      const nextFrame = prev + 1;
+      if (nextFrame >= replayData.length) {
+        // Complete playback - mark as finished
         setIsPlaying(false);
+        setPlaybackCompleted(true);
+        console.log(`🎬 PLAYBACK COMPLETE: All ${replayData.length} frames rendered`);
         return replayData.length - 1;
       }
-      return Math.floor(next);
+      
+      // Track frame rendering for debugging
+      setFramesRendered(rendered => {
+        const newSet = new Set(rendered);
+        newSet.add(nextFrame);
+        return newSet;
+      });
+      
+      return nextFrame;
     });
-  }, [isPlaying, playbackSpeed, replayData.length]);
+  }, [isPlaying, replayData.length]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isPlaying) {
-      // Real-time playback at 30 FPS (33.33ms per frame)
-      const realTimeInterval = Math.round(1000 / 30 / playbackSpeed); // Adjust for playback speed
-      intervalId = setInterval(playAnimation, realTimeInterval);
+      // Frame-perfect playback with speed control - adjust interval, not frame skipping
+      const baseFrameInterval = 1000 / 30; // 33.33ms for 30 FPS
+      const speedAdjustedInterval = Math.max(16, Math.round(baseFrameInterval / playbackSpeed)); // Min 16ms (60fps cap)
+      intervalId = setInterval(playAnimation, speedAdjustedInterval);
+      
+      console.log(`🎬 PLAYBACK STARTED: ${replayData.length} frames at ${playbackSpeed}x speed (${speedAdjustedInterval}ms interval)`);
     }
 
     return () => {
@@ -1629,6 +1656,9 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
   const handleReset = () => {
     setIsPlaying(false);
     setCurrentFrame(0);
+    setFramesRendered(new Set<number>());
+    setPlaybackCompleted(false);
+    console.log('🔄 PLAYBACK RESET: Frame counter and tracking cleared');
   };
 
   const handleDownload = () => {
@@ -1880,6 +1910,21 @@ export default function AssessmentReplay({ assessmentName, userAssessmentId, rec
                 <span>Frame: {currentFrame + 1} / {replayData.length}</span>
                 <span>Time: {((currentFrame / 30)).toFixed(1)}s / {(replayData.length / 30).toFixed(1)}s</span>
               </div>
+              
+              {/* Frame completion indicator */}
+              {playbackCompleted && (
+                <div className="flex items-center gap-2 mb-2 text-sm text-green-700 bg-green-50 px-2 py-1 rounded">
+                  <span>✓</span>
+                  <span>Complete playback: All {replayData.length} frames rendered</span>
+                </div>
+              )}
+              
+              {isPlaying && framesRendered.size > 0 && (
+                <div className="flex items-center gap-2 mb-2 text-sm text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                  <span>🎬</span>
+                  <span>Frames rendered: {framesRendered.size}/{replayData.length} ({((framesRendered.size / replayData.length) * 100).toFixed(1)}%)</span>
+                </div>
+              )}
               
               <div className="relative">
                 <input

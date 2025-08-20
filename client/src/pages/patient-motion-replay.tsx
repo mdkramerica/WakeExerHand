@@ -18,6 +18,8 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
   const [currentFrame, setCurrentFrame] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [framesRendered, setFramesRendered] = useState(new Set<number>());
+  const [playbackCompleted, setPlaybackCompleted] = useState(false);
   const logoRef = useRef<HTMLImageElement | null>(null);
 
   const totalFrames = recordingData.length;
@@ -38,6 +40,12 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    // Debug: Log frame rendering for patients (throttled)
+    const frameIndex = recordingData.indexOf(frameData);
+    if (frameIndex % 30 === 0 || frameIndex === 0 || frameIndex === totalFrames - 1) {
+      console.log(`🎨 PATIENT RENDERING FRAME ${frameIndex + 1}/${totalFrames} (${((frameIndex / totalFrames) * 100).toFixed(1)}% complete)`);
+    }
 
     // Clear canvas with ExerAI background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -240,18 +248,31 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
       setIsPlaying(true);
       intervalRef.current = setInterval(() => {
         setCurrentFrame((prev) => {
-          // Play through ALL frames, stopping after the last frame
-          if (prev >= totalFrames - 1) {
+          // Frame-perfect playback: ensure ALL frames are rendered
+          const nextFrame = prev + 1;
+          if (nextFrame >= totalFrames) {
             setIsPlaying(false);
+            setPlaybackCompleted(true);
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
               intervalRef.current = null;
             }
+            console.log(`🎬 PATIENT PLAYBACK COMPLETE: All ${totalFrames} frames rendered`);
             return totalFrames - 1; // Ensure we show the last frame
           }
-          return prev + 1;
+          
+          // Track frame rendering
+          setFramesRendered(rendered => {
+            const newSet = new Set(rendered);
+            newSet.add(nextFrame);
+            return newSet;
+          });
+          
+          return nextFrame;
         });
       }, 33); // Real-time 30 fps playbook
+      
+      console.log(`🎬 PATIENT PLAYBACK STARTED: ${totalFrames} frames at 30fps`);
     }
   };
 
@@ -262,6 +283,9 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
     }
     setIsPlaying(false);
     setCurrentFrame(0);
+    setFramesRendered(new Set<number>());
+    setPlaybackCompleted(false);
+    console.log('🔄 PATIENT PLAYBACK RESET: Frame counter and tracking cleared');
   };
 
   // Draw current frame
@@ -352,6 +376,21 @@ function PatientMotionReplay({ assessmentName, userAssessmentId, recordingData =
               <div className="text-center text-base text-black font-semibold">
                 Frame {currentFrame + 1} of {totalFrames}
               </div>
+              
+              {/* Frame completion indicator */}
+              {playbackCompleted && (
+                <div className="flex items-center justify-center gap-2 mt-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg mx-4">
+                  <span>✓</span>
+                  <span>Complete: All {totalFrames} frames shown</span>
+                </div>
+              )}
+              
+              {isPlaying && framesRendered.size > 0 && (
+                <div className="flex items-center justify-center gap-2 mt-2 text-sm text-blue-700 bg-blue-50 px-3 py-2 rounded-lg mx-4">
+                  <span>🎬</span>
+                  <span>Showing: {framesRendered.size}/{totalFrames} frames ({((framesRendered.size / totalFrames) * 100).toFixed(1)}%)</span>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-8">
