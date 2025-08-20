@@ -13,11 +13,13 @@ import { calculateWristAngles } from "@shared/wrist-calculator";
 import { calculateElbowReferencedWristAngle, calculateMaxElbowWristAngles, resetRecordingSession } from "@shared/elbow-wrist-calculator";
 
 export default function Recording() {
+  console.log('🚀 RECORDING COMPONENT MOUNTED/RENDERED');
   const { id, code } = useParams();
   const queryClient = useQueryClient();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentRepetition, setCurrentRepetition] = useState(1);
   const [isRecording, setIsRecording] = useState(false);
+  console.log(`🔄 RECORDING STATE: isRecording=${isRecording}`);
   const [recordingTimer, setRecordingTimer] = useState(0);
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
@@ -711,7 +713,10 @@ export default function Recording() {
               <div className="flex items-center justify-center space-x-4">
                 {!isRecording && !isCountingDown ? (
                   <Button
-                    onClick={startRecording}
+                    onClick={() => {
+                      console.log('🎯 BUTTON CLICKED: Calling startRecording...');
+                      startRecording();
+                    }}
                     disabled={!handDetected}
                     className="bg-red-500 text-white px-8 py-4 rounded-lg flex items-center justify-center hover:bg-red-600 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
