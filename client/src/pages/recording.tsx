@@ -19,15 +19,7 @@ export default function Recording() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentRepetition, setCurrentRepetition] = useState(1);
   const [isRecording, setIsRecording] = useState(false);
-  console.log(`🔄 RECORDING STATE: isRecording=${isRecording}`);
   
-  // Monitor when isRecording changes
-  useEffect(() => {
-    console.log(`⚡ RECORDING STATE CHANGED: isRecording=${isRecording}`);
-    if (isRecording) {
-      console.log('🚨 RECORDING BECAME TRUE - Stack trace:', new Error().stack);
-    }
-  }, [isRecording]);
   const [recordingTimer, setRecordingTimer] = useState(0);
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
@@ -149,17 +141,12 @@ export default function Recording() {
 
   // Countdown timer effect - handles 3-2-1 countdown
   useEffect(() => {
-    console.log(`🔍 COUNTDOWN USEEFFECT: isCountingDown=${isCountingDown}`);
     let interval: NodeJS.Timeout;
     if (isCountingDown) {
-      console.log('✅ Countdown started - setting up interval');
       interval = setInterval(() => {
         setCountdownTimer((prev: number) => {
-          console.log(`⏰ COUNTDOWN TICK: ${prev} seconds remaining`);
           if (prev <= 1) {
-            console.log('🎯 COUNTDOWN COMPLETE - Starting recording!');
             setIsCountingDown(false);
-            console.log('🎯 COUNTDOWN COMPLETE - Setting isRecording to TRUE');
             
             // Initialize recording state
             setIsRecording(true);
@@ -183,10 +170,7 @@ export default function Recording() {
             
             // Keep the locked session hand type from record button press
             resetRecordingSession();
-            console.log('🔄 Recording started - maintaining locked hand type:', sessionHandType);
             setMaxROM({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
-            
-            console.log('🎬 RECORDING INITIALIZED - Timer will be started by recording effect');
             return 0; // Reset countdown
           }
           return prev - 1;
@@ -200,31 +184,24 @@ export default function Recording() {
 
   // Recording timer effect - handles 15-second countdown and auto-stop
   useEffect(() => {
-    console.log(`🔍 RECORDING USEEFFECT: isRecording=${isRecording}`);
     if (isRecording && recordingStartTimeRef.current) {
       const actualStartTime = recordingStartTimeRef.current;
-      console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
       
       // Set up time monitoring interval (update every 100ms)  
-      console.log('🕒 Setting up timer interval...');
       recordingIntervalRef.current = setInterval(() => {
         const elapsed = (Date.now() - actualStartTime) / 1000;
         const remaining = Math.max(0, Math.ceil(15 - elapsed));
         setRecordingElapsedTime(elapsed);
         setRecordingTimer(remaining);
-        console.log(`⏱️ TIMER UPDATE: ${remaining}s remaining (elapsed: ${elapsed.toFixed(1)}s)`);
         
         // Auto-stop when timer reaches 0
         if (remaining <= 0) {
-          console.log('⏰ TIMER REACHED 0 - Auto-stopping recording');
           stopRecording();
         }
       }, 100);
-      console.log('✅ Timer interval created:', recordingIntervalRef.current);
       
       // Force stop recording after exactly 15 seconds as backup
       recordingTimeoutRef.current = setTimeout(() => {
-        console.log('⏰ FORCE STOP: 15 seconds elapsed, terminating recording');
         stopRecording();
       }, 15000);
     }
@@ -232,12 +209,10 @@ export default function Recording() {
     return () => {
       // Cleanup time-based recording intervals
       if (recordingIntervalRef.current) {
-        console.log('🧹 Cleaning up recording timer interval');
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;
       }
       if (recordingTimeoutRef.current) {
-        console.log('🧹 Cleaning up recording timeout');
         clearTimeout(recordingTimeoutRef.current);
         recordingTimeoutRef.current = null;
       }
@@ -248,24 +223,18 @@ export default function Recording() {
     // Lock the current detected hand type immediately when record button is pressed
     const currentDetectedHand = detectedHandType !== 'UNKNOWN' ? detectedHandType : 'LEFT';
     setSessionHandType(currentDetectedHand);
-    console.log(`🔒 RECORD BUTTON PRESSED - Locking hand type to: ${currentDetectedHand}`);
     
     setIsCountingDown(true);
     setCountdownTimer(3); // 3 second countdown
-    console.log('Starting 3 second countdown...');
   };
 
   const stopRecording = () => {
-    console.log('⏸️ STOP RECORDING: Manual/Auto stop requested');
-    
     // Clear intervals first to prevent further updates
     if (recordingIntervalRef.current) {
-      console.log('🧹 Clearing recording timer interval');
       clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = null;
     }
     if (recordingTimeoutRef.current) {
-      console.log('🧹 Clearing recording timeout');
       clearTimeout(recordingTimeoutRef.current);
       recordingTimeoutRef.current = null;
     }
@@ -277,9 +246,6 @@ export default function Recording() {
     const captureRate = expectedFrames > 0 ? (framesCaptured / expectedFrames) * 100 : 0;
     if (captureRate < 80) {
       setRecordingQualityWarning(`Warning: Only ${framesCaptured}/${expectedFrames} frames captured (${captureRate.toFixed(1)}%)`);
-      console.log(`⚠️ LOW CAPTURE RATE: ${captureRate.toFixed(1)}% - Expected 450 frames for 15s recording`);
-    } else {
-      console.log(`✅ GOOD CAPTURE RATE: ${framesCaptured}/${expectedFrames} frames (${captureRate.toFixed(1)}%)`);
     }
     
     // Delay clearing start time to allow final motion data capture
