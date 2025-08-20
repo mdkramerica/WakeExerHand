@@ -38,6 +38,13 @@ export default function Recording() {
   const [lastFrameTime, setLastFrameTime] = useState<number | null>(null);
   const [handDetectionLost, setHandDetectionLost] = useState(false);
   const [recordingQualityWarning, setRecordingQualityWarning] = useState('');
+  
+  // Time-based recording control
+  const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
+  const [recordingElapsedTime, setRecordingElapsedTime] = useState(0);
+  const recordingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSuccessfulFrameRef = useRef<any>(null);
   const [currentROM, setCurrentROM] = useState<JointAngles>({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
   const [maxROM, setMaxROM] = useState<JointAngles>({ mcpAngle: 0, pipAngle: 0, dipAngle: 0, totalActiveRom: 0 });
   const [allFingersROM, setAllFingersROM] = useState({
@@ -146,12 +153,40 @@ export default function Recording() {
             
             // Initialize motion capture tracking
             setFramesCaptured(0);
-            setExpectedFrames(0);
+            setExpectedFrames(450); // 15 seconds × 30 FPS
             setLastFrameTime(null);
             setHandDetectionLost(false);
             setRecordingQualityWarning('');
             
-            console.log('🎬 RECORDING STARTED: Monitoring motion capture quality');
+            // Initialize time-based recording
+            const actualStartTime = Date.now();
+            setRecordingStartTime(actualStartTime);
+            setRecordingElapsedTime(0);
+            lastSuccessfulFrameRef.current = null;
+            
+            console.log('🎬 RECORDING STARTED: Time-based recording for exactly 15 seconds');
+            
+            // Set up time monitoring interval (update every 100ms)
+            recordingIntervalRef.current = setInterval(() => {
+              const elapsed = (Date.now() - actualStartTime) / 1000;
+              setRecordingElapsedTime(elapsed);
+              setRecordingTimer(Math.max(0, Math.ceil(15 - elapsed)));
+            }, 100);
+            
+            // Force stop recording after exactly 15 seconds
+            recordingTimeoutRef.current = setTimeout(() => {
+              console.log('⏰ FORCE STOP: 15 seconds elapsed, terminating recording');
+              setIsRecording(false);
+              if (recordingIntervalRef.current) {
+                clearInterval(recordingIntervalRef.current);
+                recordingIntervalRef.current = null;
+              }
+              setTimeout(() => {
+                recordingStartTimeRef.current = null;
+                setRecordingStartTime(null);
+                handleRepetitionComplete();
+              }, 100);
+            }, 15000); // Exactly 15 seconds
             // Keep the locked session hand type from record button press
             resetRecordingSession();
             console.log('🔄 Recording started - maintaining locked hand type:', sessionHandType);
@@ -162,35 +197,21 @@ export default function Recording() {
         });
       }, 1000);
     } else if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingTimer((prev: number) => {
-          if (prev <= 0) {
-            setIsRecording(false);
-            console.log(`🏁 RECORDING COMPLETE: ${framesCaptured} frames captured vs ${expectedFrames} expected`);
-            
-            // Validate recording quality
-            const captureRate = expectedFrames > 0 ? (framesCaptured / expectedFrames) * 100 : 0;
-            if (captureRate < 80) {
-              setRecordingQualityWarning(`Warning: Only ${framesCaptured}/${expectedFrames} frames captured (${captureRate.toFixed(1)}%)`);
-              console.log(`⚠️ LOW CAPTURE RATE: ${captureRate.toFixed(1)}% - Expected ~450 frames for 15s recording`);
-            }
-            
-            setTimeout(() => {
-              recordingStartTimeRef.current = null;
-              handleRepetitionComplete();
-            }, 100);
-            return 15; // 15 second recording duration
-          }
-          
-          // Update expected frame count (30 FPS target)
-          const secondsElapsed = 15 - prev + 1;
-          setExpectedFrames(Math.round(secondsElapsed * 30));
-          
-          return prev - 1;
-        });
-      }, 1000);
+      // Recording is now managed by time-based system, no interval needed
+      interval = null;
     }
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // Cleanup time-based recording intervals
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
+        recordingTimeoutRef.current = null;
+      }
+    };
   }, [isRecording, isCountingDown]);
 
   const startRecording = () => {
@@ -206,9 +227,30 @@ export default function Recording() {
 
   const stopRecording = () => {
     setIsRecording(false);
+    
+    // Clean up time-based recording intervals
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = null;
+    }
+    if (recordingTimeoutRef.current) {
+      clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+    }
+    
+    // Validate recording quality
+    const captureRate = expectedFrames > 0 ? (framesCaptured / expectedFrames) * 100 : 0;
+    if (captureRate < 80) {
+      setRecordingQualityWarning(`Warning: Only ${framesCaptured}/${expectedFrames} frames captured (${captureRate.toFixed(1)}%)`);
+      console.log(`⚠️ LOW CAPTURE RATE: ${captureRate.toFixed(1)}% - Expected 450 frames for 15s recording`);
+    } else {
+      console.log(`✅ GOOD CAPTURE RATE: ${framesCaptured}/${expectedFrames} frames (${captureRate.toFixed(1)}%)`);
+    }
+    
     // Delay clearing start time to allow final motion data capture
     setTimeout(() => {
       recordingStartTimeRef.current = null;
+      setRecordingStartTime(null);
       handleRepetitionComplete();
     }, 100);
   };
@@ -441,6 +483,9 @@ export default function Recording() {
       if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15 && data.handDetected && data.landmarks && data.landmarks.length > 0) {
         console.log(`Recording motion data: ${data.landmarks.length} landmarks detected, elapsed: ${recordingElapsed.toFixed(1)}s`);
         
+        // Store successful frame for potential interpolation
+        lastSuccessfulFrameRef.current = motionFrame;
+        
         // Update frame capture tracking
         setFramesCaptured(prev => {
           const newCount = prev + 1;
@@ -496,6 +541,26 @@ export default function Recording() {
         
         // Update last successful frame time
         setLastFrameTime(currentTime);
+      } else if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15) {
+        // Handle missing frame during recording - interpolate if we have a previous frame
+        if (lastSuccessfulFrameRef.current && recordingElapsed > 1) {
+          console.log(`🔄 FRAME INTERPOLATION: Using last successful frame at ${recordingElapsed.toFixed(1)}s`);
+          
+          // Create interpolated frame with timestamp
+          const interpolatedFrame = {
+            ...lastSuccessfulFrameRef.current,
+            timestamp: recordingElapsed,
+            interpolated: true,
+            originalTimestamp: lastSuccessfulFrameRef.current.timestamp
+          };
+          
+          // Add interpolated frame to maintain timeline
+          setRecordingMotionData(prev => [...prev, interpolatedFrame]);
+          recordingMotionDataRef.current.push(interpolatedFrame);
+          
+          // Update frame count for interpolated frame
+          setFramesCaptured(prev => prev + 1);
+        }
       } else if (recordingStartTimeRef.current && recordingElapsed > 0 && recordingElapsed <= 15) {
         console.log(`Recording period but no valid landmarks: handDetected=${data.handDetected}, landmarks=${data.landmarks ? data.landmarks.length : 'none'}, elapsed=${recordingElapsed.toFixed(1)}s`);
       }
