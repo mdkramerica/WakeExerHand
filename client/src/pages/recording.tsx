@@ -20,6 +20,14 @@ export default function Recording() {
   const [currentRepetition, setCurrentRepetition] = useState(1);
   const [isRecording, setIsRecording] = useState(false);
   console.log(`🔄 RECORDING STATE: isRecording=${isRecording}`);
+  
+  // Monitor when isRecording changes
+  useEffect(() => {
+    console.log(`⚡ RECORDING STATE CHANGED: isRecording=${isRecording}`);
+    if (isRecording) {
+      console.log('🚨 RECORDING BECAME TRUE - Stack trace:', new Error().stack);
+    }
+  }, [isRecording]);
   const [recordingTimer, setRecordingTimer] = useState(0);
   const [countdownTimer, setCountdownTimer] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
@@ -150,6 +158,7 @@ export default function Recording() {
           if (prev <= 1) {
             console.log('🎯 COUNTDOWN COMPLETE - Starting recording!');
             setIsCountingDown(false);
+            console.log('🎯 COUNTDOWN COMPLETE - Setting isRecording to TRUE');
             setIsRecording(true);
             setRecordingTimer(15); // 15 second recording duration
             const startTime = Date.now();
