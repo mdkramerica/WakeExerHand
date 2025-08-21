@@ -75,6 +75,9 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
   app.use(express.json({ limit: '10mb' })); // Increase limit for motion data
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+  // TODO: Re-enable static asset serving once path issues are resolved
+  // Temporarily commented out to debug path resolution issues
+  /*
   // Serve attached assets statically with proper MIME types
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
@@ -89,6 +92,7 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
       }
     }
   }));
+  */
 
   app.use((req, res, next) => {
     const start = Date.now();
