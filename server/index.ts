@@ -76,7 +76,9 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
   // Serve attached assets statically with proper MIME types
-  app.use('/attached_assets', express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), '../attached_assets'), {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  app.use('/attached_assets', express.static(path.join(__dirname, '../attached_assets'), {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.mov')) {
         res.setHeader('Content-Type', 'video/quicktime');
