@@ -46,6 +46,11 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
   // Run the main application
   const app = express();
 
+  // Enable trust proxy for Railway's reverse proxy
+  if (process.env.TRUST_PROXY === 'true' || process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', true);
+  }
+
   // Security middleware - apply first
   app.use(helmet(helmetConfig));
   app.use(cors(corsOptions));
