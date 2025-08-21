@@ -4,6 +4,17 @@ import { setupVite, serveStatic, log } from "./vite";
 import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import session from "express-session";
+import helmet from "helmet";
+import cors from "cors";
+import { 
+  rateLimiters, 
+  corsOptions, 
+  helmetConfig, 
+  sanitizeInput, 
+  securityHeaders 
+} from "./security.js";
+import { loadEnvConfig, getEnvConfig, isProduction } from "./env-config.js";
 
 // Check if we should run the compliance portal instead
 if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
@@ -29,8 +40,38 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
     process.exit(code || 0);
   });
 } else {
+  // Load and validate environment configuration
+  const config = loadEnvConfig();
+  
   // Run the main application
   const app = express();
+
+  // Security middleware - apply first
+  app.use(helmet(helmetConfig));
+  app.use(cors(corsOptions));
+  app.use(securityHeaders);
+  
+  // Session management
+  app.use(session({
+    secret: config.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: isProduction(),
+      httpOnly: true,
+      maxAge: 30 * 60 * 1000, // 30 minutes
+      sameSite: 'lax'
+    },
+    name: 'wakeexer.sid' // Custom session name for security
+  }));
+  
+  // Rate limiting - apply to all routes
+  app.use(rateLimiters.general);
+  
+  // Input sanitization
+  app.use(sanitizeInput);
+  
+  // Body parsing with limits
   app.use(express.json({ limit: '10mb' })); // Increase limit for motion data
   app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
@@ -97,16 +138,22 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
       serveStatic(app);
     }
 
-    // ALWAYS serve the app on port 5000
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
+    // Use PORT from configuration
+    const port = config.PORT;
+    if (process.env.NODE_ENV === 'development') {
+      // Development: bind to localhost only
+      server.listen(port, 'localhost', () => {
+        log(`serving on http://localhost:${port}`);
+      });
+    } else {
+      // Production: bind to all interfaces
+      server.listen({
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      }, () => {
+        log(`serving on port ${port}`);
+      });
+    }
   })();
 }

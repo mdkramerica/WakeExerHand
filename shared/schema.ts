@@ -308,13 +308,23 @@ export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
 });
 
 export const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z.string()
+    .min(1, "Username is required")
+    .max(50, "Username must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_.-]+$/, "Username contains invalid characters"),
+  password: z.string()
+    .min(1, "Password is required")
+    .max(100, "Password is too long"),
 });
 
 export const adminLoginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z.string()
+    .min(1, "Username is required")
+    .max(50, "Username must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_.-]+$/, "Username contains invalid characters"),
+  password: z.string()
+    .min(1, "Password is required")
+    .max(100, "Password is too long"),
 });
 
 export const insertCohortSchema = createInsertSchema(cohorts).omit({
@@ -483,7 +493,85 @@ export const patientEnrollmentSchema = z.object({
   patientId: z.number(),
   cohortId: z.number(),
   enrollmentStatus: z.enum(['screening', 'enrolled', 'excluded', 'withdrawn']),
-  eligibilityNotes: z.string().optional(),
+  eligibilityNotes: z.string().max(1000, "Notes must be less than 1000 characters").optional(),
+});
+
+// Additional validation schemas for security
+export const accessCodeSchema = z.object({
+  code: z.string()
+    .length(6, "Access code must be exactly 6 characters")
+    .regex(/^[A-Z0-9]+$/, "Access code must contain only uppercase letters and numbers"),
+});
+
+export const assessmentDataSchema = z.object({
+  motionData: z.array(z.object({
+    timestamp: z.number().min(0),
+    landmarks: z.array(z.object({
+      x: z.number().min(0).max(1),
+      y: z.number().min(0).max(1),
+      z: z.number().optional(),
+      visibility: z.number().min(0).max(1).optional(),
+    })).max(21), // MediaPipe hand landmarks
+  })).max(10000), // Reasonable limit for motion data
+  assessmentTypeId: z.number().int().positive(),
+  completedAt: z.string().datetime().optional(),
+});
+
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(100, "Password is too long")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export const userRegistrationSchema = z.object({
+  username: z.string()
+    .min(3, "Username must be at least 3 characters long")
+    .max(50, "Username must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_.-]+$/, "Username contains invalid characters"),
+  email: z.string()
+    .email("Invalid email address")
+    .max(254, "Email is too long"),
+  firstName: z.string()
+    .min(1, "First name is required")
+    .max(50, "First name is too long")
+    .regex(/^[a-zA-Z\s'-]+$/, "First name contains invalid characters"),
+  lastName: z.string()
+    .min(1, "Last name is required")
+    .max(50, "Last name is too long")
+    .regex(/^[a-zA-Z\s'-]+$/, "Last name contains invalid characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(100, "Password is too long")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/\d/, "Password must contain at least one number")
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain at least one special character"),
+});
+
+// File upload validation
+export const fileUploadSchema = z.object({
+  filename: z.string()
+    .min(1, "Filename is required")
+    .max(255, "Filename is too long")
+    .regex(/^[a-zA-Z0-9._-]+$/, "Filename contains invalid characters"),
+  size: z.number().max(10 * 1024 * 1024, "File size must be less than 10MB"),
+  mimeType: z.enum([
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'application/json',
+    'text/csv',
+    'application/pdf'
+  ], "Invalid file type"),
 });
 
 export type EnrollmentEligibility = z.infer<typeof enrollmentEligibilitySchema>;

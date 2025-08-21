@@ -2021,5 +2021,7 @@ export const storage = new DatabaseStorage();
   }
 })();
 
-// Initialize database on startup
-initializeDatabase();
+// Initialize database on startup only if DATABASE_URL is provided
+if (process.env.DATABASE_URL) {
+  initializeDatabase();
+}

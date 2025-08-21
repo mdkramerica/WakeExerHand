@@ -61,7 +61,6 @@ interface ComplianceData {
 
 interface Patient {
   id: number;
-  patientId: string;
   code: string;
   injuryType: string;
   isActive: boolean;
@@ -151,8 +150,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(patient => 
-        patient.patientId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        patient.code.includes(searchTerm) ||
+        patient.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         patient.injuryType.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -396,7 +394,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `patient_${data.patient.patientId}_motion_data.json`;
+        a.download = `patient_${data.patient.code}_motion_data.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -404,7 +402,7 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
 
         toast({
           title: "Download Started",
-          description: `Motion data for ${data.patient.patientId} is downloading`,
+          description: `Motion data for ${data.patient.code} is downloading`,
         });
       }
     } catch (error) {
@@ -747,9 +745,9 @@ export default function AdminDashboard({ user, onLogout }: AdminDashboardProps) 
                       <td className="p-2">
                         <div className="flex items-center space-x-2">
                           <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-xs font-medium">
-                            {patient.patientId.slice(-2)}
+                            {patient.code.slice(-2)}
                           </div>
-                          <span className="font-medium">{patient.patientId}</span>
+                          <span className="font-medium">{patient.code}</span>
                         </div>
                       </td>
                       <td className="p-2">

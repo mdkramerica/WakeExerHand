@@ -14,6 +14,17 @@ import { IStorage } from "./storage";
 export class PersistentMemoryStorage implements IStorage {
   // Add missing admin methods as stubs
   async getAdminUser(id: number): Promise<any> {
+    // For local development, if id is 1, return the admin user
+    if (id === 1) {
+      return {
+        id: 1,
+        username: 'admin',
+        email: 'admin@local.dev',
+        firstName: 'Admin',
+        lastName: 'User',
+        isActive: true
+      };
+    }
     return undefined;
   }
 
@@ -30,20 +41,69 @@ export class PersistentMemoryStorage implements IStorage {
   }
 
   async authenticateAdminUser(username: string, password: string): Promise<any> {
-    return null;
+    // Import PasswordManager dynamically to avoid circular dependencies
+    const { PasswordManager } = await import('./security.js');
+    
+    // Find admin user
+    const adminUsers = Array.from(this.adminUsers.values());
+    const user = adminUsers.find(u => u.username === username && u.isActive);
+    
+    if (!user) {
+      return null;
+    }
+    
+    // Verify password
+    const isValidPassword = await PasswordManager.compare(password, user.passwordHash);
+    
+    if (!isValidPassword) {
+      return null;
+    }
+    
+    // Update last login
+    user.lastLoginAt = new Date();
+    this.adminUsers.set(user.id, user);
+    await this.saveToFile();
+    
+    // Return user without password hash
+    const { passwordHash, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async getAdminComplianceData(): Promise<any> {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const allUsers = Array.from(this.users.values());
+    const allAssessments = Array.from(this.userAssessments.values());
+    
+    const totalPatients = allUsers.length;
+    const activePatients = allUsers.filter(u => u.isActive !== false).length;
+    const totalAssessments = allAssessments.length;
+    const completedToday = allAssessments.filter(a => 
+      a.completedAt && a.completedAt.startsWith(today)
+    ).length;
+    
     return {
-      totalPatients: 0,
-      activePatients: 0,
-      totalAssessments: 0,
-      completedToday: 0
+      totalPatients,
+      activePatients,
+      totalAssessments,
+      completedToday
     };
   }
 
   async getAdminPatients(): Promise<any[]> {
-    return [];
+    const allUsers = Array.from(this.users.values());
+    const allAssessments = Array.from(this.userAssessments.values());
+    
+    return allUsers.map(user => ({
+      id: user.id,
+      code: user.code,
+      alias: `Patient ${user.code}`,
+      injuryType: user.injuryType,
+      createdAt: user.createdAt,
+      lastAssessment: allAssessments
+        .filter(a => a.userId === user.id)
+        .sort((a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime())[0]
+    }));
   }
 
   async generatePatientAccessCode(): Promise<string> {
@@ -222,10 +282,45 @@ export class PersistentMemoryStorage implements IStorage {
   }
 
   async authenticateClinicalUser(username: string, password: string): Promise<any> {
+    // Import PasswordManager dynamically to avoid circular dependencies
+    const { PasswordManager } = await import('./security.js');
+    
     const user = this.clinicalUsersByUsername.get(username);
-    if (user && user.password === password && user.isActive) {
-      return user;
+    
+    if (!user || !user.isActive) {
+      return null;
     }
+    
+    // Check if password is already hashed or plain text (for migration)
+    let isValidPassword = false;
+    
+    if (user.passwordHash) {
+      // Use bcrypt for hashed passwords
+      isValidPassword = await PasswordManager.compare(password, user.passwordHash);
+    } else if (user.password) {
+      // Fallback for plain text passwords (migration support)
+      isValidPassword = user.password === password;
+      
+      // If valid, upgrade to hashed password
+      if (isValidPassword) {
+        user.passwordHash = await PasswordManager.hash(password);
+        delete user.password; // Remove plain text password
+        this.clinicalUsersByUsername.set(username, user);
+        await this.saveToFile();
+      }
+    }
+    
+    if (isValidPassword) {
+      // Update last login
+      user.lastLoginAt = new Date();
+      this.clinicalUsersByUsername.set(username, user);
+      await this.saveToFile();
+      
+      // Return user without password fields
+      const { password: _, passwordHash, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    }
+    
     return null;
   }
 
@@ -354,7 +449,7 @@ export class PersistentMemoryStorage implements IStorage {
         id: 1,
         name: 'TAM (Total Active Motion)',
         description: 'Comprehensive finger flexion and extension measurement',
-        videoUrl: '/videos/tam_video.mp4',
+        videoUrl: '/videos/ClawLFistLeft_1754062432000.mp4',
         duration: 10,
         repetitions: 1,
         instructions: 'Make a complete fist, then fully extend all fingers. Repeat slowly and deliberately.',
@@ -365,7 +460,7 @@ export class PersistentMemoryStorage implements IStorage {
         id: 2,
         name: 'Kapandji Score',
         description: 'Thumb opposition assessment using standardized scoring',
-        videoUrl: '/videos/kapandji-instruction.mov',
+        videoUrl: '/videos/Kapandji Demo.mp4',
         duration: 10,
         repetitions: 1,
         instructions: 'Touch your thumb to each finger tip, then to the base of each finger, progressing down the hand.',
@@ -376,7 +471,7 @@ export class PersistentMemoryStorage implements IStorage {
         id: 3,
         name: 'Wrist Flexion/Extension',
         description: 'Measure wrist forward and backward bending range of motion',
-        videoUrl: '/videos/wrist-fe-assessment.mp4',
+        videoUrl: '/videos/Wrist Flex Ext_1754498093546.mp4',
         duration: 10,
         repetitions: 1,
         instructions: 'Bend your wrist forward as far as comfortable, then backward. Keep forearm stable.',
@@ -387,7 +482,7 @@ export class PersistentMemoryStorage implements IStorage {
         id: 4,
         name: 'Forearm Pronation/Supination',
         description: 'Assess forearm rotation capabilities',
-        videoUrl: '/videos/forearm-rotation.mp4',
+        videoUrl: '/videos/wrist-supination-pronation.mp4',
         duration: 10,
         repetitions: 1,
         instructions: 'Rotate your forearm to turn palm up and down while keeping elbow stable.',
@@ -398,7 +493,7 @@ export class PersistentMemoryStorage implements IStorage {
         id: 5,
         name: 'Wrist Radial/Ulnar Deviation',
         description: 'Measure side-to-side wrist movement',
-        videoUrl: '/videos/wrist-deviation.mp4',
+        videoUrl: '/videos/wrist-radial-ulnar-deviation.mp4',
         duration: 10,
         repetitions: 1,
         instructions: 'Move your wrist side to side, first toward thumb then toward pinky.',
@@ -989,16 +1084,52 @@ export class PersistentMemoryStorage implements IStorage {
   async authenticateClinicalUser(username: string, password: string): Promise<any> {
     console.log(`PersistentMemoryStorage authenticateClinicalUser(${username})`);
     console.log(`Available clinical users:`, Array.from(this.clinicalUsersByUsername.keys()));
+    
+    // Import PasswordManager dynamically to avoid circular dependencies
+    const { PasswordManager } = await import('./security.js');
+    
     const user = this.clinicalUsersByUsername.get(username);
     console.log(`Found user:`, user ? 'yes' : 'no');
-    if (user) {
-      console.log(`Password match:`, user.password === password);
-      console.log(`User active:`, user.isActive);
+    
+    if (!user || !user.isActive) {
+      console.log(`Clinical authentication failed for user: ${username} - user not found or inactive`);
+      return null;
     }
-    if (user && user.password === password && user.isActive) {
+    
+    // Check if password is already hashed or plain text (for migration)
+    let isValidPassword = false;
+    
+    if (user.passwordHash) {
+      // Use bcrypt for hashed passwords
+      isValidPassword = await PasswordManager.compare(password, user.passwordHash);
+      console.log(`Password hash verification:`, isValidPassword);
+    } else if (user.password) {
+      // Fallback for plain text passwords (migration support)
+      isValidPassword = user.password === password;
+      console.log(`Plain text password match:`, isValidPassword);
+      
+      // If valid, upgrade to hashed password
+      if (isValidPassword) {
+        user.passwordHash = await PasswordManager.hash(password);
+        delete user.password; // Remove plain text password
+        this.clinicalUsersByUsername.set(username, user);
+        await this.saveToFile();
+        console.log(`Password upgraded to hash for user: ${username}`);
+      }
+    }
+    
+    if (isValidPassword) {
       console.log(`Clinical authentication successful for user: ${username}`);
-      return user;
+      // Update last login
+      user.lastLoginAt = new Date();
+      this.clinicalUsersByUsername.set(username, user);
+      await this.saveToFile();
+      
+      // Return user without password fields
+      const { password: _, passwordHash, ...userWithoutPassword } = user;
+      return userWithoutPassword;
     }
+    
     console.log(`Clinical authentication failed for user: ${username}`);
     return null;
   }

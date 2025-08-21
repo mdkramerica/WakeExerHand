@@ -6,6 +6,7 @@ import { z } from "zod";
 import JSZip from 'jszip';
 import puppeteer from 'puppeteer';
 import archiver from 'archiver';
+import { rateLimiters } from "./security.js";
 
 // Extend Request interface for authentication
 declare global {
@@ -88,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Clinical Dashboard Authentication
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", rateLimiters.auth, async (req, res) => {
     try {
       const { username, password } = loginSchema.parse(req.body);
       console.log(`Login attempt for username: ${username}`);
@@ -1849,7 +1850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // AS-001: Admin Login
-  app.post("/api/admin/login", async (req, res) => {
+  app.post("/api/admin/login", rateLimiters.auth, async (req, res) => {
     try {
       const { username, password } = adminLoginSchema.parse(req.body);
       console.log(`Admin login attempt for username: ${username}`);
