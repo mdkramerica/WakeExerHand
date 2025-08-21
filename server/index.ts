@@ -13,8 +13,8 @@ import {
   helmetConfig, 
   sanitizeInput, 
   securityHeaders 
-} from "./security.js";
-import { loadEnvConfig, getEnvConfig, isProduction } from "./env-config.js";
+} from "./security";
+import { loadEnvConfig, getEnvConfig, isProduction } from "./env-config";
 
 // Check if we should run the compliance portal instead
 if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
@@ -94,6 +94,7 @@ if (process.env.RUN_COMPLIANCE_PORTAL === "true") {
   }));
   */
 
+  // Request logging middleware
   app.use((req, res, next) => {
     const start = Date.now();
     const path = req.path;

@@ -6,7 +6,7 @@ import { z } from "zod";
 import JSZip from 'jszip';
 import puppeteer from 'puppeteer';
 import archiver from 'archiver';
-import { rateLimiters } from "./security.js";
+import { rateLimiters } from "./security";
 
 // Extend Request interface for authentication
 declare global {

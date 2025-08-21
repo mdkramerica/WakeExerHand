@@ -6,7 +6,8 @@ import { z } from "zod";
 export const clinicalUsers = pgTable("clinical_users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"), // Optional, will be replaced by passwordHash
+  passwordHash: text("password_hash"), // New field for hashed passwords
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -20,7 +21,8 @@ export const clinicalUsers = pgTable("clinical_users", {
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"), // Optional, will be replaced by passwordHash
+  passwordHash: text("password_hash"), // New field for hashed passwords
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
@@ -571,7 +573,7 @@ export const fileUploadSchema = z.object({
     'application/json',
     'text/csv',
     'application/pdf'
-  ], "Invalid file type"),
+  ], { errorMap: () => ({ message: "Invalid file type" }) }),
 });
 
 export type EnrollmentEligibility = z.infer<typeof enrollmentEligibilitySchema>;
