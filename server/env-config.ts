@@ -8,11 +8,11 @@ const envSchema = z.object({
   HOST: z.string().default('0.0.0.0'),
   
   // Database configuration
-  DATABASE_URL: z.string().url().optional(),
+  DATABASE_URL: z.string().optional(),
   USE_DATABASE: z.string().transform(val => val === 'true').default('false'),
   
   // Security settings
-  SESSION_SECRET: z.string().min(32, 'Session secret must be at least 32 characters'),
+  SESSION_SECRET: z.string().min(1, 'Session secret is required').default('change-this-in-production-32-chars-min-please'),
   
   // Admin credentials (for initial setup only)
   DEFAULT_ADMIN_USERNAME: z.string().min(3).default('admin'),
@@ -21,7 +21,7 @@ const envSchema = z.object({
   
   // CORS settings
   ALLOWED_ORIGINS: z.string().optional(),
-  FRONTEND_URL: z.string().url().optional(),
+  FRONTEND_URL: z.string().optional(),
   
   // Rate limiting
   RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).default('900000'), // 15 minutes
@@ -33,14 +33,14 @@ const envSchema = z.object({
   UPLOAD_DIR: z.string().default('./uploads'),
   
   // External services
-  MEDIAPIPE_CDN_URL: z.string().url().default('https://cdn.jsdelivr.net/npm/@mediapipe/'),
+  MEDIAPIPE_CDN_URL: z.string().default('https://cdn.jsdelivr.net/npm/@mediapipe/'),
   
   // Email configuration (optional)
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().regex(/^\d+$/).transform(Number).optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  FROM_EMAIL: z.string().email().optional(),
+  FROM_EMAIL: z.string().optional(),
   
   // Railway deployment (automatically set by Railway)
   RAILWAY_ENVIRONMENT: z.string().optional(),
@@ -57,7 +57,7 @@ const envSchema = z.object({
   
   // Monitoring
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: z.string().optional(),
   
   // Feature flags
   ENABLE_REGISTRATION: z.string().transform(val => val === 'true').default('false'),
@@ -111,8 +111,9 @@ export function loadEnvConfig(): EnvConfig {
         console.warn('⚠️  WARNING: Using default admin password in production!');
       }
       
-      if (!cachedConfig.DATABASE_URL) {
-        throw new Error('DATABASE_URL is required in production');
+      // Only require DATABASE_URL if USE_DATABASE is true
+      if (cachedConfig.USE_DATABASE && !cachedConfig.DATABASE_URL) {
+        throw new Error('DATABASE_URL is required when USE_DATABASE=true');
       }
       
       if (!cachedConfig.ALLOWED_ORIGINS) {

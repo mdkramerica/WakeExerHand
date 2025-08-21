@@ -1,20 +1,14 @@
-[build]
-# Explicitly use Node.js 18+ for Railway
-providers = ["node"]
+[phases.setup]
+nixPackages = ["nodejs_18"]
 
-[phases]
-  [phases.setup]
-  nixPackages = ["nodejs_18", "npm"]
-  
-  [phases.install]
-  cmd = "npm ci --only=production"
-  
-  [phases.build]
-  cmd = "npm run build"
-  
-  [phases.start]
-  cmd = "npm run start"
+[phases.install]
+cmd = "npm ci"
+
+[phases.build]  
+cmd = "npm run build"
+
+[phases.start]
+cmd = "npm run start"
 
 [variables]
 NODE_ENV = "production"
-NPM_CONFIG_PRODUCTION = "false"

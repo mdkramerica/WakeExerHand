@@ -1,0 +1,32 @@
+
+> rest-express@1.0.0 prestart
+> node --version && npm --version
+
+v24.3.0
+11.4.2
+
+> rest-express@1.0.0 start
+> NODE_ENV=production tsx server/index.ts
+
+⚠️  DATABASE_URL not available, falling back to memory storage
+⚠️  This is not recommended for production use
+Database connection established, ready for use
+⚠️  WARNING: Using weak SESSION_SECRET in production!
+⚠️  WARNING: Using default admin password in production!
+⚠️  WARNING: No ALLOWED_ORIGINS set - CORS will be very permissive
+✅ Environment configuration loaded (production)
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+Storage system initialized: DatabaseStorage
+Environment check - USE_DATABASE: undefined NODE_ENV: production DATABASE_URL exists: false
+/Users/mattkramer/Coding/WakeExer/WakeExerHand/server/vite.ts:79
+    throw new Error(
+          ^
+
+
+Error: Could not find the build directory: /Users/mattkramer/Coding/WakeExer/WakeExerHand/server/public, make sure to build the client first
+    at serveStatic (/Users/mattkramer/Coding/WakeExer/WakeExerHand/server/vite.ts:79:11)
+    at <anonymous> (/Users/mattkramer/Coding/WakeExer/WakeExerHand/server/index.ts:145:7)
+
+Node.js v24.3.0
